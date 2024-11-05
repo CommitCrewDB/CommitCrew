@@ -1,0 +1,190 @@
+import mysql.connector
+import kagglehub
+
+# MySQL connection setup
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="<password>", # enter your mySQL password here
+    allow_local_infile=True
+)
+
+path = kagglehub.dataset_download("freshrenzo/lahmanbaseballdatabase")
+
+def execute_query(query, commit=False):
+    cursor = db.cursor()
+    cursor.execute(query)
+    if commit:
+        db.commit()
+    cursor.close()
+
+def create_database():
+    execute_query("DROP DATABASE IF EXISTS lahmansbaseballdb;", commit=True)
+    execute_query("CREATE DATABASE lahmansbaseballdb;", commit=True)
+    execute_query("USE lahmansbaseballdb;", commit=False)
+
+def set_encoding():
+    execute_query("SET NAMES utf8;", commit=False)
+    execute_query("SET character_set_client = utf8mb4;", commit=False)
+
+def drop_tables():
+    drop_query = '''
+        DROP TABLE IF EXISTS seriespost, salaries, pitchingpost, pitching,
+        managershalf, managers, homegames, parks, halloffame, fieldingpost,
+        fieldingofsplit, fieldingof, fielding, collegeplaying, schools,
+        battingpost, batting, awardsshareplayers, awardssharemanagers,
+        awardsplayers, awardsmanagers, appearances, allstarfull, people,
+        teamshalf, teams, teamsfranchises, divisions, leagues;
+    '''
+    execute_query(drop_query, commit=True)
+
+def create_tables():
+    # Create `leagues` table
+    leagues_table = '''
+        CREATE TABLE leagues (
+            lgID char(2) NOT NULL,
+            league varchar(50) NOT NULL,
+            active char NOT NULL,
+            PRIMARY KEY (lgID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(leagues_table, commit=True)
+    
+    # Insert data into `leagues` table
+    leagues_data = '''
+        INSERT INTO leagues (lgID, league, active) VALUES
+        ('ML', 'Major League', 'Y'), ('AL', 'American League', 'Y'),
+        ('NL', 'National League', 'Y'), ('AA', 'American Association', 'N'),
+        ('FL', 'Federal League', 'N'), ('NA', 'National Association', 'N'),
+        ('PL', 'Players'' League', 'N'), ('UA', 'Union Association', 'N');
+    '''
+    execute_query(leagues_data, commit=True)
+    
+    # Create `divisions` table
+    divisions_table = '''
+        CREATE TABLE divisions (
+            ID INT NOT NULL AUTO_INCREMENT,
+            divID char(2) NOT NULL,
+            lgID char(2) NOT NULL,
+            division varchar(50) NOT NULL,
+            active char NOT NULL,
+            PRIMARY KEY (ID),
+            UNIQUE KEY (divID, lgID),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(divisions_table, commit=True)
+    
+    # Insert data into `divisions` table
+    divisions_data = '''
+        INSERT INTO divisions (divID, lgID, division, active) VALUES
+        ('E', 'AL', 'AL East', 'Y'), ('W', 'AL', 'AL West', 'Y'),
+        ('C', 'AL', 'AL Central', 'Y'), ('E', 'NL', 'NL East', 'Y'),
+        ('W', 'NL', 'NL West', 'Y'), ('C', 'NL', 'NL Central', 'Y'),
+        ('A', 'AA', 'Sole Division', 'N'), ('F', 'FL', 'Sole Division', 'N'),
+        ('N', 'NA', 'Sole Division', 'N'), ('P', 'PL', 'Sole Division', 'N'),
+        ('U', 'UA', 'Sole Division', 'N');
+    '''
+    execute_query(divisions_data, commit=True)
+
+def load_data():
+    # Load data into `TeamsFranchises` table
+    franchises_table = '''
+        CREATE TABLE IF NOT EXISTS TeamsFranchises (
+            franchID VARCHAR(3) NOT NULL,
+            franchName VARCHAR(50) DEFAULT NULL,
+            active CHAR DEFAULT NULL,
+            NAassoc VARCHAR(3) DEFAULT NULL,
+            PRIMARY KEY (franchID)
+        );
+    '''
+    execute_query(franchises_table, commit=True)
+    
+    load_franchises_data = f'''
+        LOAD DATA LOCAL INFILE '{path}TeamsFranchises.csv'
+        INTO TABLE TeamsFranchises
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+    execute_query(load_franchises_data, commit=True)
+
+    teams_table = '''
+        CREATE TABLE teams (
+            ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
+            yearID smallint(6) NOT NULL,
+            lgID char(2) DEFAULT NULL,
+            teamID char(3) NOT NULL,
+            franchID varchar(3) DEFAULT NULL,
+            divID char(1) DEFAULT NULL,
+            div_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO divisions TABLE*/
+            teamRank smallint(6) DEFAULT NULL,
+            G smallint(6) DEFAULT NULL,
+            Ghome smallint(6) DEFAULT NULL,
+            W smallint(6) DEFAULT NULL,
+            L smallint(6) DEFAULT NULL,
+            DivWin varchar(1) DEFAULT NULL,
+            WCWin varchar(1) DEFAULT NULL,
+            LgWin varchar(1) DEFAULT NULL,
+            WSWin varchar(1) DEFAULT NULL,
+            R smallint(6) DEFAULT NULL,
+            AB smallint(6) DEFAULT NULL,
+            H smallint(6) DEFAULT NULL,
+            2B smallint(6) DEFAULT NULL,
+            3B smallint(6) DEFAULT NULL,
+            HR smallint(6) DEFAULT NULL,
+            BB smallint(6) DEFAULT NULL,
+            SO smallint(6) DEFAULT NULL,
+            SB smallint(6) DEFAULT NULL,
+            CS smallint(6) DEFAULT NULL,
+            HBP smallint(6) DEFAULT NULL,
+            SF smallint(6) DEFAULT NULL,
+            RA smallint(6) DEFAULT NULL,
+            ER smallint(6) DEFAULT NULL,
+            ERA double DEFAULT NULL,
+            CG smallint(6) DEFAULT NULL,
+            SHO smallint(6) DEFAULT NULL,
+            SV smallint(6) DEFAULT NULL,
+            IPouts int(11) DEFAULT NULL,
+            HA smallint(6) DEFAULT NULL,
+            HRA smallint(6) DEFAULT NULL,
+            BBA smallint(6) DEFAULT NULL,
+            SOA smallint(6) DEFAULT NULL,
+            E int(11) DEFAULT NULL,
+            DP int(11) DEFAULT NULL,
+            FP double DEFAULT NULL,
+            name varchar(50) DEFAULT NULL,
+            park varchar(255) DEFAULT NULL,
+            attendance int(11) DEFAULT NULL,
+            BPF int(11) DEFAULT NULL,
+            PPF int(11) DEFAULT NULL,
+            teamIDBR varchar(3) DEFAULT NULL,
+            teamIDlahman45 varchar(3) DEFAULT NULL,
+            teamIDretro varchar(3) DEFAULT NULL,
+            PRIMARY KEY (ID),
+            UNIQUE KEY (yearID,lgID,teamID),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID), /* Not normalized, but keeping to maintain consistency with original */
+            FOREIGN KEY (div_ID) REFERENCES divisions(ID),
+            FOREIGN KEY (franchID) REFERENCES teamsfranchises(franchID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(teams_table, commit=True)
+    load_teams_data = f'''
+        LOAD DATA LOCAL INFILE '{path}Teams.csv'
+        INTO TABLE Teams
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+    execute_query(load_teams_data, commit=True)
+# Run initialization functions
+create_database()
+set_encoding()
+drop_tables()
+create_tables()
+load_data()
+
+# Close the main database connection
+db.close()
