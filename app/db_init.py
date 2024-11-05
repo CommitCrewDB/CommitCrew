@@ -210,7 +210,7 @@ def load_data():
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''    
     execute_query(fielding_table, commit=True)
-    
+
     load_fielding_data = f'''
         LOAD DATA LOCAL INFILE '{path}Fielding.csv'
         INTO TABLE Fielding
@@ -221,6 +221,51 @@ def load_data():
     '''
     execute_query(load_fielding_data, commit=True)
 
+    batting_table = '''
+        CREATE TABLE batting (
+            ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
+            playerID varchar(9) NOT NULL,
+            yearID smallint(6) NOT NULL,
+            stint smallint(6) NOT NULL,
+            teamID char(3) DEFAULT NULL,
+            team_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO teams TABLE*/
+            lgID char(2) DEFAULT NULL,
+            G smallint(6) DEFAULT NULL,
+            G_batting smallint(6) DEFAULT NULL,
+            AB smallint(6) DEFAULT NULL,
+            R smallint(6) DEFAULT NULL,
+            H smallint(6) DEFAULT NULL,
+            2B smallint(6) DEFAULT NULL,
+            3B smallint(6) DEFAULT NULL,
+            HR smallint(6) DEFAULT NULL,
+            RBI smallint(6) DEFAULT NULL,
+            SB smallint(6) DEFAULT NULL,
+            CS smallint(6) DEFAULT NULL,
+            BB smallint(6) DEFAULT NULL,
+            SO smallint(6) DEFAULT NULL,
+            IBB smallint(6) DEFAULT NULL,
+            HBP smallint(6) DEFAULT NULL,
+            SH smallint(6) DEFAULT NULL,
+            SF smallint(6) DEFAULT NULL,
+            GIDP smallint(6) DEFAULT NULL,
+            PRIMARY KEY (ID),
+            UNIQUE KEY (playerID,yearID,stint),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID), /* Not normalized, but keeping to maintain consistency with original */
+            FOREIGN KEY (team_ID) REFERENCES teams(ID),
+            FOREIGN KEY (playerID) REFERENCES master(playerID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(batting_table, commit=True)
+    load_batting_data = f'''
+        LOAD DATA LOCAL INFILE '{path}Batting.csv'
+        INTO TABLE Batting
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+    execute_query(load_batting_data, commit=True)
+    
 # Run initialization functions
 create_database()
 set_encoding()
