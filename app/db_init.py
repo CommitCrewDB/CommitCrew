@@ -265,6 +265,59 @@ def load_data():
         IGNORE 1 ROWS;
     '''
     execute_query(load_batting_data, commit=True)
+
+    pitching_table = '''
+        CREATE TABLE pitching (
+            ID INT NOT NULL AUTO_INCREMENT,
+            playerID VARCHAR(9) NOT NULL,
+            yearID SMALLINT(6) NOT NULL,
+            stint SMALLINT(6) NOT NULL,
+            teamID CHAR(3) DEFAULT NULL,
+            lgID CHAR(2) DEFAULT NULL,
+            W SMALLINT(6) DEFAULT NULL,
+            L SMALLINT(6) DEFAULT NULL,
+            G SMALLINT(6) DEFAULT NULL,
+            GS SMALLINT(6) DEFAULT NULL,
+            CG SMALLINT(6) DEFAULT NULL,
+            SHO SMALLINT(6) DEFAULT NULL,
+            SV SMALLINT(6) DEFAULT NULL,
+            IPOuts INT DEFAULT NULL,
+            H SMALLINT(6) DEFAULT NULL,
+            ER SMALLINT(6) DEFAULT NULL,
+            HR SMALLINT(6) DEFAULT NULL,
+            BB SMALLINT(6) DEFAULT NULL,
+            SO SMALLINT(6) DEFAULT NULL,
+            BAOpp FLOAT DEFAULT NULL,
+            ERA FLOAT DEFAULT NULL,
+            IBB SMALLINT(6) DEFAULT NULL,
+            WP SMALLINT(6) DEFAULT NULL,
+            HBP SMALLINT(6) DEFAULT NULL,
+            BK SMALLINT(6) DEFAULT NULL,
+            BFP SMALLINT(6) DEFAULT NULL,
+            GF SMALLINT(6) DEFAULT NULL,
+            R SMALLINT(6) DEFAULT NULL,
+            SH SMALLINT(6) DEFAULT NULL,
+            SF SMALLINT(6) DEFAULT NULL,
+            GIDP SMALLINT(6) DEFAULT NULL,
+            PRIMARY KEY (ID),
+            UNIQUE KEY (playerID, yearID, stint),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID),
+            FOREIGN KEY (teamID) REFERENCES teams(ID),
+            FOREIGN KEY (playerID) REFERENCES master(playerID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(pitching_table, commit=True)
+
+    load_pitching_data = '''
+        LOAD DATA LOCAL INFILE '{path}Pitching.csv'
+        INTO TABLE Pitching
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+
+    execute_query(load_pitching_data, commit=True)
     
 # Run initialization functions
 create_database()
