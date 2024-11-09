@@ -318,7 +318,55 @@ def load_data():
     '''
 
     execute_query(load_pitching_data, commit=True)
-    
+
+
+
+    master_table = '''
+        CREATE TABLE IF NOT EXISTS master (
+            playerID VARCHAR(9) NOT NULL,
+            birthYear SMALLINT(6) DEFAULT NULL,
+            birthMonth TINYINT(4) DEFAULT NULL,
+            birthDay TINYINT(4) DEFAULT NULL,
+            birthCountry VARCHAR(50) DEFAULT NULL,
+            birthState VARCHAR(50) DEFAULT NULL,
+            birthCity VARCHAR(50) DEFAULT NULL,
+            deathYear SMALLINT(6) DEFAULT NULL,
+            deathMonth TINYINT(4) DEFAULT NULL,
+            deathDay TINYINT(4) DEFAULT NULL,
+            deathCountry VARCHAR(50) DEFAULT NULL,
+            deathState VARCHAR(50) DEFAULT NULL,
+            deathCity VARCHAR(50) DEFAULT NULL,
+            nameFirst VARCHAR(50) DEFAULT NULL,
+            nameLast VARCHAR(50) DEFAULT NULL,
+            nameGiven VARCHAR(50) DEFAULT NULL,
+            weight SMALLINT(6) DEFAULT NULL,
+            height SMALLINT(6) DEFAULT NULL,
+            bats CHAR(1) DEFAULT NULL,
+            throws CHAR(1) DEFAULT NULL,
+            debut DATE DEFAULT NULL,
+            finalGame DATE DEFAULT NULL,
+            retroID VARCHAR(9) DEFAULT NULL,
+            bbrefID VARCHAR(9) DEFAULT NULL,
+            PRIMARY KEY (playerID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(master_table, commit=True)
+
+
+    load_master_data = f'''
+        LOAD DATA LOCAL INFILE '{path}master.csv'
+        INTO TABLE master
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+    execute_query(load_master_data, commit=True)
+
+# Call the functions in the appropriate part of the script
+create_master_table()
+load_master_data(path)
+
 # Run initialization functions
 create_database()
 set_encoding()
