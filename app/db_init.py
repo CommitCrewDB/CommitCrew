@@ -180,6 +180,40 @@ def load_data():
     '''
     execute_query(load_teams_data, commit=True)
 
+    teamshalf = '''
+    CREATE TABLE teamshalf (
+        ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
+        yearID smallint(6) NOT NULL,
+        lgID char(2) NOT NULL,
+        teamID char(3) NOT NULL,
+        team_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO teams TABLE*/
+        Half varchar(1) NOT NULL,
+        divID char(1) DEFAULT NULL,
+        div_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO divisions TABLE*/
+        DivWin varchar(1) DEFAULT NULL,
+        teamRank smallint(6) DEFAULT NULL,
+        G smallint(6) DEFAULT NULL,
+        W smallint(6) DEFAULT NULL,
+        L smallint(6) DEFAULT NULL,
+        PRIMARY KEY (ID),
+        UNIQUE KEY (yearID,lgID,teamID,Half),
+        FOREIGN KEY (lgID) REFERENCES leagues(lgID), /* Not normalized, but keeping to maintain consistency with original */
+        FOREIGN KEY (div_ID) REFERENCES divisions(ID), /* Not normalized, but keeping to maintain consistency with original */
+        FOREIGN KEY (team_ID) REFERENCES teams(ID)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(teamshalf, commit=True)
+
+    load_teamshalf_data = f'''
+        LOAD DATA LOCAL INFILE '{path}TeamsHalf.csv'
+        INTO TABLE teamshalf
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+    execute_query(load_teamshalf_data, commit=True)
+
     fielding_table = '''
     CREATE TABLE fielding (
         ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
