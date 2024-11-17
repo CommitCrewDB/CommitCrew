@@ -255,6 +255,48 @@ def load_data():
     '''
     execute_query(load_fielding_data, commit=True)
 
+    fielding_of_split_table = '''
+    CREATE TABLE fielding_of_split (
+        ID INT NOT NULL AUTO_INCREMENT,
+        playerID varchar(9) NOT NULL,
+        yearID smallint(6) NOT NULL,
+        stint smallint(6) NOT NULL,
+        teamID char(3) DEFAULT NULL,
+        team_ID INT DEFAULT NULL,
+        lgID char(2) DEFAULT NULL,
+        POS varchar(2) NOT NULL,
+        G smallint(6) DEFAULT NULL,
+        GS smallint(6) DEFAULT NULL,
+        InnOuts smallint(6) DEFAULT NULL,
+        PO smallint(6) DEFAULT NULL,
+        A smallint(6) DEFAULT NULL,
+        E smallint(6) DEFAULT NULL,
+        DP smallint(6) DEFAULT NULL,
+        PB smallint(6) DEFAULT NULL,
+        WP smallint(6) DEFAULT NULL,
+        SB smallint(6) DEFAULT NULL,
+        CS smallint(6) DEFAULT NULL,
+        ZR double DEFAULT NULL,
+        PRIMARY KEY (ID),
+        UNIQUE KEY (playerID, yearID, stint, POS),
+        FOREIGN KEY (lgID) REFERENCES leagues(lgID),
+        FOREIGN KEY (team_ID) REFERENCES teams(ID),
+        FOREIGN KEY (playerID) REFERENCES master(playerID)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(fielding_of_split_table, commit=True)
+
+    load_fielding_of_split_data = f'''
+        LOAD DATA LOCAL INFILE '{path}FieldingOfSplit.csv'
+        INTO TABLE fielding_of_split
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+    execute_query(load_fielding_of_split_data, commit=True)
+
+
     batting_table = '''
         CREATE TABLE batting (
             ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
