@@ -1,11 +1,17 @@
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 import mysql.connector
 import kagglehub
 
+dotenv_path = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=dotenv_path)
+
 # MySQL connection setup
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="<password>", # enter your mySQL password here
+    host=os.getenv("DB_HOST", "localhost"),
+    user=os.getenv("DB_USER", "root"),
+    password=os.getenv("DB_PASSWORD"),  # Ensure this is set in the .env file
     allow_local_infile=True
 )
 
