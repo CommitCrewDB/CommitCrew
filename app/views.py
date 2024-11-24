@@ -6,3 +6,6 @@ def home_page():
 
 def movies_page():
     return render_template("teams.html")
+
+def fielding_page():
+    return render_template("fielding.html")
