@@ -446,8 +446,8 @@ def load_data():
     execute_query(load_master_data, commit=True)
 
 # Call the functions in the appropriate part of the script
-create_master_table()
-load_master_data(path)
+# create_master_table()
+# load_master_data(path)
 
 # Run initialization functions
 create_database()

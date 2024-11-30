@@ -1,0 +1,113 @@
+/* General Styling for the Baseball Theme */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5; /* Light gray, mimicking a baseball field background */
+    color: #333; /* Dark gray for text */
+    line-height: 1.6;
+}
+
+/* About Us Section */
+.about-us {
+    text-align: center;
+    padding: 2rem;
+    line-height: 1.8;
+    color: #333;
+    background: linear-gradient(to bottom, #ffffff, #f5f5f5); /* Subtle white gradient */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.about-us h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #00274d; /* Dark blue */
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.about-us p {
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+    color: #444; /* Slightly darker gray */
+}
+
+.about-us .team {
+    margin: 2rem 0;
+}
+
+.about-us .team h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    color: #ba0c2f; /* Baseball red */
+    border-bottom: 2px solid #ba0c2f;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+}
+
+.about-us .team ul {
+    list-style: none;
+    padding: 0;
+}
+
+.about-us .team ul li {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: #00274d; /* Dark blue */
+}
+
+.about-us .closing {
+    font-style: italic;
+    color: #555;
+}
+
+/* Links (if any) */
+.about-us a {
+    color: #ba0c2f;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.about-us a:hover {
+    text-decoration: underline;
+}
+/* Header Styling */
+header {
+    background-color: #ba0c2f; /* Baseball red */
+    color: #fff;
+    padding: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+}
+
+header nav ul li {
+    margin: 0 1rem;
+}
+
+header nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease-in-out;
+}
+
+header nav ul li a:hover {
+    color: #ffd700; /* Gold for hover */
+}
+
+/* Footer Styling */
+footer {
+    text-align: center;
+    padding: 1rem;
+    background-color: #00274d; /* Baseball blue */
+    color: white;
+    font-size: 0.9rem;
+}

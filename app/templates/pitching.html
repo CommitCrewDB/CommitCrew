@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Pitching Table
+{% endblock %}
+
+{% block content %}
+    <h1>Pitching Table</h1>
+    <p>Explore the records of pitchers from the Lahman Baseball Database.</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Player ID</th>
+                <th>Year</th>
+                <th>Stint</th>
+                <th>Team</th>
+                <th>Wins</th>
+                <th>Losses</th>
+                <th>ERA</th>
+                <th>Strikeouts</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in pitching_data %}
+            <tr>
+                <td>{{ row['playerID'] }}</td>
+                <td>{{ row['yearID'] }}</td>
+                <td>{{ row['stint'] }}</td>
+                <td>{{ row['teamID'] }}</td>
+                <td>{{ row['W'] }}</td>
+                <td>{{ row['L'] }}</td>
+                <td>{{ row['ERA'] }}</td>
+                <td>{{ row['SO'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
