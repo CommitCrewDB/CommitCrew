@@ -1,11 +1,14 @@
 from flask import render_template
+from app.models.teams import Teams
+
 
 
 def home_page():
     return render_template("home.html")
 
 def teams_page():
-    return render_template("teams.html")
+    teams = Teams.get_all_teams()
+    return render_template("teams.html", teams=teams)
 
 def fielding_page():
     return render_template("fielding.html")

@@ -18,5 +18,21 @@
                 <th>Losses</th>
             </tr>
         </thead>
-    </table>
+        <tbody>
+            {% for team in teams %}
+            <tr>
+                <td>{{ team.Year }}</td>
+                <td>{{ team.League }}</td>
+                <td>{{ team.Team }}</td>
+                <td>{{ team.Franchise }}</td>
+                <td>{{ team.TeamDivision }}</td>
+                <td>{{ team.Rank }}</td>
+                <td>{{ team.GamesPlayed }}</td>
+                <td>{{ team.HomeGames }}</td>
+                <td>{{ team.Wins }}</td>
+                <td>{{ team.Losses }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>    
 {% endblock %}
