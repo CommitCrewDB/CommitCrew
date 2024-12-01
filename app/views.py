@@ -1,6 +1,6 @@
 from flask import render_template
 from app.models.teams import Teams
-
+from app.models.fielding import Fielding
 
 
 def home_page():
@@ -11,7 +11,8 @@ def teams_page():
     return render_template("teams.html", teams=teams)
 
 def fielding_page():
-    return render_template("fielding.html")
+    fielding_records = Fielding.get_all_fielding()
+    return render_template("fielding.html",fielding_records = fielding_records)
 
 def pitching_page():
     return render_template("pitching.html")

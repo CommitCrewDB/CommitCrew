@@ -25,5 +25,29 @@
                 <th>Zone Rating</th>
             </tr>
         </thead>
+        <tbody>
+            {% for record in fielding_records %}
+                <tr>
+                    <td>{{ record.playerID }}</td>
+                    <td>{{ record.yearID }}</td>
+                    <td>{{ record.stint }}</td>
+                    <td>{{ record.teamID }}</td>
+                    <td>{{ record.lgID }}</td>
+                    <td>{{ record.POS }}</td>
+                    <td>{{ record.G }}</td>
+                    <td>{{ record.GS }}</td>
+                    <td>{{ record.InnOuts }}</td>
+                    <td>{{ record.PO }}</td>
+                    <td>{{ record.A }}</td>
+                    <td>{{ record.E }}</td>
+                    <td>{{ record.DP }}</td>
+                    <td>{{ record.PB }}</td>
+                    <td>{{ record.WP }}</td>
+                    <td>{{ record.SB }}</td>
+                    <td>{{ record.CS }}</td>
+                    <td>{{ record.ZR }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
     </table>
 {% endblock %}
