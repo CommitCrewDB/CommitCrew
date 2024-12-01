@@ -2,39 +2,71 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import mysql.connector
+import click
 import kagglehub
 
 dotenv_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-# MySQL connection setup
-db = mysql.connector.connect(
-    host=os.getenv("DB_HOST", "localhost"),
-    user=os.getenv("DB_USER", "root"),
-    password=os.getenv("DB_PASSWORD"),  # Ensure this is set in the .env file
-    allow_local_infile=True
-)
-
 path = kagglehub.dataset_download("freshrenzo/lahmanbaseballdatabase")
 
-def execute_query(query, commit=False):
-    cursor = db.cursor()
-    cursor.execute(query)
-    if commit:
-        db.commit()
-    cursor.close()
+def get_db(use_database=True):
+    """
+    Establish a connection to the MySQL server.
 
-def create_database():
-    execute_query("DROP DATABASE IF EXISTS lahmansbaseballdb;", commit=True)
-    execute_query("CREATE DATABASE lahmansbaseballdb;", commit=True)
-    execute_query("USE lahmansbaseballdb;", commit=False)
+    :param use_database: If True, connect to the specific database; otherwise, connect to the server only.
+    :return: A MySQL connection object.
+    :raises RuntimeError: If the connection fails.
+    """
+    try:
+        db = mysql.connector.connect(
+                host=os.getenv("DB_HOST", "localhost"),
+                user=os.getenv("DB_USER", "root"),
+                password=os.getenv("DB_PASSWORD", ""), # Ensure this is set in the .env file
+                database=os.getenv("DB_NAME") if use_database else None,
+                allow_local_infile=True
+            )
+        return db
+    except Exception as e:
+        print(f"Error connecting to the database: {e}")
+        raise RuntimeError("Database connection failed. Please check the configuration.")
 
-def set_encoding():
-    execute_query("SET NAMES utf8;", commit=False)
-    execute_query("SET character_set_client = utf8mb4;", commit=False)
+def execute_query(connection, query, commit=False):
+    """
+    Execute a SQL query on the database.
+    """
+    cursor = connection.cursor()
+    try:
+        cursor.execute(query)
+        if commit:
+            connection.commit()
+    except Exception as e:
+        print(f"Error executing query: {query}\n{e}")
+        connection.rollback()
+        raise
+    finally:
+        cursor.close()
 
-def drop_tables():
-    drop_query = '''
+def create_database(connection):
+    """
+    Create the database schema.
+    """
+    execute_query(connection, "DROP DATABASE IF EXISTS lahmansbaseballdb;", commit=True)
+    execute_query(connection, "CREATE DATABASE lahmansbaseballdb;", commit=True)
+    execute_query(connection, "USE lahmansbaseballdb;")
+
+def set_encoding(connection):
+    """
+    Set the database encoding to UTF-8.
+    """
+    execute_query(connection,"SET NAMES utf8;", commit=False)
+    execute_query(connection,"SET character_set_client = utf8mb4;", commit=False)
+
+def drop_tables(connection):
+    """
+    Drop all tables in the database.
+    """
+    drop_tables_query = '''
         DROP TABLE IF EXISTS seriespost, salaries, pitchingpost, pitching,
         managershalf, managers, homegames, parks, halloffame, fieldingpost,
         fieldingofsplit, fieldingof, fielding, collegeplaying, schools,
@@ -42,11 +74,13 @@ def drop_tables():
         awardsplayers, awardsmanagers, appearances, allstarfull, people,
         teamshalf, teams, teamsfranchises, divisions, leagues;
     '''
-    execute_query(drop_query, commit=True)
+    execute_query(connection,drop_tables_query, commit=True)
 
-def create_tables():
-    # Create `leagues` table
-    leagues_table = '''
+def create_tables(connection):
+    """
+    Create all required tables. Load initial data into tables from CSV files or static queries.
+    """
+    create_leagues_table = '''
         CREATE TABLE leagues (
             lgID char(2) NOT NULL,
             league varchar(50) NOT NULL,
@@ -54,20 +88,18 @@ def create_tables():
             PRIMARY KEY (lgID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
-    execute_query(leagues_table, commit=True)
-    
-    # Insert data into `leagues` table
-    leagues_data = '''
+    execute_query(connection,create_leagues_table, commit=True)
+
+    load_leagues_data = '''
         INSERT INTO leagues (lgID, league, active) VALUES
         ('ML', 'Major League', 'Y'), ('AL', 'American League', 'Y'),
         ('NL', 'National League', 'Y'), ('AA', 'American Association', 'N'),
         ('FL', 'Federal League', 'N'), ('NA', 'National Association', 'N'),
         ('PL', 'Players'' League', 'N'), ('UA', 'Union Association', 'N');
     '''
-    execute_query(leagues_data, commit=True)
-    
-    # Create `divisions` table
-    divisions_table = '''
+    execute_query(connection,load_leagues_data, commit=True)
+
+    create_divisions_table = '''
         CREATE TABLE divisions (
             ID INT NOT NULL AUTO_INCREMENT,
             divID char(2) NOT NULL,
@@ -79,10 +111,9 @@ def create_tables():
             FOREIGN KEY (lgID) REFERENCES leagues(lgID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
-    execute_query(divisions_table, commit=True)
-    
-    # Insert data into `divisions` table
-    divisions_data = '''
+    execute_query(connection,create_divisions_table, commit=True)
+
+    load_divisions_data = '''
         INSERT INTO divisions (divID, lgID, division, active) VALUES
         ('E', 'AL', 'AL East', 'Y'), ('W', 'AL', 'AL West', 'Y'),
         ('C', 'AL', 'AL Central', 'Y'), ('E', 'NL', 'NL East', 'Y'),
@@ -91,11 +122,50 @@ def create_tables():
         ('N', 'NA', 'Sole Division', 'N'), ('P', 'PL', 'Sole Division', 'N'),
         ('U', 'UA', 'Sole Division', 'N');
     '''
-    execute_query(divisions_data, commit=True)
+    execute_query(connection,load_divisions_data, commit=True)
 
-def load_data():
-    # Load data into `TeamsFranchises` table
-    franchises_table = '''
+    create_master_table = '''
+        CREATE TABLE IF NOT EXISTS master (
+            playerID VARCHAR(9) NOT NULL,
+            birthYear SMALLINT(6) DEFAULT NULL,
+            birthMonth TINYINT(4) DEFAULT NULL,
+            birthDay TINYINT(4) DEFAULT NULL,
+            birthCountry VARCHAR(50) DEFAULT NULL,
+            birthState VARCHAR(50) DEFAULT NULL,
+            birthCity VARCHAR(50) DEFAULT NULL,
+            deathYear SMALLINT(6) DEFAULT NULL,
+            deathMonth TINYINT(4) DEFAULT NULL,
+            deathDay TINYINT(4) DEFAULT NULL,
+            deathCountry VARCHAR(50) DEFAULT NULL,
+            deathState VARCHAR(50) DEFAULT NULL,
+            deathCity VARCHAR(50) DEFAULT NULL,
+            nameFirst VARCHAR(50) DEFAULT NULL,
+            nameLast VARCHAR(50) DEFAULT NULL,
+            nameGiven VARCHAR(50) DEFAULT NULL,
+            weight SMALLINT(6) DEFAULT NULL,
+            height SMALLINT(6) DEFAULT NULL,
+            bats CHAR(1) DEFAULT NULL,
+            throws CHAR(1) DEFAULT NULL,
+            debut DATE DEFAULT NULL,
+            finalGame DATE DEFAULT NULL,
+            retroID VARCHAR(9) DEFAULT NULL,
+            bbrefID VARCHAR(9) DEFAULT NULL,
+            PRIMARY KEY (playerID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+    '''
+    execute_query(connection,create_master_table, commit=True)
+
+    load_master_data = f'''
+        LOAD DATA LOCAL INFILE '{path}Master.csv'
+        INTO TABLE master
+        FIELDS TERMINATED BY ','
+        ENCLOSED BY '"'
+        LINES TERMINATED BY '\n'
+        IGNORE 1 ROWS;
+    '''
+    execute_query(connection,load_master_data, commit=True)
+
+    create_teams_franchises_table = '''
         CREATE TABLE IF NOT EXISTS TeamsFranchises (
             franchID VARCHAR(3) NOT NULL,
             franchName VARCHAR(50) DEFAULT NULL,
@@ -104,9 +174,9 @@ def load_data():
             PRIMARY KEY (franchID)
         );
     '''
-    execute_query(franchises_table, commit=True)
+    execute_query(connection,create_teams_franchises_table, commit=True)
     
-    load_franchises_data = f'''
+    load_teams_franchises_data = f'''
         LOAD DATA LOCAL INFILE '{path}TeamsFranchises.csv'
         INTO TABLE TeamsFranchises
         FIELDS TERMINATED BY ','
@@ -114,9 +184,9 @@ def load_data():
         LINES TERMINATED BY '\n'
         IGNORE 1 ROWS;
     '''
-    execute_query(load_franchises_data, commit=True)
+    execute_query(connection,load_teams_franchises_data, commit=True)
 
-    teams_table = '''
+    create_teams_table = '''
         CREATE TABLE teams (
             ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
             yearID smallint(6) NOT NULL,
@@ -175,7 +245,8 @@ def load_data():
             FOREIGN KEY (franchID) REFERENCES teamsfranchises(franchID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
-    execute_query(teams_table, commit=True)
+    execute_query(connection,create_teams_table, commit=True)
+
     load_teams_data = f'''
         LOAD DATA LOCAL INFILE '{path}Teams.csv'
         INTO TABLE Teams
@@ -184,9 +255,9 @@ def load_data():
         LINES TERMINATED BY '\n'
         IGNORE 1 ROWS;
     '''
-    execute_query(load_teams_data, commit=True)
+    execute_query(connection,load_teams_data, commit=True)
 
-    teamshalf = '''
+    create_teamshalf_table = '''
     CREATE TABLE teamshalf (
         ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
         yearID smallint(6) NOT NULL,
@@ -208,7 +279,7 @@ def load_data():
         FOREIGN KEY (team_ID) REFERENCES teams(ID)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
-    execute_query(teamshalf, commit=True)
+    execute_query(connection,create_teamshalf_table, commit=True)
 
     load_teamshalf_data = f'''
         LOAD DATA LOCAL INFILE '{path}TeamsHalf.csv'
@@ -218,9 +289,9 @@ def load_data():
         LINES TERMINATED BY '\n'
         IGNORE 1 ROWS;
     '''
-    execute_query(load_teamshalf_data, commit=True)
+    execute_query(connection,load_teamshalf_data, commit=True)
 
-    fielding_table = '''
+    create_fielding_table = '''
     CREATE TABLE fielding (
         ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
         playerID varchar(9) NOT NULL,
@@ -249,7 +320,7 @@ def load_data():
         FOREIGN KEY (playerID) REFERENCES master(playerID)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''    
-    execute_query(fielding_table, commit=True)
+    execute_query(connection,create_fielding_table, commit=True)
 
     load_fielding_data = f'''
         LOAD DATA LOCAL INFILE '{path}Fielding.csv'
@@ -259,51 +330,9 @@ def load_data():
         LINES TERMINATED BY '\n'
         IGNORE 1 ROWS;
     '''
-    execute_query(load_fielding_data, commit=True)
+    execute_query(connection,load_fielding_data, commit=True)
 
-    fielding_of_split_table = '''
-    CREATE TABLE fielding_of_split (
-        ID INT NOT NULL AUTO_INCREMENT,
-        playerID varchar(9) NOT NULL,
-        yearID smallint(6) NOT NULL,
-        stint smallint(6) NOT NULL,
-        teamID char(3) DEFAULT NULL,
-        team_ID INT DEFAULT NULL,
-        lgID char(2) DEFAULT NULL,
-        POS varchar(2) NOT NULL,
-        G smallint(6) DEFAULT NULL,
-        GS smallint(6) DEFAULT NULL,
-        InnOuts smallint(6) DEFAULT NULL,
-        PO smallint(6) DEFAULT NULL,
-        A smallint(6) DEFAULT NULL,
-        E smallint(6) DEFAULT NULL,
-        DP smallint(6) DEFAULT NULL,
-        PB smallint(6) DEFAULT NULL,
-        WP smallint(6) DEFAULT NULL,
-        SB smallint(6) DEFAULT NULL,
-        CS smallint(6) DEFAULT NULL,
-        ZR double DEFAULT NULL,
-        PRIMARY KEY (ID),
-        UNIQUE KEY (playerID, yearID, stint, POS),
-        FOREIGN KEY (lgID) REFERENCES leagues(lgID),
-        FOREIGN KEY (team_ID) REFERENCES teams(ID),
-        FOREIGN KEY (playerID) REFERENCES master(playerID)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-    '''
-    execute_query(fielding_of_split_table, commit=True)
-
-    load_fielding_of_split_data = f'''
-        LOAD DATA LOCAL INFILE '{path}FieldingOfSplit.csv'
-        INTO TABLE fielding_of_split
-        FIELDS TERMINATED BY ','
-        ENCLOSED BY '"'
-        LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
-    '''
-    execute_query(load_fielding_of_split_data, commit=True)
-
-
-    batting_table = '''
+    create_batting_table = '''
         CREATE TABLE batting (
             ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
             playerID varchar(9) NOT NULL,
@@ -337,7 +366,8 @@ def load_data():
             FOREIGN KEY (playerID) REFERENCES master(playerID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
-    execute_query(batting_table, commit=True)
+    execute_query(connection,create_batting_table, commit=True)
+
     load_batting_data = f'''
         LOAD DATA LOCAL INFILE '{path}Batting.csv'
         INTO TABLE Batting
@@ -346,9 +376,9 @@ def load_data():
         LINES TERMINATED BY '\n'
         IGNORE 1 ROWS;
     '''
-    execute_query(load_batting_data, commit=True)
+    execute_query(connection,load_batting_data, commit=True)
 
-    pitching_table = '''
+    create_pitching_table = '''
         CREATE TABLE pitching (
             ID INT NOT NULL AUTO_INCREMENT,
             playerID VARCHAR(9) NOT NULL,
@@ -388,9 +418,9 @@ def load_data():
             FOREIGN KEY (playerID) REFERENCES master(playerID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
-    execute_query(pitching_table, commit=True)
+    execute_query(connection,create_pitching_table, commit=True)
 
-    load_pitching_data = '''
+    load_pitching_data = f'''
         LOAD DATA LOCAL INFILE '{path}Pitching.csv'
         INTO TABLE Pitching
         FIELDS TERMINATED BY ','
@@ -398,63 +428,27 @@ def load_data():
         LINES TERMINATED BY '\n'
         IGNORE 1 ROWS;
     '''
+    execute_query(connection,load_pitching_data, commit=True)
 
-    execute_query(load_pitching_data, commit=True)
+@click.group()
+def cli():
+    """Database Management CLI"""
+    pass
 
+@cli.command("init-db")
+def init_db():
+    """
+    Initialize the database: create schema, tables, and load data.
+    """
+    try:
+        connection = get_db(use_database=False)
+        create_database(connection)
+        set_encoding(connection)
+        create_tables(connection)
+        connection.close()
+    except Exception as e:
+        print(f"Database initialization failed: {e}")
+        raise RuntimeError("Failed to initialize the database.")
 
-
-    master_table = '''
-        CREATE TABLE IF NOT EXISTS master (
-            playerID VARCHAR(9) NOT NULL,
-            birthYear SMALLINT(6) DEFAULT NULL,
-            birthMonth TINYINT(4) DEFAULT NULL,
-            birthDay TINYINT(4) DEFAULT NULL,
-            birthCountry VARCHAR(50) DEFAULT NULL,
-            birthState VARCHAR(50) DEFAULT NULL,
-            birthCity VARCHAR(50) DEFAULT NULL,
-            deathYear SMALLINT(6) DEFAULT NULL,
-            deathMonth TINYINT(4) DEFAULT NULL,
-            deathDay TINYINT(4) DEFAULT NULL,
-            deathCountry VARCHAR(50) DEFAULT NULL,
-            deathState VARCHAR(50) DEFAULT NULL,
-            deathCity VARCHAR(50) DEFAULT NULL,
-            nameFirst VARCHAR(50) DEFAULT NULL,
-            nameLast VARCHAR(50) DEFAULT NULL,
-            nameGiven VARCHAR(50) DEFAULT NULL,
-            weight SMALLINT(6) DEFAULT NULL,
-            height SMALLINT(6) DEFAULT NULL,
-            bats CHAR(1) DEFAULT NULL,
-            throws CHAR(1) DEFAULT NULL,
-            debut DATE DEFAULT NULL,
-            finalGame DATE DEFAULT NULL,
-            retroID VARCHAR(9) DEFAULT NULL,
-            bbrefID VARCHAR(9) DEFAULT NULL,
-            PRIMARY KEY (playerID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-    '''
-    execute_query(master_table, commit=True)
-
-
-    load_master_data = f'''
-        LOAD DATA LOCAL INFILE '{path}master.csv'
-        INTO TABLE master
-        FIELDS TERMINATED BY ','
-        ENCLOSED BY '"'
-        LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
-    '''
-    execute_query(load_master_data, commit=True)
-
-# Call the functions in the appropriate part of the script
-# create_master_table()
-# load_master_data(path)
-
-# Run initialization functions
-create_database()
-set_encoding()
-drop_tables()
-create_tables()
-load_data()
-
-# Close the main database connection
-db.close()
+if __name__ == "__main__":
+    cli()
