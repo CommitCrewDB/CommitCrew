@@ -19,3 +19,6 @@ def pitching_page():
 
 def about_page():
     return render_template("about.html")
+
+def master_page():
+    return render_template("master.html")
