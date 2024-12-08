@@ -3,12 +3,11 @@ from pathlib import Path
 from dotenv import load_dotenv
 import mysql.connector
 import click
-import kagglehub
 
 dotenv_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-path = kagglehub.dataset_download("freshrenzo/lahmanbaseballdatabase")
+path = r"<path/to/csv/"
 
 def get_db(use_database=True):
     """
@@ -249,11 +248,12 @@ def create_tables(connection):
 
     load_teams_data = f'''
         LOAD DATA LOCAL INFILE '{path}Teams.csv'
-        INTO TABLE Teams
-        FIELDS TERMINATED BY ','
+        INTO TABLE teams
+        FIELDS TERMINATED BY ',' 
         ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
+        IGNORE 1 ROWS
+        (yearID, lgID, teamID, franchID, divID, teamRank, G, Ghome, W, L, DivWin, WCWin, LgWin, WSWin, R, AB, H, `2B`, `3B`, HR, BB, SO, SB, CS, HBP, SF, RA, ER, ERA, CG, SHO, SV, IPouts, HA, HRA, BBA, SOA, E, DP, FP, name, park, attendance, BPF, PPF, teamIDBR, teamIDlahman45, teamIDretro);
     '''
     execute_query(connection,load_teams_data, commit=True)
 
@@ -384,7 +384,7 @@ def create_tables(connection):
             playerID VARCHAR(9) NOT NULL,
             yearID SMALLINT(6) NOT NULL,
             stint SMALLINT(6) NOT NULL,
-            teamID CHAR(3) DEFAULT NULL,
+            teamID INT(3) DEFAULT NULL,
             lgID CHAR(2) DEFAULT NULL,
             W SMALLINT(6) DEFAULT NULL,
             L SMALLINT(6) DEFAULT NULL,

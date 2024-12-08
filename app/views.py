@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, request
 from app.models.teams import Teams
 from app.models.fielding import Fielding
 
@@ -7,8 +7,14 @@ def home_page():
     return render_template("home.html")
 
 def teams_page():
-    teams = Teams.get_all_teams()
-    return render_template("teams.html", teams=teams)
+    # Get search query from request arguments
+    search_query = request.args.get("search", "")
+    if search_query:
+        teams = Teams.search_by_name(search_query)
+    else:
+        teams = []
+    top_teams = Teams.get_top_teams_by_league()
+    return render_template("teams.html", teams=teams, top_teams=top_teams)
 
 def fielding_page():
     fielding_records = Fielding.get_all_fielding()

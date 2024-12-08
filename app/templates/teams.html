@@ -1,8 +1,22 @@
 {% extends "layout.html" %}
-{% block title %}Teams{% endblock %}
+{% block title %}Teams,{% endblock %}
 {% block content %}
-    <h1 class="title">Teams</h1>
+<h1 class="title">Teams</h1>
 
+<!-- Search Form -->
+<form method="get" action="/teams" class="search-form">
+    <input
+        type="text"
+        name="search"
+        value="{{ request.args.get('search', '') }}"
+        placeholder="Search by team name"
+    />
+    <button type="submit">Search</button>
+</form>
+
+<!-- Search Results -->
+{% if teams %}
+    <h2>Search Results</h2>
     <table class="table">
         <thead>
             <tr>
@@ -10,10 +24,10 @@
                 <th>League</th>
                 <th>Team</th>
                 <th>Franchise</th>
-                <th>Team's division</th>
+                <th>Division</th>
                 <th>Rank</th>
-                <th>Games played</th>
-                <th>Games played at home</th>
+                <th>Games Played</th>
+                <th>Home Games</th>
                 <th>Wins</th>
                 <th>Losses</th>
             </tr>
@@ -34,5 +48,32 @@
             </tr>
             {% endfor %}
         </tbody>
-    </table>    
+    </table>
+{% elif request.args.get('search') %}
+    <p>No results found. Try searching for a different team name.</p>
+{% endif %}
+
+<!-- Top Teams by League -->
+<h2>Top Teams by League</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>League</th>
+            <th>Team Name</th>
+            <th>Wins</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for team in top_teams %}
+        <tr>
+            <td>{{ team.League }}</td>
+            <td>{{ team.Team }}</td>
+            <td>{{ team.Wins }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
 {% endblock %}
+
