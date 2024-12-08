@@ -56,3 +56,32 @@ class Fielding:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
+
+    
+    def search_by_position(position):
+        try:
+            db = mysql.connector.connect(
+                host=os.getenv("DB_HOST", "localhost"),
+                user=os.getenv("DB_USER", "root"),
+                password=os.getenv("DB_PASSWORD"),
+                database=os.getenv("DB_NAME", "lahmansbaseballdb")
+            )
+            cursor = db.cursor()
+
+            query = """
+                SELECT 
+                    ID, playerID, yearID, stint, teamID, team_ID, lgID, POS, G, GS, InnOuts, 
+                    PO, A, E, DP, PB, WP, SB, CS, ZR
+                FROM fielding
+                WHERE POS LIKE %s
+            """
+            cursor.execute(query, (f"%{position}%",))
+            fielding_records = [Fielding(*row) for row in cursor.fetchall()]
+
+            cursor.close()
+            db.close()
+            return fielding_records
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return []
+

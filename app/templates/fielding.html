@@ -1,7 +1,19 @@
 {% extends "layout.html" %}
+
 {% block title %}Fielding{% endblock %}
+
 {% block content %}
     <h1 class="title">Fielding</h1>
+
+    <form method="GET" action="{{ url_for('fielding_page') }}">
+        <div class="form-group">
+            <label for="position">Search by Position:</label>
+            <input type="text" id="position" name="position" class="form-control" placeholder="Enter position" value="{{ request.args.get('position', '') }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <br>
     <table class="table">
         <thead>
             <tr>
@@ -51,3 +63,4 @@
         </tbody>
     </table>
 {% endblock %}
+
