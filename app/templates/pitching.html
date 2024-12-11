@@ -1,39 +1,92 @@
 {% extends "layout.html" %}
 
-{% block title %}
-Pitching Table
-{% endblock %}
-
 {% block content %}
-    <h1>Pitching Table</h1>
-    <p>Explore the records of pitchers from the Lahman Baseball Database.</p>
+<h1>Pitching Table</h1>
+{% if search_query %}
+    <p>Showing results for search query: "{{ search_query }}"</p>
+{% else %}
+    <p>Displaying all data.</p>
+{% endif %}
 
-    <table>
-        <thead>
-            <tr>
-                <th>Player ID</th>
-                <th>Year</th>
-                <th>Stint</th>
-                <th>Team</th>
-                <th>Wins</th>
-                <th>Losses</th>
-                <th>ERA</th>
-                <th>Strikeouts</th>
-            </tr>
-        </thead>
-        <tbody>
+<!-- Table -->
+<table border="1">
+    <thead>
+        <tr>
+            <th>Player ID</th>
+            <th>Year</th>
+            <th>Stint</th>
+            <th>Team</th>
+            <th>League</th>
+            <th>Wins</th>
+            <th>Losses</th>
+            <th>Games</th>
+            <th>Games Started</th>
+            <th>Complete Games</th>
+            <th>Shutouts</th>
+            <th>Saves</th>
+            <th>IPouts</th>
+            <th>Hits</th>
+            <th>Earned Runs</th>
+            <th>Home Runs</th>
+            <th>Walks</th>
+            <th>Strikeouts</th>
+            <th>BAOpp</th>
+            <th>ERA</th>
+            <th>IBB</th>
+            <th>WP</th>
+            <th>HBP</th>
+            <th>BK</th>
+            <th>BFP</th>
+            <th>GF</th>
+            <th>Runs</th>
+            <th>SH</th>
+            <th>SF</th>
+            <th>GIDP</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if pitching_data %}
             {% for row in pitching_data %}
             <tr>
-                <td>{{ row['playerID'] }}</td>
-                <td>{{ row['yearID'] }}</td>
-                <td>{{ row['stint'] }}</td>
-                <td>{{ row['teamID'] }}</td>
-                <td>{{ row['W'] }}</td>
-                <td>{{ row['L'] }}</td>
-                <td>{{ row['ERA'] }}</td>
-                <td>{{ row['SO'] }}</td>
+                <td>{{ row.playerID }}</td>
+                <td>{{ row.yearID }}</td>
+                <td>{{ row.stint }}</td>
+                <td>{{ row.teamID }}</td>
+                <td>{{ row.lgID }}</td>
+                <td>{{ row.W }}</td>
+                <td>{{ row.L }}</td>
+                <td>{{ row.G }}</td>
+                <td>{{ row.GS }}</td>
+                <td>{{ row.CG }}</td>
+                <td>{{ row.SHO }}</td>
+                <td>{{ row.SV }}</td>
+                <td>{{ row.IPouts }}</td>
+                <td>{{ row.H }}</td>
+                <td>{{ row.ER }}</td>
+                <td>{{ row.HR }}</td>
+                <td>{{ row.BB }}</td>
+                <td>{{ row.SO }}</td>
+                <td>{{ row.BAOpp }}</td>
+                <td>{{ row.ERA }}</td>
+                <td>{{ row.IBB }}</td>
+                <td>{{ row.WP }}</td>
+                <td>{{ row.HBP }}</td>
+                <td>{{ row.BK }}</td>
+                <td>{{ row.BFP }}</td>
+                <td>{{ row.GF }}</td>
+                <td>{{ row.R }}</td>
+                <td>{{ row.SH }}</td>
+                <td>{{ row.SF }}</td>
+                <td>{{ row.GIDP }}</td>
             </tr>
             {% endfor %}
-        </tbody>
-    </table>
+        {% else %}
+            <tr>
+                <td colspan="30">No data found in pitching.csv.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('pitching_options') }}">Go Back</a>
 {% endblock %}
