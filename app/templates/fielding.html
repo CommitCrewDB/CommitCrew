@@ -5,6 +5,7 @@
 {% block content %}
     <h1 class="title">Fielding</h1>
 
+
     <form method="GET" action="{{ url_for('fielding_page') }}">
         <div class="form-group">
             <label for="position">Search by Position:</label>
@@ -12,6 +13,11 @@
         </div>
         <button type="submit" class="btn btn-primary">Search</button>
     </form>
+
+    <form action="/fielding/all" method="get">
+        <button type="submit">Show All Data</button>
+    </form>
+
 
     <br>
     <table class="table">
@@ -63,4 +69,4 @@
         </tbody>
     </table>
 {% endblock %}
-
+                      

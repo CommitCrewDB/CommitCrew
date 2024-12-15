@@ -37,18 +37,16 @@ class Fielding:
                 password=os.getenv("DB_PASSWORD"),
                 database=os.getenv("DB_NAME", "lahmansbaseballdb")
             )
-            cursor = db.cursor()
+            cursor = db.cursor(dictionary=True)
 
             query = """
                 SELECT 
-                    ID, playerID, yearID, stint, teamID, team_ID, lgID, POS, G, GS, InnOuts, 
+                    playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, 
                     PO, A, E, DP, PB, WP, SB, CS, ZR
                 FROM fielding
             """
             cursor.execute(query)
-            fielding_records = []
-            for row in cursor.fetchall():
-                fielding_records.append(Fielding(*row))
+            fielding_records = cursor.fetchall()
 
             cursor.close()
             db.close()
@@ -57,7 +55,7 @@ class Fielding:
             print(f"Error: {err}")
             return []
 
-    
+    @staticmethod
     def search_by_position(position):
         try:
             db = mysql.connector.connect(
@@ -66,17 +64,17 @@ class Fielding:
                 password=os.getenv("DB_PASSWORD"),
                 database=os.getenv("DB_NAME", "lahmansbaseballdb")
             )
-            cursor = db.cursor()
+            cursor = db.cursor(dictionary=True)
 
             query = """
                 SELECT 
-                    ID, playerID, yearID, stint, teamID, team_ID, lgID, POS, G, GS, InnOuts, 
+                    playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, 
                     PO, A, E, DP, PB, WP, SB, CS, ZR
                 FROM fielding
                 WHERE POS LIKE %s
             """
             cursor.execute(query, (f"%{position}%",))
-            fielding_records = [Fielding(*row) for row in cursor.fetchall()]
+            fielding_records = cursor.fetchall()
 
             cursor.close()
             db.close()
@@ -84,4 +82,3 @@ class Fielding:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
-

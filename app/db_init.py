@@ -7,7 +7,7 @@ import click
 dotenv_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-path = r"<path/to/csv/"
+path = r"/home/sevim-eftal/CommitCrew/csv/"
 
 def get_db(use_database=True):
     """
@@ -241,7 +241,7 @@ def create_tables(connection):
             UNIQUE KEY (yearID,lgID,teamID),
             FOREIGN KEY (lgID) REFERENCES leagues(lgID), /* Not normalized, but keeping to maintain consistency with original */
             FOREIGN KEY (div_ID) REFERENCES divisions(ID),
-            FOREIGN KEY (franchID) REFERENCES teamsfranchises(franchID)
+            FOREIGN KEY (franchID) REFERENCES TeamsFranchises(franchID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
     execute_query(connection,create_teams_table, commit=True)
@@ -332,7 +332,7 @@ def create_tables(connection):
     execute_query(connection, load_fielding_data, commit=True)
 
     create_batting_table = '''
-        CREATE TABLE batting (
+        CREATE TABLE Batting (
             ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
             playerID varchar(9) NOT NULL,
             yearID smallint(6) NOT NULL,
@@ -378,7 +378,7 @@ def create_tables(connection):
     execute_query(connection,load_batting_data, commit=True)
 
     create_pitching_table = '''
-        CREATE TABLE pitching (
+        CREATE TABLE Pitching (
             ID INT NOT NULL AUTO_INCREMENT,
             playerID VARCHAR(9) NOT NULL,
             yearID SMALLINT(6) NOT NULL,
