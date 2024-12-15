@@ -106,6 +106,44 @@ class Teams:
             print(f"Error: {err}")
             return []
 
+    @staticmethod
+    def add_team(team_data):
+        try:
+            db = mysql.connector.connect(
+                host=os.getenv("DB_HOST"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                database=os.getenv("DB_NAME")
+            )
+            cursor = db.cursor()
+            query = """
+                INSERT INTO teams (yearID, lgID, name, franchID, W, L)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (team_data["Year"], team_data["League"], team_data["Team"],
+                                team_data["Franchise"], team_data["Wins"], team_data["Losses"]))
+            db.commit()
+            cursor.close()
+            db.close()
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
 
+    @staticmethod
+    def delete_team(team_id):
+        try:
+            db = mysql.connector.connect(
+                host=os.getenv("DB_HOST"),
+                user=os.getenv("DB_USER"),
+                password=os.getenv("DB_PASSWORD"),
+                database=os.getenv("DB_NAME")
+            )
+            cursor = db.cursor()
+            query = "DELETE FROM teams WHERE teamID = %s"
+            cursor.execute(query, (team_id,))
+            db.commit()
+            cursor.close()
+            db.close()
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
 
 

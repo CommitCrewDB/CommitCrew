@@ -7,7 +7,7 @@ import click
 dotenv_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-path = r"/home/sevim-eftal/CommitCrew/csv/"
+path = r"C:/Users/Busra/Desktop/github/CommitCrew/csv/"
 
 def get_db(use_database=True):
     """

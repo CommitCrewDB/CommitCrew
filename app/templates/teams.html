@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
-{% block title %}Teams,{% endblock %}
+{% block title %}Teams{% endblock %}
 {% block content %}
 <h1 class="title">Teams</h1>
 
-
+<!-- Search Form -->
 <form method="get" action="/teams" class="search-form">
     <input
         type="text"
@@ -17,7 +17,7 @@
 
 {% if teams %}
     <h2>Search Results</h2>
-    <table class="table">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Year</th>
@@ -25,11 +25,9 @@
                 <th>Team</th>
                 <th>Franchise</th>
                 <th>Division</th>
-                <th>Rank</th>
-                <th>Games Played</th>
-                <th>Home Games</th>
                 <th>Wins</th>
                 <th>Losses</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -40,11 +38,15 @@
                 <td>{{ team.Team }}</td>
                 <td>{{ team.Franchise }}</td>
                 <td>{{ team.TeamDivision }}</td>
-                <td>{{ team.Rank }}</td>
-                <td>{{ team.GamesPlayed }}</td>
-                <td>{{ team.HomeGames }}</td>
                 <td>{{ team.Wins }}</td>
                 <td>{{ team.Losses }}</td>
+                <td>
+                    <form method="POST" action="/teams" style="display:inline;">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="team_id" value="{{ team.id }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -53,27 +55,59 @@
     <p>No results found. Try searching for a different team name.</p>
 {% endif %}
 
-<!-- Top Teams by League -->
-<h2>Top Teams by League</h2>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>League</th>
-            <th>Team Name</th>
-            <th>Wins</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for team in top_teams %}
-        <tr>
-            <td>{{ team.League }}</td>
-            <td>{{ team.Team }}</td>
-            <td>{{ team.Wins }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<!-- "Top Teams by League" Button -->
+<div>
+    <form method="get" action="/teams">
+        <input type="hidden" name="action" value="view_top_teams">
+        <button type="submit" class="btn btn-primary">Top Teams by League</button>
+    </form>
+</div>
 
+<!-- Top Teams Table (Only visible after button click) -->
+{% if top_teams %}
+    <h2>Top Teams by League</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>League</th>
+                <th>Team Name</th>
+                <th>Wins</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in top_teams %}
+            <tr>
+                <td>{{ team.League }}</td>
+                <td>{{ team.Team }}</td>
+                <td>{{ team.Wins }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+
+<!-- Add New Team Form -->
+<h3>Add New Team</h3>
+<form method="POST" action="/teams">
+    <input type="hidden" name="action" value="add">
+    <input type="text" name="year" placeholder="Year" required>
+    <input type="text" name="league" placeholder="League" required>
+    <input type="text" name="team_name" placeholder="Team Name" required>
+    <input type="text" name="franchise" placeholder="Franchise" required>
+    <input type="number" name="wins" placeholder="Wins" required>
+    <input type="number" name="losses" placeholder="Losses" required>
+    <button type="submit" class="btn btn-success">Add Team</button>
+</form>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
 
 {% endblock %}
-

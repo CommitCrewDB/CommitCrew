@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
 from flask import app
 from app.models.teams import Teams
 from app.models.fielding import Fielding
@@ -8,7 +8,7 @@ from app.models.pitching import Pitching
 
 def home_page():
     return render_template("home.html")
-
+'''
 def teams_page():
 
     search_query = request.args.get("search", "")
@@ -18,6 +18,46 @@ def teams_page():
         teams = []
     top_teams = Teams.get_top_teams_by_league()
     return render_template("teams.html", teams=teams, top_teams=top_teams)
+
+'''
+
+def teams_page():
+    search_query = request.args.get("search", "")
+    action = request.args.get('action')
+
+    # "Top Teams" butonuna tıklanmışsa
+    if action == 'view_top_teams':
+        top_teams = Teams.get_top_teams_by_league()
+        return render_template("teams.html", top_teams=top_teams)
+    if search_query:
+        teams = Teams.search_by_name(search_query)
+    else:
+        teams = []
+
+    if request.method == "POST":
+        action = request.form.get("action")
+        team_data = {
+            "Year": request.form.get("year"),
+            "League": request.form.get("league"),
+            "Team": request.form.get("team_name"),
+            "Franchise": request.form.get("franchise"),
+            "Wins": request.form.get("wins"),
+            "Losses": request.form.get("losses")
+        }
+
+        if action == "add":
+            Teams.add_team(team_data)
+            flash("New team added successfully!", "success")
+
+        elif action == "delete":
+            team_id = request.form.get("team_id")
+            Teams.delete_team(team_id)
+            flash("Team deleted successfully!", "success")
+
+        return redirect(url_for("teams_page"))
+
+    return render_template("teams.html", teams=teams)
+
 
 def fielding_page():
 
