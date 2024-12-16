@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 from dotenv import load_dotenv
 import mysql.connector
@@ -7,7 +8,14 @@ import click
 dotenv_path = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=dotenv_path)
 
-path = r"<path/to/csv>"
+def get_git_base_dir():
+    try:
+        base_dir = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"], stderr=subprocess.STDOUT
+        ).strip().decode('utf-8')
+        return Path(base_dir)
+    except subprocess.CalledProcessError:
+        return None
 
 def get_db(use_database=True):
     """
@@ -17,6 +25,11 @@ def get_db(use_database=True):
     :return: A MySQL connection object.
     :raises RuntimeError: If the connection fails.
     """
+    base_dir = get_git_base_dir()
+    if base_dir:
+        dotenv_dir = base_dir / '.env'
+    load_dotenv(dotenv_path=dotenv_dir)
+
     try:
         db = mysql.connector.connect(
                 host=os.getenv("DB_HOST", "localhost"),
@@ -70,7 +83,7 @@ def drop_tables(connection):
         managershalf, managers, homegames, parks, halloffame, fieldingpost,
         fieldingofsplit, fieldingof, fielding, collegeplaying, schools,
         battingpost, batting, awardsshareplayers, awardssharemanagers,
-        awardsplayers, awardsmanagers, appearances, allstarfull, people,
+        awardsplayers, awardsmanagers, appearances, allstarfull, master,
         teamshalf, teams, teamsfranchises, divisions, leagues;
     '''
     execute_query(connection,drop_tables_query, commit=True)
@@ -79,6 +92,10 @@ def create_tables(connection):
     """
     Create all required tables. Load initial data into tables from CSV files or static queries.
     """
+    base_dir = get_git_base_dir()
+    if base_dir:
+        csv_dir = base_dir / 'csv'
+    
     create_leagues_table = '''
         CREATE TABLE leagues (
             lgID char(2) NOT NULL,
@@ -129,9 +146,9 @@ def create_tables(connection):
             birthYear SMALLINT(6) DEFAULT NULL,
             birthMonth TINYINT(4) DEFAULT NULL,
             birthDay TINYINT(4) DEFAULT NULL,
+            birthCity VARCHAR(50) DEFAULT NULL,
             birthCountry VARCHAR(50) DEFAULT NULL,
             birthState VARCHAR(50) DEFAULT NULL,
-            birthCity VARCHAR(50) DEFAULT NULL,
             deathYear SMALLINT(6) DEFAULT NULL,
             deathMonth TINYINT(4) DEFAULT NULL,
             deathDay TINYINT(4) DEFAULT NULL,
@@ -146,26 +163,27 @@ def create_tables(connection):
             bats CHAR(1) DEFAULT NULL,
             throws CHAR(1) DEFAULT NULL,
             debut DATE DEFAULT NULL,
+            bbrefID VARCHAR(9) DEFAULT NULL,
             finalGame DATE DEFAULT NULL,
             retroID VARCHAR(9) DEFAULT NULL,
-            bbrefID VARCHAR(9) DEFAULT NULL,
             PRIMARY KEY (playerID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
     execute_query(connection,create_master_table, commit=True)
 
     load_master_data = f'''
-        LOAD DATA LOCAL INFILE '{path}Master.csv'
+        LOAD DATA LOCAL INFILE '{(csv_dir / 'Master.csv').as_posix()}'
         INTO TABLE master
         FIELDS TERMINATED BY ','
         ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
+        IGNORE 1 ROWS
+        (@dummy, playerID, birthYear, birthMonth, birthDay, birthCity, birthCountry, birthState, deathYear, deathMonth, deathDay, deathCountry, deathState, deathCity, nameFirst, nameLast, nameGiven, weight, height, bats, throws, debut, bbrefID, finalGame, retroID);
     '''
     execute_query(connection,load_master_data, commit=True)
 
     create_teams_franchises_table = '''
-        CREATE TABLE IF NOT EXISTS TeamsFranchises (
+        CREATE TABLE IF NOT EXISTS teamsfranchises (
             franchID VARCHAR(3) NOT NULL,
             franchName VARCHAR(50) DEFAULT NULL,
             active CHAR DEFAULT NULL,
@@ -176,24 +194,24 @@ def create_tables(connection):
     execute_query(connection,create_teams_franchises_table, commit=True)
     
     load_teams_franchises_data = f'''
-        LOAD DATA LOCAL INFILE '{path}TeamsFranchises.csv'
-        INTO TABLE TeamsFranchises
+        LOAD DATA LOCAL INFILE '{(csv_dir / 'TeamsFranchises.csv').as_posix()}'
+        INTO TABLE teamsfranchises
         FIELDS TERMINATED BY ','
         ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
+        IGNORE 1 ROWS
+        (franchID, franchName, active, NAassoc);
     '''
     execute_query(connection,load_teams_franchises_data, commit=True)
 
     create_teams_table = '''
         CREATE TABLE teams (
-            ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
+            ID INT NOT NULL AUTO_INCREMENT,
             yearID smallint(6) NOT NULL,
             lgID char(2) DEFAULT NULL,
             teamID char(3) NOT NULL,
             franchID varchar(3) DEFAULT NULL,
             divID char(1) DEFAULT NULL,
-            div_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO divisions TABLE*/
             teamRank smallint(6) DEFAULT NULL,
             G smallint(6) DEFAULT NULL,
             Ghome smallint(6) DEFAULT NULL,
@@ -238,16 +256,16 @@ def create_tables(connection):
             teamIDlahman45 varchar(3) DEFAULT NULL,
             teamIDretro varchar(3) DEFAULT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (yearID,lgID,teamID),
-            FOREIGN KEY (lgID) REFERENCES leagues(lgID), /* Not normalized, but keeping to maintain consistency with original */
-            FOREIGN KEY (div_ID) REFERENCES divisions(ID),
-            FOREIGN KEY (franchID) REFERENCES TeamsFranchises(franchID)
+            UNIQUE KEY (yearID, lgID, teamID),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID),
+            FOREIGN KEY (divID, lgID) REFERENCES divisions(divID, lgID),
+            FOREIGN KEY (franchID) REFERENCES teamsfranchises(franchID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
     execute_query(connection,create_teams_table, commit=True)
 
     load_teams_data = f'''
-        LOAD DATA LOCAL INFILE '{path}Teams.csv'
+        LOAD DATA LOCAL INFILE '{(csv_dir / 'Teams.csv').as_posix()}'
         INTO TABLE teams
         FIELDS TERMINATED BY ',' 
         ENCLOSED BY '"'
@@ -258,36 +276,35 @@ def create_tables(connection):
     execute_query(connection,load_teams_data, commit=True)
 
     create_teamshalf_table = '''
-    CREATE TABLE teamshalf (
-        ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
-        yearID smallint(6) NOT NULL,
-        lgID char(2) NOT NULL,
-        teamID char(3) NOT NULL,
-        team_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO teams TABLE*/
-        Half varchar(1) NOT NULL,
-        divID char(1) DEFAULT NULL,
-        div_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO divisions TABLE*/
-        DivWin varchar(1) DEFAULT NULL,
-        teamRank smallint(6) DEFAULT NULL,
-        G smallint(6) DEFAULT NULL,
-        W smallint(6) DEFAULT NULL,
-        L smallint(6) DEFAULT NULL,
-        PRIMARY KEY (ID),
-        UNIQUE KEY (yearID,lgID,teamID,Half),
-        FOREIGN KEY (lgID) REFERENCES leagues(lgID), /* Not normalized, but keeping to maintain consistency with original */
-        FOREIGN KEY (div_ID) REFERENCES divisions(ID), /* Not normalized, but keeping to maintain consistency with original */
-        FOREIGN KEY (team_ID) REFERENCES teams(ID)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        CREATE TABLE teamshalf (
+            ID INT NOT NULL AUTO_INCREMENT,
+            yearID smallint(6) NOT NULL,
+            lgID char(2) NOT NULL,
+            teamID char(3) NOT NULL,
+            Half varchar(1) NOT NULL,
+            divID char(1) DEFAULT NULL,
+            DivWin varchar(1) DEFAULT NULL,
+            teamRank smallint(6) DEFAULT NULL,
+            G smallint(6) DEFAULT NULL,
+            W smallint(6) DEFAULT NULL,
+            L smallint(6) DEFAULT NULL,
+            PRIMARY KEY (ID),
+            UNIQUE KEY (yearID, lgID, teamID, Half),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID),
+            FOREIGN KEY (divID, lgID) REFERENCES divisions(divID, lgID),
+            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
     execute_query(connection,create_teamshalf_table, commit=True)
 
     load_teamshalf_data = f'''
-        LOAD DATA LOCAL INFILE '{path}TeamsHalf.csv'
+        LOAD DATA LOCAL INFILE '{(csv_dir / 'TeamsHalf.csv').as_posix()}'
         INTO TABLE teamshalf
         FIELDS TERMINATED BY ','
         ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
+        IGNORE 1 ROWS
+        (yearID, lgID, teamID, Half, divID, DivWin, teamRank, G, W, L);
     '''
     execute_query(connection,load_teamshalf_data, commit=True)
 
@@ -295,34 +312,34 @@ def create_tables(connection):
         CREATE TABLE fielding (
             ID INT NOT NULL AUTO_INCREMENT,
             playerID VARCHAR(9) NOT NULL,
-            yearID SMALLINT NOT NULL,
-            stint SMALLINT NOT NULL,
-            teamID CHAR(3),
-            lgID CHAR(2),
+            yearID SMALLINT(6) NOT NULL,
+            stint SMALLINT(6) NOT NULL,
+            teamID CHAR(3) DEFAULT NULL,
+            lgID CHAR(2) DEFAULT NULL,
             POS VARCHAR(2) NOT NULL,
-            G SMALLINT,
-            GS SMALLINT,
-            InnOuts INT,
-            PO SMALLINT,
-            A SMALLINT,
-            E SMALLINT,
-            DP SMALLINT,
-            PB SMALLINT,
-            WP SMALLINT,
-            SB SMALLINT,
-            CS SMALLINT,
-            ZR DOUBLE,
+            G SMALLINT(6) DEFAULT NULL,
+            GS SMALLINT(6) DEFAULT NULL,
+            InnOuts SMALLINT(6) DEFAULT NULL,
+            PO SMALLINT(6) DEFAULT NULL,
+            A SMALLINT(6) DEFAULT NULL,
+            E SMALLINT(6) DEFAULT NULL,
+            DP SMALLINT(6) DEFAULT NULL,
+            PB SMALLINT(6) DEFAULT NULL,
+            WP SMALLINT(6) DEFAULT NULL,
+            SB SMALLINT(6) DEFAULT NULL,
+            CS SMALLINT(6) DEFAULT NULL,
+            ZR DOUBLE DEFAULT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (playerID, yearID, stint, POS)
+            UNIQUE KEY (playerID, yearID, stint, POS),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID),
+            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID),
+            FOREIGN KEY (playerID) REFERENCES master(playerID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
-        '''
+    '''
     execute_query(connection, create_fielding_table, commit=True)
 
-
     load_fielding_data = f'''
-        LOAD DATA LOCAL INFILE '{path}Fielding.csv'
+        LOAD DATA LOCAL INFILE '{(csv_dir / 'Fielding.csv').as_posix()}'
         INTO TABLE fielding
         FIELDS TERMINATED BY ',' ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
@@ -332,13 +349,12 @@ def create_tables(connection):
     execute_query(connection, load_fielding_data, commit=True)
 
     create_batting_table = '''
-        CREATE TABLE Batting (
-            ID INT NOT NULL AUTO_INCREMENT, /* ADDED BY WEBUCATOR */
+        CREATE TABLE batting (
+            ID INT NOT NULL AUTO_INCREMENT,
             playerID varchar(9) NOT NULL,
             yearID smallint(6) NOT NULL,
             stint smallint(6) NOT NULL,
             teamID char(3) DEFAULT NULL,
-            team_ID INT DEFAULT NULL, /* ADDED BY WEBUCATOR AS FK TO teams TABLE*/
             lgID char(2) DEFAULT NULL,
             G smallint(6) DEFAULT NULL,
             G_batting smallint(6) DEFAULT NULL,
@@ -359,31 +375,32 @@ def create_tables(connection):
             SF smallint(6) DEFAULT NULL,
             GIDP smallint(6) DEFAULT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (playerID,yearID,stint),
-            FOREIGN KEY (lgID) REFERENCES leagues(lgID), /* Not normalized, but keeping to maintain consistency with original */
-            FOREIGN KEY (team_ID) REFERENCES teams(ID),
+            UNIQUE KEY (playerID, yearID, stint),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID),
+            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID),
             FOREIGN KEY (playerID) REFERENCES master(playerID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
     execute_query(connection,create_batting_table, commit=True)
 
     load_batting_data = f'''
-        LOAD DATA LOCAL INFILE '{path}Batting.csv'
-        INTO TABLE Batting
+        LOAD DATA LOCAL INFILE '{(csv_dir / 'Batting.csv').as_posix()}'
+        INTO TABLE batting
         FIELDS TERMINATED BY ','
         ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
+        IGNORE 1 ROWS
+        (playerID, yearID, stint, teamID, lgID, G, G_batting, AB, R, H, `2B`, `3B`, HR, RBI, SB, CS, BB, SO, IBB, HBP, SH, SF, GIDP, @dummy);
     '''
     execute_query(connection,load_batting_data, commit=True)
 
     create_pitching_table = '''
-        CREATE TABLE Pitching (
+        CREATE TABLE pitching (
             ID INT NOT NULL AUTO_INCREMENT,
             playerID VARCHAR(9) NOT NULL,
             yearID SMALLINT(6) NOT NULL,
             stint SMALLINT(6) NOT NULL,
-            teamID INT(3) DEFAULT NULL,
+            teamID char(3) DEFAULT NULL,
             lgID CHAR(2) DEFAULT NULL,
             W SMALLINT(6) DEFAULT NULL,
             L SMALLINT(6) DEFAULT NULL,
@@ -413,19 +430,20 @@ def create_tables(connection):
             PRIMARY KEY (ID),
             UNIQUE KEY (playerID, yearID, stint),
             FOREIGN KEY (lgID) REFERENCES leagues(lgID),
-            FOREIGN KEY (teamID) REFERENCES teams(ID),
+            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID),
             FOREIGN KEY (playerID) REFERENCES master(playerID)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
     '''
     execute_query(connection,create_pitching_table, commit=True)
 
     load_pitching_data = f'''
-        LOAD DATA LOCAL INFILE '{path}Pitching.csv'
-        INTO TABLE Pitching
+        LOAD DATA LOCAL INFILE '{(csv_dir / 'Pitching.csv').as_posix()}'
+        INTO TABLE pitching
         FIELDS TERMINATED BY ','
         ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
-        IGNORE 1 ROWS;
+        IGNORE 1 ROWS
+        (playerID, yearID, stint, teamID, lgID, W, L, G, GS, CG, SHO, SV, IPOuts, H, ER, HR, BB, SO, BAOpp, ERA, IBB, WP, HBP, BK, BFP, GF, R, SH, SF, GIDP);
     '''
     execute_query(connection,load_pitching_data, commit=True)
 
