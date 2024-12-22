@@ -102,7 +102,7 @@ def create_tables(connection):
             league varchar(50) NOT NULL,
             active char NOT NULL,
             PRIMARY KEY (lgID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_leagues_table, commit=True)
 
@@ -111,7 +111,7 @@ def create_tables(connection):
         ('ML', 'Major League', 'Y'), ('AL', 'American League', 'Y'),
         ('NL', 'National League', 'Y'), ('AA', 'American Association', 'N'),
         ('FL', 'Federal League', 'N'), ('NA', 'National Association', 'N'),
-        ('PL', 'Players'' League', 'N'), ('UA', 'Union Association', 'N');
+        ('PL', 'Players' 'League', 'N'), ('UA', 'Union Association', 'N');
     '''
     execute_query(connection,load_leagues_data, commit=True)
 
@@ -123,9 +123,9 @@ def create_tables(connection):
             division varchar(50) NOT NULL,
             active char NOT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (divID, lgID),
+            UNIQUE KEY (divID,lgID),
             FOREIGN KEY (lgID) REFERENCES leagues(lgID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_divisions_table, commit=True)
 
@@ -141,33 +141,37 @@ def create_tables(connection):
     execute_query(connection,load_divisions_data, commit=True)
 
     create_master_table = '''
-        CREATE TABLE IF NOT EXISTS master (
-            playerID VARCHAR(9) NOT NULL,
-            birthYear SMALLINT(6) DEFAULT NULL,
-            birthMonth TINYINT(4) DEFAULT NULL,
-            birthDay TINYINT(4) DEFAULT NULL,
-            birthCity VARCHAR(50) DEFAULT NULL,
-            birthCountry VARCHAR(50) DEFAULT NULL,
-            birthState VARCHAR(50) DEFAULT NULL,
-            deathYear SMALLINT(6) DEFAULT NULL,
-            deathMonth TINYINT(4) DEFAULT NULL,
-            deathDay TINYINT(4) DEFAULT NULL,
-            deathCountry VARCHAR(50) DEFAULT NULL,
-            deathState VARCHAR(50) DEFAULT NULL,
-            deathCity VARCHAR(50) DEFAULT NULL,
-            nameFirst VARCHAR(50) DEFAULT NULL,
-            nameLast VARCHAR(50) DEFAULT NULL,
-            nameGiven VARCHAR(50) DEFAULT NULL,
-            weight SMALLINT(6) DEFAULT NULL,
-            height SMALLINT(6) DEFAULT NULL,
-            bats CHAR(1) DEFAULT NULL,
-            throws CHAR(1) DEFAULT NULL,
-            debut DATE DEFAULT NULL,
-            bbrefID VARCHAR(9) DEFAULT NULL,
-            finalGame DATE DEFAULT NULL,
-            retroID VARCHAR(9) DEFAULT NULL,
+        CREATE TABLE master (
+            playerID varchar(9) NOT NULL,
+            birthYear int(11) DEFAULT NULL,
+            birthMonth int(11) DEFAULT NULL,
+            birthDay int(11) DEFAULT NULL,
+            birthCountry varchar(255) DEFAULT NULL,
+            birthState varchar(255) DEFAULT NULL,
+            birthCity varchar(255) DEFAULT NULL,
+            deathYear int(11) DEFAULT NULL,
+            deathMonth int(11) DEFAULT NULL,
+            deathDay int(11) DEFAULT NULL,
+            deathCountry varchar(255) DEFAULT NULL,
+            deathState varchar(255) DEFAULT NULL,
+            deathCity varchar(255) DEFAULT NULL,
+            nameFirst varchar(255) DEFAULT NULL,
+            nameLast varchar(255) DEFAULT NULL,
+            nameGiven varchar(255) DEFAULT NULL,
+            weight int(11) DEFAULT NULL,
+            height int(11) DEFAULT NULL,
+            bats varchar(255) DEFAULT NULL,
+            throws varchar(255) DEFAULT NULL,
+            debut varchar(255) DEFAULT NULL,
+            finalGame varchar(255) DEFAULT NULL,
+            retroID varchar(255) DEFAULT NULL,
+            bbrefID varchar(255) DEFAULT NULL,
+            birth_date date DEFAULT NULL,
+            debut_date date DEFAULT NULL,
+            finalgame_date date DEFAULT NULL,
+            death_date date DEFAULT NULL,
             PRIMARY KEY (playerID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_master_table, commit=True)
 
@@ -183,13 +187,13 @@ def create_tables(connection):
     execute_query(connection,load_master_data, commit=True)
 
     create_teams_franchises_table = '''
-        CREATE TABLE IF NOT EXISTS teamsfranchises (
-            franchID VARCHAR(3) NOT NULL,
-            franchName VARCHAR(50) DEFAULT NULL,
-            active CHAR DEFAULT NULL,
-            NAassoc VARCHAR(3) DEFAULT NULL,
+        CREATE TABLE teamsfranchises (
+            franchID varchar(3) NOT NULL,
+            franchName varchar(50) DEFAULT NULL,
+            active char DEFAULT NULL,
+            NAassoc varchar(3) DEFAULT NULL,
             PRIMARY KEY (franchID)
-        );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_teams_franchises_table, commit=True)
     
@@ -212,6 +216,7 @@ def create_tables(connection):
             teamID char(3) NOT NULL,
             franchID varchar(3) DEFAULT NULL,
             divID char(1) DEFAULT NULL,
+            div_ID INT DEFAULT NULL,
             teamRank smallint(6) DEFAULT NULL,
             G smallint(6) DEFAULT NULL,
             Ghome smallint(6) DEFAULT NULL,
@@ -256,11 +261,11 @@ def create_tables(connection):
             teamIDlahman45 varchar(3) DEFAULT NULL,
             teamIDretro varchar(3) DEFAULT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (yearID, lgID, teamID),
-            FOREIGN KEY (lgID) REFERENCES leagues(lgID),
-            FOREIGN KEY (divID, lgID) REFERENCES divisions(divID, lgID),
+            UNIQUE KEY (yearID,lgID,teamID),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID), 
+            FOREIGN KEY (div_ID) REFERENCES divisions(ID),
             FOREIGN KEY (franchID) REFERENCES teamsfranchises(franchID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_teams_table, commit=True)
 
@@ -271,29 +276,34 @@ def create_tables(connection):
         ENCLOSED BY '"'
         LINES TERMINATED BY '\n'
         IGNORE 1 ROWS
-        (yearID, lgID, teamID, franchID, divID, teamRank, G, Ghome, W, L, DivWin, WCWin, LgWin, WSWin, R, AB, H, `2B`, `3B`, HR, BB, SO, SB, CS, HBP, SF, RA, ER, ERA, CG, SHO, SV, IPouts, HA, HRA, BBA, SOA, E, DP, FP, name, park, attendance, BPF, PPF, teamIDBR, teamIDlahman45, teamIDretro);
+        (yearID, lgID, teamID, franchID, divID, @teamRank, G, Ghome, W, L, DivWin, WCWin, LgWin, WSWin, R, AB, H, `2B`, `3B`, HR, BB, SO, SB, CS, HBP, SF, RA, ER, ERA, CG, SHO, SV, IPouts, HA, HRA, BBA, SOA, E, DP, FP, name, park, attendance, BPF, PPF, teamIDBR, teamIDlahman45, teamIDretro)
+        SET 
+            teamRank = NULLIF(@teamRank, '');
     '''
+
     execute_query(connection,load_teams_data, commit=True)
 
     create_teamshalf_table = '''
         CREATE TABLE teamshalf (
-            ID INT NOT NULL AUTO_INCREMENT,
+            ID INT NOT NULL AUTO_INCREMENT, 
             yearID smallint(6) NOT NULL,
             lgID char(2) NOT NULL,
             teamID char(3) NOT NULL,
+            team_ID INT DEFAULT NULL,
             Half varchar(1) NOT NULL,
             divID char(1) DEFAULT NULL,
+            div_ID INT DEFAULT NULL, 
             DivWin varchar(1) DEFAULT NULL,
             teamRank smallint(6) DEFAULT NULL,
             G smallint(6) DEFAULT NULL,
             W smallint(6) DEFAULT NULL,
             L smallint(6) DEFAULT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (yearID, lgID, teamID, Half),
+            UNIQUE KEY (yearID,lgID,teamID,Half),
             FOREIGN KEY (lgID) REFERENCES leagues(lgID),
-            FOREIGN KEY (divID, lgID) REFERENCES divisions(divID, lgID),
-            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+            FOREIGN KEY (div_ID) REFERENCES divisions(ID), 
+            FOREIGN KEY (team_ID) REFERENCES teams(ID)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_teamshalf_table, commit=True)
 
@@ -311,30 +321,31 @@ def create_tables(connection):
     create_fielding_table = '''
         CREATE TABLE fielding (
             ID INT NOT NULL AUTO_INCREMENT,
-            playerID VARCHAR(9) NOT NULL,
-            yearID SMALLINT(6) NOT NULL,
-            stint SMALLINT(6) NOT NULL,
-            teamID CHAR(3) DEFAULT NULL,
-            lgID CHAR(2) DEFAULT NULL,
-            POS VARCHAR(2) NOT NULL,
-            G SMALLINT(6) DEFAULT NULL,
-            GS SMALLINT(6) DEFAULT NULL,
-            InnOuts SMALLINT(6) DEFAULT NULL,
-            PO SMALLINT(6) DEFAULT NULL,
-            A SMALLINT(6) DEFAULT NULL,
-            E SMALLINT(6) DEFAULT NULL,
-            DP SMALLINT(6) DEFAULT NULL,
-            PB SMALLINT(6) DEFAULT NULL,
-            WP SMALLINT(6) DEFAULT NULL,
-            SB SMALLINT(6) DEFAULT NULL,
-            CS SMALLINT(6) DEFAULT NULL,
-            ZR DOUBLE DEFAULT NULL,
-            PRIMARY KEY (ID),
-            UNIQUE KEY (playerID, yearID, stint, POS),
+            playerID varchar(9) NOT NULL,
+            yearID smallint(6) NOT NULL,
+            stint smallint(6) NOT NULL,
+            teamID char(3) DEFAULT NULL,
+            team_ID INT DEFAULT NULL, 
+            lgID char(2) DEFAULT NULL,
+            POS varchar(2) NOT NULL,
+            G smallint(6) DEFAULT NULL,
+            GS smallint(6) DEFAULT NULL,
+            InnOuts smallint(6) DEFAULT NULL,
+            PO smallint(6) DEFAULT NULL,
+            A smallint(6) DEFAULT NULL,
+            E smallint(6) DEFAULT NULL,
+            DP smallint(6) DEFAULT NULL,
+            PB smallint(6) DEFAULT NULL,
+            WP smallint(6) DEFAULT NULL,
+            SB smallint(6) DEFAULT NULL,
+            CS smallint(6) DEFAULT NULL,
+            ZR double DEFAULT NULL,
+            PRIMARY KEY (ID),  
+            UNIQUE KEY (playerID,yearID,stint,POS),
             FOREIGN KEY (lgID) REFERENCES leagues(lgID),
-            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID),
+            FOREIGN KEY (team_ID) REFERENCES teams(ID),
             FOREIGN KEY (playerID) REFERENCES master(playerID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection, create_fielding_table, commit=True)
 
@@ -350,11 +361,12 @@ def create_tables(connection):
 
     create_batting_table = '''
         CREATE TABLE batting (
-            ID INT NOT NULL AUTO_INCREMENT,
+            ID INT NOT NULL AUTO_INCREMENT, 
             playerID varchar(9) NOT NULL,
             yearID smallint(6) NOT NULL,
             stint smallint(6) NOT NULL,
             teamID char(3) DEFAULT NULL,
+            team_ID INT DEFAULT NULL, 
             lgID char(2) DEFAULT NULL,
             G smallint(6) DEFAULT NULL,
             G_batting smallint(6) DEFAULT NULL,
@@ -375,11 +387,11 @@ def create_tables(connection):
             SF smallint(6) DEFAULT NULL,
             GIDP smallint(6) DEFAULT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (playerID, yearID, stint),
+            UNIQUE KEY (playerID,yearID,stint),
             FOREIGN KEY (lgID) REFERENCES leagues(lgID),
-            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID),
+            FOREIGN KEY (team_ID) REFERENCES teams(ID),
             FOREIGN KEY (playerID) REFERENCES master(playerID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_batting_table, commit=True)
 
@@ -396,43 +408,44 @@ def create_tables(connection):
 
     create_pitching_table = '''
         CREATE TABLE pitching (
-            ID INT NOT NULL AUTO_INCREMENT,
-            playerID VARCHAR(9) NOT NULL,
-            yearID SMALLINT(6) NOT NULL,
-            stint SMALLINT(6) NOT NULL,
+            ID INT NOT NULL AUTO_INCREMENT, 
+            playerID varchar(9) NOT NULL,
+            yearID smallint(6) NOT NULL,
+            stint smallint(6) NOT NULL,
             teamID char(3) DEFAULT NULL,
-            lgID CHAR(2) DEFAULT NULL,
-            W SMALLINT(6) DEFAULT NULL,
-            L SMALLINT(6) DEFAULT NULL,
-            G SMALLINT(6) DEFAULT NULL,
-            GS SMALLINT(6) DEFAULT NULL,
-            CG SMALLINT(6) DEFAULT NULL,
-            SHO SMALLINT(6) DEFAULT NULL,
-            SV SMALLINT(6) DEFAULT NULL,
-            IPOuts INT DEFAULT NULL,
-            H SMALLINT(6) DEFAULT NULL,
-            ER SMALLINT(6) DEFAULT NULL,
-            HR SMALLINT(6) DEFAULT NULL,
-            BB SMALLINT(6) DEFAULT NULL,
-            SO SMALLINT(6) DEFAULT NULL,
-            BAOpp FLOAT DEFAULT NULL,
-            ERA FLOAT DEFAULT NULL,
-            IBB SMALLINT(6) DEFAULT NULL,
-            WP SMALLINT(6) DEFAULT NULL,
-            HBP SMALLINT(6) DEFAULT NULL,
-            BK SMALLINT(6) DEFAULT NULL,
-            BFP SMALLINT(6) DEFAULT NULL,
-            GF SMALLINT(6) DEFAULT NULL,
-            R SMALLINT(6) DEFAULT NULL,
-            SH SMALLINT(6) DEFAULT NULL,
-            SF SMALLINT(6) DEFAULT NULL,
-            GIDP SMALLINT(6) DEFAULT NULL,
+            team_ID INT DEFAULT NULL,
+            lgID char(2) DEFAULT NULL,
+            W smallint(6) DEFAULT NULL,
+            L smallint(6) DEFAULT NULL,
+            G smallint(6) DEFAULT NULL,
+            GS smallint(6) DEFAULT NULL,
+            CG smallint(6) DEFAULT NULL,
+            SHO smallint(6) DEFAULT NULL,
+            SV smallint(6) DEFAULT NULL,
+            IPouts int(11) DEFAULT NULL,
+            H smallint(6) DEFAULT NULL,
+            ER smallint(6) DEFAULT NULL,
+            HR smallint(6) DEFAULT NULL,
+            BB smallint(6) DEFAULT NULL,
+            SO smallint(6) DEFAULT NULL,
+            BAOpp double DEFAULT NULL,
+            ERA double DEFAULT NULL,
+            IBB smallint(6) DEFAULT NULL,
+            WP smallint(6) DEFAULT NULL,
+            HBP smallint(6) DEFAULT NULL,
+            BK smallint(6) DEFAULT NULL,
+            BFP smallint(6) DEFAULT NULL,
+            GF smallint(6) DEFAULT NULL,
+            R smallint(6) DEFAULT NULL,
+            SH smallint(6) DEFAULT NULL,
+            SF smallint(6) DEFAULT NULL,
+            GIDP smallint(6) DEFAULT NULL,
             PRIMARY KEY (ID),
-            UNIQUE KEY (playerID, yearID, stint),
-            FOREIGN KEY (lgID) REFERENCES leagues(lgID),
-            FOREIGN KEY (yearID, lgID, teamID) REFERENCES teams(yearID, lgID, teamID),
+            UNIQUE KEY (playerID,yearID,stint),
+            FOREIGN KEY (lgID) REFERENCES leagues(lgID), 
+            FOREIGN KEY (team_ID) REFERENCES teams(ID),
             FOREIGN KEY (playerID) REFERENCES master(playerID)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
     '''
     execute_query(connection,create_pitching_table, commit=True)
 
