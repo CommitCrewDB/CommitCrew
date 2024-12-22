@@ -1,97 +1,55 @@
 import os
-import mysql.connector
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-
-class Database:
-    @staticmethod
-    def get_connection():
-        """Establish and return a database connection."""
-        return mysql.connector.connect(
-            host=os.getenv("DB_HOST", "localhost"),
-            user=os.getenv("DB_USER", "root"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME", "lahmansbaseballdb")
-        )
-
+import csv
 
 class Master:
-    def __init__(self, playerID, birthYear, birthMonth, birthDay, birthCountry, birthState, birthCity, 
-                 deathYear, deathMonth, deathDay, deathCountry, deathState, deathCity, nameFirst, 
-                 nameLast, nameGiven, weight, height, bats, throws, debut, finalGame, retroID, bbrefID):
+    def __init__(self, ID, playerID, nameFirst, nameLast, birthYear, birthCountry, birthState, height, weight, bats, throws):
+        self.ID = ID
         self.playerID = playerID
-        self.birthYear = birthYear
-        self.birthMonth = birthMonth
-        self.birthDay = birthDay
-        self.birthCountry = birthCountry
-        self.birthState = birthState
-        self.birthCity = birthCity
-        self.deathYear = deathYear
-        self.deathMonth = deathMonth
-        self.deathDay = deathDay
-        self.deathCountry = deathCountry
-        self.deathState = deathState
-        self.deathCity = deathCity
         self.nameFirst = nameFirst
         self.nameLast = nameLast
-        self.nameGiven = nameGiven
-        self.weight = weight
+        self.birthYear = birthYear
+        self.birthCountry = birthCountry
+        self.birthState = birthState
         self.height = height
+        self.weight = weight
         self.bats = bats
         self.throws = throws
-        self.debut = debut
-        self.finalGame = finalGame
-        self.retroID = retroID
-        self.bbrefID = bbrefID
 
     @staticmethod
-    def get_all_records():
-        """Retrieve all records from the master table."""
+    def load_master_data():
+        """Load data directly from Master.csv."""
         try:
-            db = Database.get_connection()
-            cursor = db.cursor()
+            csv_folder = os.path.join(os.getcwd(), 'csv')  # Ensure the CSV folder is in the project directory
+            file_path = os.path.join(csv_folder, 'Master.csv')
+            file_path = r"C:\Users\recep\Desktop\CommitCrew\csv\Master.csv"
 
-            query = """
-                SELECT 
-                    playerID, birthYear, birthMonth, birthDay, birthCountry, birthState, birthCity, 
-                    deathYear, deathMonth, deathDay, deathCountry, deathState, deathCity, nameFirst, 
-                    nameLast, nameGiven, weight, height, bats, throws, debut, finalGame, retroID, bbrefID
-                FROM master
-            """
-            cursor.execute(query)
-            master_records = [Master(*row) for row in cursor.fetchall()]
-
-            cursor.close()
-            db.close()
-            return master_records
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
+            data = []
+            with open(file_path, mode='r') as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    data.append(Master(
+                        ID=row['ID'],
+                        playerID=row['playerID'],
+                        nameFirst=row['nameFirst'],
+                        nameLast=row['nameLast'],
+                        birthYear=int(row['birthYear']),
+                        birthCountry=row['birthCountry'],
+                        birthState=row['birthState'],
+                        height=int(row['height']),
+                        weight=int(row['weight']),
+                        bats=row['bats'],
+                        throws=row['throws'],
+                    ))
+            return data
+        except FileNotFoundError:
+            print(f"File not found: {file_path}")
+            return []
+        except Exception as e:
+            print(f"Error reading CSV file: {e}")
             return []
 
     @staticmethod
-    def get_record_by_id(playerID):
-        """Retrieve a specific record by playerID."""
-        try:
-            db = Database.get_connection()
-            cursor = db.cursor()
-
-            query = """
-                SELECT 
-                    playerID, birthYear, birthMonth, birthDay, birthCountry, birthState, birthCity, 
-                    deathYear, deathMonth, deathDay, deathCountry, deathState, deathCity, nameFirst, 
-                    nameLast, nameGiven, weight, height, bats, throws, debut, finalGame, retroID, bbrefID
-                FROM master
-                WHERE playerID = %s
-            """
-            cursor.execute(query, (playerID,))
-            record = cursor.fetchone()
-
-            cursor.close()
-            db.close()
-            return Master(*record) if record else None
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return None
+    def search_and_sort(search_query):
+        """Search for specific data in Master.csv."""
+        data = Master.load_master_data()
+        return [row for row in data if search_query.lower() in row.playerID.lower()]

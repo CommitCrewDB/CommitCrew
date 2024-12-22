@@ -1,65 +1,54 @@
 {% extends "layout.html" %}
-{% block title %}Master{% endblock %}
+
 {% block content %}
-    <h1 class="title">Master</h1>
-    <table class="table">
-        <thead>
+<h1>Master Table</h1>
+{% if search_query %}
+    <p>Showing results for search query: "{{ search_query }}"</p>
+{% else %}
+    <p>Displaying all data.</p>
+{% endif %}
+
+<!-- Table -->
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Player ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Birth Year</th>
+            <th>Birth Country</th>
+            <th>Birth State</th>
+            <th>Height</th>
+            <th>Weight</th>
+            <th>Bats</th>
+            <th>Throws</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if master_data %}
+            {% for row in master_data %}
             <tr>
-                <th>Player ID</th>
-                <th>Birth Year</th>
-                <th>Birth Month</th>
-                <th>Birth Day</th>
-                <th>Birth Country</th>
-                <th>Birth State</th>
-                <th>Birth City</th>
-                <th>Death Year</th>
-                <th>Death Month</th>
-                <th>Death Day</th>
-                <th>Death Country</th>
-                <th>Death State</th>
-                <th>Death City</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Given Name</th>
-                <th>Weight</th>
-                <th>Height</th>
-                <th>Bats</th>
-                <th>Throws</th>
-                <th>Debut</th>
-                <th>Final Game</th>
-                <th>Retro ID</th>
-                <th>BBRef ID</th>
+                <td>{{ row.ID }}</td>
+                <td>{{ row.playerID }}</td>
+                <td>{{ row.nameFirst }}</td>
+                <td>{{ row.nameLast }}</td>
+                <td>{{ row.birthYear }}</td>
+                <td>{{ row.birthCountry }}</td>
+                <td>{{ row.birthState }}</td>
+                <td>{{ row.height }}</td>
+                <td>{{ row.weight }}</td>
+                <td>{{ row.bats }}</td>
+                <td>{{ row.throws }}</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for record in master_records %}
-                <tr>
-                    <td>{{ record.playerID }}</td>
-                    <td>{{ record.birthYear }}</td>
-                    <td>{{ record.birthMonth }}</td>
-                    <td>{{ record.birthDay }}</td>
-                    <td>{{ record.birthCountry }}</td>
-                    <td>{{ record.birthState }}</td>
-                    <td>{{ record.birthCity }}</td>
-                    <td>{{ record.deathYear }}</td>
-                    <td>{{ record.deathMonth }}</td>
-                    <td>{{ record.deathDay }}</td>
-                    <td>{{ record.deathCountry }}</td>
-                    <td>{{ record.deathState }}</td>
-                    <td>{{ record.deathCity }}</td>
-                    <td>{{ record.nameFirst }}</td>
-                    <td>{{ record.nameLast }}</td>
-                    <td>{{ record.nameGiven }}</td>
-                    <td>{{ record.weight }}</td>
-                    <td>{{ record.height }}</td>
-                    <td>{{ record.bats }}</td>
-                    <td>{{ record.throws }}</td>
-                    <td>{{ record.debut }}</td>
-                    <td>{{ record.finalGame }}</td>
-                    <td>{{ record.retroID }}</td>
-                    <td>{{ record.bbrefID }}</td>
-                </tr>
             {% endfor %}
-        </tbody>
-    </table>
+        {% else %}
+            <tr>
+                <td colspan="11">No data found in Master.csv.</td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('master_options') }}">Go Back</a>
 {% endblock %}

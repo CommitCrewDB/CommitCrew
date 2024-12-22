@@ -3,6 +3,7 @@ from flask import app
 from app.models.teams import Teams
 from app.models.fielding import Fielding
 from app.models.pitching import Pitching
+from app.models.master import Master
 
 
 
@@ -87,9 +88,24 @@ def pitching_table():
     # Default behavior: return to pitching options
     return redirect(url_for('pitching_options'))
 
+def master_options():
+    return render_template("master_options.html")
+
+def master_table():
+    action = request.args.get('action', 'view_all')
+    search_query = request.args.get('search', '')
+
+    if action == 'view_all':
+        master_data = Master.load_master_data()
+        return render_template("master.html", master_data=master_data)
+
+    elif action == 'search' and search_query:
+        # Search for specific data
+        master_data = Master.search_and_sort(search_query=search_query)
+        return render_template("master.html", master_data=master_data, search_query=search_query)
+
+    # Default behavior: return to master options
+    return redirect(url_for('master_options'))
 
 def about_page():
     return render_template("about.html")
-
-def master_page():
-    return render_template("master.html")

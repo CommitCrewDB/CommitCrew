@@ -10,4 +10,7 @@ def create_app():
     app.add_url_rule(rule="/about", view_func=views.about_page)
     app.add_url_rule(rule="/pitching-options/", view_func=views.pitching_options)
     app.add_url_rule(rule="/pitching", view_func=views.pitching_table)
+    app.add_url_rule(rule="/master-options/", view_func=views.master_options)
+    app.add_url_rule(rule="/master", view_func=views.master_table)
+
     return app
