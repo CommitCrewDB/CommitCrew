@@ -1,72 +1,85 @@
 {% extends "layout.html" %}
-
-{% block title %}Fielding{% endblock %}
-
-{% block content %}
-    <h1 class="title">Fielding</h1>
-
-
-    <form method="GET" action="{{ url_for('fielding_page') }}">
-        <div class="form-group">
-            <label for="position">Search by Position:</label>
-            <input type="text" id="position" name="position" class="form-control" placeholder="Enter position" value="{{ request.args.get('position', '') }}">
-        </div>
-        <button type="submit" class="btn btn-primary">Search</button>
-    </form>
-
-    <form action="/fielding/all" method="get">
-        <button type="submit">Show All Data</button>
-    </form>
-
-
-    <br>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Player ID</th>
-                <th>Year</th>
-                <th>Stint</th>
-                <th>Team</th>
-                <th>League</th>
-                <th>Position</th>
-                <th>Games</th>
-                <th>Games Started</th>
-                <th>Innings (Outs)</th>
-                <th>Putouts</th>
-                <th>Assists</th>
-                <th>Errors</th>
-                <th>Double Plays</th>
-                <th>Passed Balls</th>
-                <th>Wild Pitches</th>
-                <th>Stolen Bases Against</th>
-                <th>Caught Stealing</th>
-                <th>Zone Rating</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for record in fielding_records %}
-                <tr>
-                    <td>{{ record.playerID }}</td>
-                    <td>{{ record.yearID }}</td>
-                    <td>{{ record.stint }}</td>
-                    <td>{{ record.teamID }}</td>
-                    <td>{{ record.lgID }}</td>
-                    <td>{{ record.POS }}</td>
-                    <td>{{ record.G }}</td>
-                    <td>{{ record.GS }}</td>
-                    <td>{{ record.InnOuts }}</td>
-                    <td>{{ record.PO }}</td>
-                    <td>{{ record.A }}</td>
-                    <td>{{ record.E }}</td>
-                    <td>{{ record.DP }}</td>
-                    <td>{{ record.PB }}</td>
-                    <td>{{ record.WP }}</td>
-                    <td>{{ record.SB }}</td>
-                    <td>{{ record.CS }}</td>
-                    <td>{{ record.ZR }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+{% block title %}
+Fielding
 {% endblock %}
-                      
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='fielding.css') }}">
+
+<h1 class="title text-center my-4">Fielding</h1>
+
+<!-- Search Form -->
+<form method="GET" action="{{ url_for('fielding_page') }}" class="search-form">
+    <input
+        type="text"
+        id="position"
+        name="position"
+        class="form-control d-inline-block"
+        style="width: 300px;"
+        placeholder="Search by position"
+        value="{{ request.args.get('position', '') }}"
+    />
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+</form>
+
+<div>
+    <form method="GET" action="{{ url_for('fielding_page') }}" style="text-align: center; margin-top: 10px;">
+        <input type="hidden" name="action" value="view_all_data">
+        <button type="submit" class="btn btn-primary btn-sm">Show All Data</button>
+    </form>
+</div>
+
+{% if fielding_records %}
+    <div class="scrollable-table">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Player ID</th>
+                    <th>Year</th>
+                    <th>Stint</th>
+                    <th>Team</th>
+                    <th>League</th>
+                    <th>Position</th>
+                    <th>Games</th>
+                    <th>Games Started</th>
+                    <th>Innings (Outs)</th>
+                    <th>Putouts</th>
+                    <th>Assists</th>
+                    <th>Errors</th>
+                    <th>Double Plays</th>
+                    <th>Passed Balls</th>
+                    <th>Wild Pitches</th>
+                    <th>Stolen Bases Against</th>
+                    <th>Caught Stealing</th>
+                    <th>Zone Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in fielding_records %}
+                    <tr>
+                        <td>{{ record.playerID }}</td>
+                        <td>{{ record.yearID }}</td>
+                        <td>{{ record.stint }}</td>
+                        <td>{{ record.teamID }}</td>
+                        <td>{{ record.lgID }}</td>
+                        <td>{{ record.POS }}</td>
+                        <td>{{ record.G }}</td>
+                        <td>{{ record.GS }}</td>
+                        <td>{{ record.InnOuts }}</td>
+                        <td>{{ record.PO }}</td>
+                        <td>{{ record.A }}</td>
+                        <td>{{ record.E }}</td>
+                        <td>{{ record.DP }}</td>
+                        <td>{{ record.PB }}</td>
+                        <td>{{ record.WP }}</td>
+                        <td>{{ record.SB }}</td>
+                        <td>{{ record.CS }}</td>
+                        <td>{{ record.ZR }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <p class="text-center">No records to display. Use the search or Show All Data button.</p>
+{% endif %}
+{% endblock %}

@@ -61,13 +61,22 @@ def teams_page():
 
 
 def fielding_page():
-
     position_query = request.args.get("position", "")
+    action = request.args.get("action")
+
     if position_query:
         fielding_records = Fielding.search_by_position(position_query)
-    else:
+    elif action == "view_all_data":
         fielding_records = Fielding.get_all_fielding()
-    return render_template("fielding.html", fielding_records=fielding_records)
+    else:
+        fielding_records = []
+
+    return render_template(
+        "fielding.html",
+        fielding_records=fielding_records,
+        position_query=position_query,
+    )
+
 
 def pitching_options():
     return render_template("pitching_options.html")
