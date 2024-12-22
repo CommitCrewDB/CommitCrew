@@ -84,27 +84,63 @@ class Teams:
             cursor = db.cursor()
 
             query = """
-                SELECT t1.lgID, t1.name, t1.W
+                SELECT t1.yearID, t1.lgID, l.league AS league_name, t1.name AS team_name, t1.W AS wins
                 FROM teams t1
                 INNER JOIN (
-                    SELECT lgID, MAX(W) as MaxWins
+                    SELECT lgID, MAX(W) AS MaxWins
                     FROM teams
                     WHERE lgID IS NOT NULL AND W IS NOT NULL
                     GROUP BY lgID
-                ) t2
-                ON t1.lgID = t2.lgID AND t1.W = t2.MaxWins
+                ) t2 ON t1.lgID = t2.lgID AND t1.W = t2.MaxWins
+                INNER JOIN leagues l ON t1.lgID = l.lgID
             """
             cursor.execute(query)
 
             # Collecting result as a list of dictionaries for rendering
-            top_teams = [{"League": row[0], "Team": row[1], "Wins": row[2]} for row in cursor.fetchall()]
+            top_league_teams = [{"Year": row[0], "LeagueID": row[1], "LeagueName": row[2], "Team": row[3], "Wins": row[4]} for row in cursor.fetchall()]
 
             cursor.close()
             db.close()
-            return top_teams
+            return top_league_teams
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
+        
+    @staticmethod
+    def get_top_teams_by_year():
+        try:
+            db = mysql.connector.connect(
+                host=os.getenv("DB_HOST", "localhost"),
+                user=os.getenv("DB_USER", "root"),
+                password=os.getenv("DB_PASSWORD"),
+                database=os.getenv("DB_NAME", "lahmansbaseballdb")
+            )
+            cursor = db.cursor()
+
+            query = """
+                SELECT t1.yearID, t1.lgID, l.league AS league_name, t1.name AS team_name, t1.W AS wins
+                FROM teams t1
+                INNER JOIN (
+                    SELECT yearID, MAX(W) as MaxWins
+                    FROM teams
+                    WHERE yearID IS NOT NULL AND W IS NOT NULL
+                    GROUP BY yearID
+                ) t2
+                ON t1.yearID = t2.yearID AND t1.W = t2.MaxWins
+                INNER JOIN leagues l ON t1.lgID = l.lgID
+            """
+            cursor.execute(query)
+
+            # Collecting result as a list of dictionaries for rendering
+            top_year_teams = [{"Year": row[0], "LeagueID": row[1], "LeagueName": row[2], "Team": row[3], "Wins": row[4]} for row in cursor.fetchall()]
+
+            cursor.close()
+            db.close()
+            return top_year_teams
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+            return []
+
 
     @staticmethod
     def add_team(team_data):
@@ -145,5 +181,6 @@ class Teams:
             db.close()
         except mysql.connector.Error as err:
             print(f"Error: {err}")
+            return False
 
 

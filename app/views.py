@@ -26,10 +26,12 @@ def teams_page():
     search_query = request.args.get("search", "")
     action = request.args.get('action')
 
-    # "Top Teams" butonuna tıklanmışsa
-    if action == 'view_top_teams':
-        top_teams = Teams.get_top_teams_by_league()
-        return render_template("teams.html", top_teams=top_teams)
+    if action == 'view_top_teams_byLeague':
+        top_teams_league = Teams.get_top_teams_by_league()
+        return render_template("teams.html", top_teams_league=top_teams_league)
+    if action == 'view_top_teams_byYear':
+        top_teams_year = Teams.get_top_teams_by_year()
+        return render_template("teams.html", top_teams_year=top_teams_year)
     if search_query:
         teams = Teams.search_by_name(search_query)
     else:
@@ -54,20 +56,28 @@ def teams_page():
             team_id = request.form.get("team_id")
             Teams.delete_team(team_id)
             flash("Team deleted successfully!", "success")
-
         return redirect(url_for("teams_page"))
 
     return render_template("teams.html", teams=teams)
 
 
 def fielding_page():
-
     position_query = request.args.get("position", "")
+    action = request.args.get("action")
+
     if position_query:
         fielding_records = Fielding.search_by_position(position_query)
-    else:
+    elif action == "view_all_data":
         fielding_records = Fielding.get_all_fielding()
-    return render_template("fielding.html", fielding_records=fielding_records)
+    else:
+        fielding_records = []
+
+    return render_template(
+        "fielding.html",
+        fielding_records=fielding_records,
+        position_query=position_query,
+    )
+
 
 def pitching_options():
     return render_template("pitching_options.html")
