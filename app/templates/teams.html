@@ -12,6 +12,29 @@ Teams{% endblock %}
     <a href="{{ url_for('add_team_page') }}" class="btn btn-success">Add New Team</a>
 </div>
 
+<!-- Sorting Option -->
+<div class="form-group2">
+    <label>Sort By:</label>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="sort_by" id="sort_by_wins" value="wins" {% if request.args.get('sort_by') == 'wins' %}checked{% endif %}>
+        <label class="form-check-label" for="sort_by_wins">
+            Wins
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="sort_by" id="sort_by_year" value="year" {% if request.args.get('sort_by') == 'year' %}checked{% endif %}>
+        <label class="form-check-label" for="sort_by_year">
+            Year
+        </label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="sort_by" id="sort_by_team" value="team" {% if request.args.get('sort_by') == 'team' %}checked{% endif %}>
+        <label class="form-check-label" for="sort_by_team">
+            Team Name
+        </label>
+    </div>
+</div>
+
 
 <!-- Filter Form -->
 <form id="filter-form" method="get" action="/teams" class="filter-form">
@@ -74,7 +97,8 @@ Teams{% endblock %}
         style="width: 300px;"
         placeholder="Search by team name"
     />
-    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
 </form>
 
 
@@ -107,8 +131,8 @@ Teams{% endblock %}
                     <form method="POST" action="/teams" style="display:inline;">
                         <input type="hidden" name="action" value="delete">
                         <input type="hidden" name="team_id" value="{{ team.TeamID }}">
-                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>                                                    
+                        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
+                    </form>                                                                        
                 </td>
             </tr>
             {% endfor %}
