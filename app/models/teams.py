@@ -36,13 +36,11 @@ class Teams:
     @staticmethod
     def get_all_teams():
         try:
-            db = mysql.connector.connect(
-                host=os.getenv("DB_HOST", "localhost"),
-                user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD"),
-                database=os.getenv("DB_NAME", "lahmansbaseballdb")
-            )
-            cursor = db.cursor()
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()  
 
             query = """
                 SELECT 
@@ -55,7 +53,7 @@ class Teams:
                 teams.append(Teams(*row))
 
             cursor.close()
-            db.close()
+            connection.close()
             return teams
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -64,13 +62,11 @@ class Teams:
     @staticmethod
     def search_by_name(team_name):
         try:
-            db = mysql.connector.connect(
-                host=os.getenv("DB_HOST", "localhost"),
-                user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD"),
-                database=os.getenv("DB_NAME", "lahmansbaseballdb")
-            )
-            cursor = db.cursor()
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()  
 
             query = """
                 SELECT yearID, lgID,teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
@@ -81,7 +77,7 @@ class Teams:
             teams = [Teams(*row) for row in cursor.fetchall()]
 
             cursor.close()
-            db.close()
+            connection.close()
             return teams
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -90,13 +86,11 @@ class Teams:
     @staticmethod
     def get_top_teams_by_league():
         try:
-            db = mysql.connector.connect(
-                host=os.getenv("DB_HOST", "localhost"),
-                user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD"),
-                database=os.getenv("DB_NAME", "lahmansbaseballdb")
-            )
-            cursor = db.cursor()
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()  
 
             query = """
                 SELECT t1.yearID, t1.lgID, l.league AS league_name, t1.name AS team_name, t1.W AS wins
@@ -115,7 +109,7 @@ class Teams:
             top_league_teams = [{"Year": row[0], "LeagueID": row[1], "LeagueName": row[2], "Team": row[3], "Wins": row[4]} for row in cursor.fetchall()]
 
             cursor.close()
-            db.close()
+            connection.close()
             return top_league_teams
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -124,13 +118,11 @@ class Teams:
     @staticmethod
     def get_top_teams_by_year():
         try:
-            db = mysql.connector.connect(
-                host=os.getenv("DB_HOST", "localhost"),
-                user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD"),
-                database=os.getenv("DB_NAME", "lahmansbaseballdb")
-            )
-            cursor = db.cursor()
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()  
 
             query = """
                 SELECT t1.yearID, t1.lgID, l.league AS league_name, t1.name AS team_name, t1.W AS wins
@@ -150,7 +142,7 @@ class Teams:
             top_year_teams = [{"Year": row[0], "LeagueID": row[1], "LeagueName": row[2], "Team": row[3], "Wins": row[4]} for row in cursor.fetchall()]
 
             cursor.close()
-            db.close()
+            connection.close()
             return top_year_teams
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -159,12 +151,11 @@ class Teams:
 
     @staticmethod
     def add_team(team_data):
-        connection = create_connection()
-        if connection is None:
-            print("Database connection failed.")
-            return
-
         try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
             cursor = connection.cursor()
             query = """
                 INSERT INTO teams (yearID, lgID, name, franchID, W, L, teamID)
@@ -212,14 +203,12 @@ class Teams:
     @staticmethod
     def filter_teams(league=None, year=None, team_name=None):
         try:
-            db = mysql.connector.connect(
-                host=os.getenv("DB_HOST", "localhost"),
-                user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD"),
-                database=os.getenv("DB_NAME", "lahmansbaseballdb")
-            )
-            cursor = db.cursor()
-
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()  
+                      
             query = """
                 SELECT yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
                 FROM teams
@@ -243,7 +232,7 @@ class Teams:
             teams = [Teams(*row) for row in cursor.fetchall()]
 
             cursor.close()
-            db.close()
+            connection.close()
             return teams
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -252,20 +241,18 @@ class Teams:
     @staticmethod
     def get_all_leagues():
         try:
-            db = mysql.connector.connect(
-                host=os.getenv("DB_HOST", "localhost"),
-                user=os.getenv("DB_USER", "root"),
-                password=os.getenv("DB_PASSWORD"),
-                database=os.getenv("DB_NAME", "lahmansbaseballdb")
-            )
-            cursor = db.cursor()
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()  
 
             query = "SELECT lgID, league FROM leagues"
             cursor.execute(query)
             leagues = [{"id": row[0], "name": row[1]} for row in cursor.fetchall()]
 
             cursor.close()
-            db.close()
+            connection.close()
             return leagues
         except mysql.connector.Error as err:
             print(f"Error: {err}")

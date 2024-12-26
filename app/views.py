@@ -7,7 +7,7 @@ from app.models.master import Master
 
 
 
-def home_page()
+def home_page():
     return render_template("home.html")
 
 def teams_page():
