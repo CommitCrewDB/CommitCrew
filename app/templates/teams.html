@@ -4,8 +4,64 @@
 Teams{% endblock %}
 {% block content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 <h1 class="title text-center my-4">Teams</h1>
+
+<div class="text-right my-3">
+    <a href="{{ url_for('add_team_page') }}" class="btn btn-success">Add New Team</a>
+</div>
+
+
+<!-- Filter Form -->
+<form id="filter-form" method="get" action="/teams" class="filter-form">
+    <div class="form-row">
+        <!-- League Filter -->
+        <div class="form-group col-md-4">
+            <label for="league">League</label>
+            <select name="league" id="league" class="form-control">
+                <option value="">Select League</option>
+                {% for league in leagues %}
+                <option value="{{ league.id }}" {% if league.id == request.args.get('league', '') %}selected{% endif %}>
+                    {{ league.name }} ({{ league.id }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Year Filter -->
+        <div class="form-group col-md-4">
+            <label for="year">Year</label>
+            <input
+                type="text"
+                name="year"
+                id="year"
+                value="{{ request.args.get('year', '') }}"
+                class="form-control"
+                placeholder="Enter Year"
+            />
+        </div>
+
+        <!-- Team Name Filter -->
+        <div class="form-group col-md-4">
+            <label for="team_name">Team Name</label>
+            <input
+                type="text"
+                name="team_name"
+                id="team_name"
+                value="{{ request.args.get('team_name', '') }}"
+                class="form-control"
+                placeholder="Enter Team Name"
+            />
+        </div>
+
+        <!-- Submit Button -->
+        <div class="form-group col-md-12">
+            <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        </div>
+    </div>
+</form>
+
 
 
 <!-- Search Form -->
@@ -50,9 +106,9 @@ Teams{% endblock %}
                 <td>
                     <form method="POST" action="/teams" style="display:inline;">
                         <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="team_id" value="{{ team.id }}">
+                        <input type="hidden" name="team_id" value="{{ team.TeamID }}">
                         <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                    </form>                    
+                    </form>                                                    
                 </td>
             </tr>
             {% endfor %}
@@ -132,19 +188,6 @@ Teams{% endblock %}
     </table>
 {% endif %}
 
-<!-- Add New Team Form -->
-<h3>Add New Team</h3>
-<form method="POST" action="/teams">
-    <input type="hidden" name="action" value="add">
-    <input type="text" name="year" placeholder="Year" required>
-    <input type="text" name="league" placeholder="League" required>
-    <input type="text" name="team_name" placeholder="Team Name" required>
-    <input type="text" name="franchise" placeholder="Franchise" required>
-    <input type="number" name="wins" placeholder="Wins" required>
-    <input type="number" name="losses" placeholder="Losses" required>
-    <button type="submit" class="btn btn-success">Add Team</button>
-</form>
-
 <!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
@@ -155,7 +198,6 @@ Teams{% endblock %}
     </div>
   {% endif %}
 {% endwith %}
-
 
 {% endblock %}
 

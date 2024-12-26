@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Add Team
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center my-4">Add a New Team</h1>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- Add Team Form -->
+<form method="POST" action="/teams/add">
+    <div class="form-group">
+        <label for="year">Year</label>
+        <input type="number" class="form-control" id="year" name="year" placeholder="Enter Year" required>
+    </div>
+    <div class="form-group">
+        <label for="league">League</label>
+        <input type="text" class="form-control" id="league" name="league" placeholder="Enter League" required>
+    </div>
+    <div class="form-group">
+        <label for="team_id">Team ID</label>
+        <input type="text" class="form-control" id="team_id" name="team_id" placeholder="Enter Team ID" required>
+    </div>
+    <div class="form-group">
+        <label for="team_name">Team Name</label>
+        <input type="text" class="form-control" id="team_name" name="team_name" placeholder="Enter Team Name" required>
+    </div>
+    <div class="form-group">
+        <label for="franchise">Franchise</label>
+        <input type="text" class="form-control" id="franchise" name="franchise" placeholder="Enter Franchise" required>
+    </div>
+    <div class="form-group">
+        <label for="wins">Wins</label>
+        <input type="number" class="form-control" id="wins" name="wins" placeholder="Enter Wins" required>
+    </div>
+    <div class="form-group">
+        <label for="losses">Losses</label>
+        <input type="number" class="form-control" id="losses" name="losses" placeholder="Enter Losses" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Team</button>
+</form>
+
+
+
+<div class="text-left my-3">
+    <a href="{{ url_for('teams_page') }}" class="btn btn-secondary">Back to Teams</a>
+</div>
+
+{% endblock %}

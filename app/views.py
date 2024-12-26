@@ -7,59 +7,79 @@ from app.models.master import Master
 
 
 
-def home_page():
+def home_page()
     return render_template("home.html")
-'''
-def teams_page():
 
+def teams_page():
     search_query = request.args.get("search", "")
+    league_filter = request.args.get("league", "")
+    year_filter = request.args.get("year", "")
+    team_name_filter = request.args.get("team_name", "")
+    action = request.args.get('action')
+
+    leagues = Teams.get_all_leagues()
+
+    teams = []
+    if league_filter or year_filter or team_name_filter:
+        teams = Teams.filter_teams(league=league_filter, year=year_filter, team_name=team_name_filter)
+
     if search_query:
         teams = Teams.search_by_name(search_query)
-    else:
-        teams = []
-    top_teams = Teams.get_top_teams_by_league()
-    return render_template("teams.html", teams=teams, top_teams=top_teams)
-
-'''
-
-def teams_page():
-    search_query = request.args.get("search", "")
-    action = request.args.get('action')
 
     if action == 'view_top_teams_byLeague':
         top_teams_league = Teams.get_top_teams_by_league()
         return render_template("teams.html", top_teams_league=top_teams_league)
+
     if action == 'view_top_teams_byYear':
         top_teams_year = Teams.get_top_teams_by_year()
         return render_template("teams.html", top_teams_year=top_teams_year)
-    if search_query:
-        teams = Teams.search_by_name(search_query)
-    else:
-        teams = []
-
+    
     if request.method == "POST":
         action = request.form.get("action")
-        team_data = {
-            "Year": request.form.get("year"),
-            "League": request.form.get("league"),
-            "Team": request.form.get("team_name"),
-            "Franchise": request.form.get("franchise"),
-            "Wins": request.form.get("wins"),
-            "Losses": request.form.get("losses")
-        }
+        team_id = request.form.get("team_id")
 
-        if action == "add":
+        if action == "delete":
+            if not team_id:
+                flash("Team ID is required to delete a team.", "danger")
+            else:
+                try:
+                    Teams.delete_team(team_id)
+                    flash(f"Team with ID {team_id} deleted successfully!", "success")
+                except Exception as e:
+                    print(f"Error while deleting team: {e}")
+                    flash(f"An error occurred while deleting team: {e}", "danger")
+            return redirect(url_for("teams_page"))
+
+    return render_template("teams.html", teams=teams, leagues=leagues)
+
+def add_team_page():
+    if request.method == "POST":
+        year = request.form.get("year")
+        league = request.form.get("league")
+        team_name = request.form.get("team_name")
+        team_id = request.form.get("team_id")
+        franchise = request.form.get("franchise")
+        wins = request.form.get("wins")
+        losses = request.form.get("losses")
+
+
+        try:
+            team_data = {
+                "yearID": year,
+                "League": league,
+                "Team": team_name,
+                "TeamID": team_id,
+                "Franchise": franchise,
+                "Wins": wins,
+                "Losses": losses,
+            }
             Teams.add_team(team_data)
             flash("New team added successfully!", "success")
+            return redirect(url_for("teams_page"))
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
 
-        elif action == "delete":
-            team_id = request.form.get("team_id")
-            Teams.delete_team(team_id)
-            flash("Team deleted successfully!", "success")
-        return redirect(url_for("teams_page"))
-
-    return render_template("teams.html", teams=teams)
-
+    return render_template("addteams.html")
 
 def fielding_page():
     position_query = request.args.get("position", "")
