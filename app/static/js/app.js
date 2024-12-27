@@ -1,19 +1,33 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Filter form event handling
     const filterForm = document.querySelector('.filter-form');
     if (filterForm) {
+        // Prevent default input event submission
         filterForm.addEventListener('input', function (event) {
             event.preventDefault();
         });
-    }
 
-    const resetButton = document.querySelector('button[type="reset"]');
-    if (resetButton) {
-        resetButton.addEventListener('click', function () {
-            document.querySelector('.filter-form').reset();
+        // Form submission event
+        filterForm.addEventListener('submit', function () {
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) {
+                spinner.style.display = 'block'; // Show loading spinner
+            }
         });
     }
 
+    // Reset button functionality
+    const resetButton = document.querySelector('button[type="reset"]');
+    if (resetButton) {
+        resetButton.addEventListener('click', function () {
+            if (filterForm) {
+                filterForm.reset(); // Reset all form fields
+            }
+        });
+    }
+
+    // Show error messages
     function showErrorMessage(message) {
         const errorMessageElement = document.getElementById('error-message');
         if (errorMessageElement) {
@@ -22,36 +36,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const yearInput = document.getElementById('year');
-        const form = document.getElementById('filter-form');
-
-        yearInput.addEventListener('input', function(event) {
-            form.submit = function() {};
-        });
-    });
-    
-    const winsSlider = document.getElementById('wins');
-    if (winsSlider) {
-        const winsValue = document.getElementById('wins-value');
-        winsSlider.addEventListener('input', function () {
-            winsValue.textContent = winsSlider.value;
+    // Year input handling
+    const yearInput = document.getElementById('year');
+    if (yearInput) {
+        yearInput.addEventListener('input', function () {
+            const form = document.getElementById('filter-form');
+            if (form) {
+                form.submit = function () {}; // Prevent auto-submit
+            }
         });
     }
-
-    filterForm?.addEventListener('submit', function () {
-        document.getElementById('loading-spinner').style.display = 'block'; 
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // Handle "Sort By" change
-        const radioButtons = document.querySelectorAll('input[name="sort_by"]');
-        radioButtons.forEach(button => {
-            button.addEventListener('change', function () {
-                document.getElementById('filter-form').submit(); // Automatically submit the form on change
-            });
-        });
-    });
-    
 
 });

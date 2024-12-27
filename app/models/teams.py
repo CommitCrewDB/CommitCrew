@@ -20,7 +20,7 @@ def create_connection():
         return None
 
 class Teams:
-    def __init__(self, Year, League,TeamID, Team, Franchise, TeamDivision, Rank, GamesPlayed, HomeGames, Wins, Losses):
+    def __init__(self, Year, League, TeamID, Team, Franchise, TeamDivision, Rank, GamesPlayed, HomeGames, Wins, Losses):
         self.Year = Year
         self.League = League
         self.TeamID = TeamID
@@ -201,7 +201,7 @@ class Teams:
 
 
     @staticmethod
-    def filter_teams(league=None, year=None, team_name=None):
+    def filter_teams(league=None, year=None, team_name=None, sort_by=None):
         try:
             connection = create_connection()
             if connection is None:
@@ -228,6 +228,19 @@ class Teams:
                 query += " AND name LIKE %s"
                 params.append(f"%{team_name}%")
 
+            if sort_by == "wins_asc":
+                query += " ORDER BY W ASC"
+            elif sort_by == "wins_desc":
+                query += " ORDER BY W DESC"
+            elif sort_by == "year_asc":
+                query += " ORDER BY yearID ASC"
+            elif sort_by == "year_desc":
+                query += " ORDER BY yearID DESC"
+            elif sort_by == "team_name_asc":
+                query += " ORDER BY name ASC"
+            elif sort_by == "team_name_desc":
+                query += " ORDER BY name DESC"
+
             cursor.execute(query, tuple(params))
             teams = [Teams(*row) for row in cursor.fetchall()]
 
@@ -237,6 +250,8 @@ class Teams:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
+        
+        
         
     @staticmethod
     def get_all_leagues():

@@ -17,20 +17,17 @@ def teams_page():
     team_name_filter = request.args.get("team_name", "")
     action = request.args.get('action')
     sort_by = request.args.get("sort_by", "")
-    status = request.args.get("status", "")
-    view_mode = request.args.get("view_mode", "")
 
     leagues = Teams.get_all_leagues()
 
     teams = []
-    if sort_by == 'wins':
-        teams = sorted(teams, key=lambda x: x.Wins, reverse=True)
-    elif sort_by == 'year':
-        teams = sorted(teams, key=lambda x: x.Year, reverse=True)
-    elif sort_by == 'team':
-        teams = sorted(teams, key=lambda x: x.Team)
-    if league_filter or year_filter or team_name_filter:
-        teams = Teams.filter_teams(league=league_filter, year=year_filter, team_name=team_name_filter)
+    if league_filter or year_filter or team_name_filter or sort_by:
+        teams = Teams.filter_teams(
+            league=league_filter,
+            year=year_filter,
+            team_name=team_name_filter,
+            sort_by=sort_by
+        )
     if search_query:
         teams = Teams.search_by_name(search_query)
 

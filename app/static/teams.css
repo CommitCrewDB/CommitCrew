@@ -80,6 +80,7 @@ form, .form-control{
     box-shadow: 0 0 5px rgba(0, 86, 179, 0.5); /* Blue glow effect */
 }
 
+
 /* Optional: add placeholder styling to make it more consistent */
 .form-control::placeholder {
     color: #6c757d; /* Lighter color for placeholder text */
@@ -188,7 +189,7 @@ form, .form-control{
 .form-row {
     display: grid;
     flex-wrap: wrap;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 15px;
     width: 100%;
 }
