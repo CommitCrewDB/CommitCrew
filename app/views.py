@@ -12,7 +12,7 @@ def home_page():
 
 def teams_page():
     search_query = request.args.get("search", "")
-    league_filter = request.args.get("league", "")
+    league_filters = request.args.getlist("league")
     year_filter = request.args.get("year", "")
     team_name_filter = request.args.get("team_name", "")
     action = request.args.get('action')
@@ -21,9 +21,9 @@ def teams_page():
     leagues = Teams.get_all_leagues()
 
     teams = []
-    if league_filter or year_filter or team_name_filter or sort_by:
+    if league_filters or year_filter or team_name_filter or sort_by:
         teams = Teams.filter_teams(
-            league=league_filter,
+            leagues=league_filters,
             year=year_filter,
             team_name=team_name_filter,
             sort_by=sort_by

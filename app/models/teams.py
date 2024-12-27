@@ -201,24 +201,24 @@ class Teams:
 
 
     @staticmethod
-    def filter_teams(league=None, year=None, team_name=None, sort_by=None):
+    def filter_teams(leagues=None, year=None, team_name=None, sort_by=None):
         try:
             connection = create_connection()
             if connection is None:
                 print("Database connection failed.")
                 return
-            cursor = connection.cursor()  
-                      
+            cursor = connection.cursor()
+
             query = """
-                SELECT yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
+                SELECT yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L
                 FROM teams
                 WHERE 1=1
             """
             params = []
 
-            if league:
-                query += " AND lgID = %s"
-                params.append(league)
+            if leagues:
+                query += " AND lgID IN ({})".format(",".join(["%s"] * len(leagues)))
+                params.extend(leagues)
 
             if year:
                 query += " AND yearID = %s"
@@ -250,8 +250,9 @@ class Teams:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
-        
-        
+
+            
+            
         
     @staticmethod
     def get_all_leagues():

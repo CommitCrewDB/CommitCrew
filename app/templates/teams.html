@@ -1,5 +1,4 @@
 {% extends "layout.html" %}
-
 {% block title %}
 Teams{% endblock %}
 {% block content %}
@@ -11,77 +10,6 @@ Teams{% endblock %}
 <div class="text-right my-3">
     <a href="{{ url_for('add_team_page') }}" class="btn btn-success">Add New Team</a>
 </div>
-
-
-<!-- Filter Form -->
-<form id="filter-form" method="get" action="/teams" class="filter-form">
-    <div class="form-row">
-        <!-- League Filter -->
-        <div class="form-group">
-            <label for="league">League</label>
-            <select name="league" id="league" class="form-control">
-                <option value="">Select League</option>
-                {% for league in leagues %}
-                <option value="{{ league.id }}" {% if league.id == request.args.get('league', '') %}selected{% endif %}>
-                    {{ league.name }} ({{ league.id }})
-                </option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <!-- Year Filter -->
-        <div class="form-group">
-            <label for="year">Year</label>
-            <input
-                type="text"
-                name="year"
-                id="year"
-                value="{{ request.args.get('year', '') }}"
-                class="form-control"
-                placeholder="Enter Year"
-            />
-        </div>
-        <!-- Team Name Filter -->
-        <div class="form-group">
-            <label for="team_name">Team Name</label>
-            <input
-                type="text"
-                name="team_name"
-                id="team_name"
-                value="{{ request.args.get('team_name', '') }}"
-                class="form-control"
-                placeholder="Enter Team Name"
-            />
-        </div>
-
-        <!-- Sort By Filter -->
-        <div class="form-group">
-            <label for="sort_by">Sort By</label>
-            <select name="sort_by" id="sort_by" class="form-control">
-                <option value="">Select</option>
-                <option value="wins_asc" {% if request.args.get('sort_by') == 'wins_asc' %}selected{% endif %}>Wins (Ascending)</option>
-                <option value="wins_desc" {% if request.args.get('sort_by') == 'wins_desc' %}selected{% endif %}>Wins (Descending)</option>
-                <option value="year_asc" {% if request.args.get('sort_by') == 'year_asc' %}selected{% endif %}>Year (Ascending)</option>
-                <option value="year_desc" {% if request.args.get('sort_by') == 'year_desc' %}selected{% endif %}>Year (Descending)</option>
-                <option value="team_name_asc" {% if request.args.get('sort_by') == 'team_name_asc' %}selected{% endif %}>Team Name (A-Z)</option>
-                <option value="team_name_desc" {% if request.args.get('sort_by') == 'team_name_desc' %}selected{% endif %}>Team Name (Z-A)</option>
-            </select>
-        </div>
-
-        <!-- Submit and Reset Buttons -->
-        <div class="form-group btn-block">
-            <button type="submit" class="btn btn-primary btn-block">Filter</button>
-            <button type="reset" class="btn btn-secondary btn-block">Reset</button>
-        </div>
-    </div>
-</form>
-
-<!-- Loading Spinner -->
-<div id="loading-spinner" style="display: none; text-align: center;">
-    <span>Loading...</span>
-</div>
-
-
 
 <!-- Search Form -->
 <form method="get" action="/teams" class="search-form">
@@ -137,6 +65,82 @@ Teams{% endblock %}
 {% elif request.args.get('search') %}
     <p>No results found. Try searching for a different team name.</p>
 {% endif %}
+
+
+
+<!-- Filter Form -->
+<form id="filter-form" method="get" action="/teams" class="filter-form">
+    <div class="form-row">
+        <!-- League Filter -->
+        <div class="form-group">
+            <label for="league">Leagues</label>
+            <div>
+                {% for league in leagues %}
+                <div class="form-check">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="league"
+                        value="{{ league.id }}"
+                        id="league-{{ league.id }}"
+                        {% if league.id in request.args.getlist('league') %}checked{% endif %}
+                    />
+                    <label class="form-check-label" for="league-{{ league.id }}">
+                        {{ league.name }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Year Filter -->
+        <div class="form-group">
+            <label for="year">Year</label>
+            <input
+                type="text"
+                name="year"
+                id="year"
+                value="{{ request.args.get('year', '') }}"
+                class="form-control"
+                placeholder="Enter Year"
+            />
+        </div>
+        <!-- Team Name Filter -->
+        <div class="form-group">
+            <label for="team_name">Team Name</label>
+            <input
+                type="text"
+                name="team_name"
+                id="team_name"
+                value="{{ request.args.get('team_name', '') }}"
+                class="form-control"
+                placeholder="Enter Team Name"
+            />
+        </div>
+
+        <!-- Sort By Filter -->
+        <div class="form-group">
+            <label for="sort_by">Sort By</label>
+            <select name="sort_by" id="sort_by" class="form-control">
+                <option value="">Select</option>
+                <option value="wins_asc" {% if request.args.get('sort_by') == 'wins_asc' %}selected{% endif %}>Wins (Ascending)</option>
+                <option value="wins_desc" {% if request.args.get('sort_by') == 'wins_desc' %}selected{% endif %}>Wins (Descending)</option>
+                <option value="year_asc" {% if request.args.get('sort_by') == 'year_asc' %}selected{% endif %}>Year (Ascending)</option>
+                <option value="year_desc" {% if request.args.get('sort_by') == 'year_desc' %}selected{% endif %}>Year (Descending)</option>
+                <option value="team_name_asc" {% if request.args.get('sort_by') == 'team_name_asc' %}selected{% endif %}>Team Name (A-Z)</option>
+                <option value="team_name_desc" {% if request.args.get('sort_by') == 'team_name_desc' %}selected{% endif %}>Team Name (Z-A)</option>
+            </select>
+        </div>
+
+        <!-- Submit and Reset Buttons -->
+        <div class="form-group btn-block">
+            <button type="submit" class="btn btn-primary btn-block">Filter</button>
+            <button type="reset" class="btn btn-secondary btn-block">Reset</button>
+        </div>
+    </div>
+</form>
+
+
 
 <!-- "Top Teams by League" Button -->
 <div>

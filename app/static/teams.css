@@ -68,11 +68,15 @@ h1, h2, h3 {
 form, .form-control{
     max-width: 600px;
     margin: 20px auto;
-    padding: 20px;
+    padding: 13px;
     background-color: #ffffff; 
     border: 1px solid #dee2e6;
-    border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    font-size: 16px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    width: 100%;
 }
 /* On focus, apply a highlighted border */
 .form-control:focus {
@@ -160,22 +164,140 @@ form, .form-control{
     border-top-right-radius: 10px;
 }
 /* Filter Form Settings */
+
+
+/* Form Row */
+.form-row {
+    display: grid;
+    flex-wrap: wrap;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+}
+
+.table tr:hover {
+    background-color: #e9ecef; 
+    transform: translateY(-2px); 
+    transition: transform 0.3s ease;
+}
+
+/* Genel Checkbox ve Form Ayarları */
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.form-check-input {
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.form-check-input:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.8);
+}
+
+.form-check-label {
+    font-size: 14px;
+    color: #495057;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.form-check-label:hover {
+    color: #007bff;
+}
+
+/* Checkbox İçin Hover ve Focus Efektleri */
+.form-check:hover .form-check-input {
+    border-color: #0056b3;
+}
+
+/* Filter Form Genel Düzen */
 .filter-form {
     background-color: #ffffff;
-    padding: 15px 20px;
+    padding: 20px;
     margin: 20px auto;
     border: 1px solid #ddd;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 100%;
-    width: 90%;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
+    max-width: 90%;
+    width: 70%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
     animation: fadeIn 0.5s ease-in;
 }
 
+.filter-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-form label {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.filter-form input, .filter-form select {
+    padding: 13px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filter-form input:focus, .filter-form select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Butonlar */
+.filter-form button {
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.filter-form .btn-primary {
+    background-color: #002d62;
+    color: #fff;
+    border: none;
+}
+
+.filter-form .btn-primary:hover {
+    background-color: #001b40;
+    transform: scale(1.03);
+}
+
+.filter-form .btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+}
+
+.filter-form .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: scale(1.03);
+}
+
+/* Animasyon */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -185,115 +307,14 @@ form, .form-control{
     }
 }
 
-/* Form Row */
-.form-row {
-    display: grid;
-    flex-wrap: wrap;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 15px;
-    width: 100%;
+/* Mobil Uyumluluk */
+@media (max-width: 768px) {
+    .filter-form {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-form .form-group {
+        gap: 10px;
+    }
 }
-
-.table tr:hover {
-    background-color: #e9ecef; /* Hoverda daha açık bir arka plan */
-    transform: translateY(-2px); /* Hafif yukarı kayma */
-    transition: transform 0.3s ease;
-}
-
-
-/* Container for the sort by section */
-
-
-
-
-/* Sort By Section */
-/* Apply styles only to input and select elements within the filter form */
-.filter-form .form-group input,
-.filter-form .form-group select {
-    width: 100%;
-    padding: 10px;
-    font-size: 14px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
-    box-sizing: border-box;
-}
-
-/* Styling for radio buttons remains unaffected */
-.form-check {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-/* Style for radio button input */
-.form-check-input {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 1px solid #ced4da;
-    background-color: #ffffff;
-    cursor: pointer;
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-    margin-right: 10px;
-}
-
-/* Focus on radio button */
-.form-check-input:focus {
-    border-color: #0056b3;
-    box-shadow: 0 0 3px rgba(0, 86, 179, 0.5);
-}
-
-/* Hover Effect */
-.form-check-input:hover {
-    border-color: #0056b3;
-    background-color: #e6f0ff;
-}
-
-/* When radio button is checked */
-.form-check-input:checked {
-    background-color: #007bff;
-    border-color: #0056b3;
-}
-
-/* Styling for the label */
-.form-check-label {
-    font-size: 14px;
-    color: #495057;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-/* Hover effect for the label */
-.form-check-label:hover {
-    color: #0056b3;
-}
-
-/* When radio button is selected */
-.form-check-input:checked + .form-check-label {
-    color: #007bff;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
