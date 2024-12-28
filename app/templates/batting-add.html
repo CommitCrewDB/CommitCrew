@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block title %}Add Batting Record{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='batting.css') }}">
+
+<h2>Add Batting Record</h2>
+<form method="POST" action="{{ url_for('add_batting_record') }}">
+    <div class="form-group">
+        <label for="playerID">Player ID:</label>
+        <input type="text" name="playerID" id="playerID" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="yearID">Year:</label>
+        <input type="number" name="yearID" id="yearID" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="stint">Stint:</label>
+        <input type="number" name="stint" id="stint" class="form-control" required>
+    </div>
+    <div class="form-group">
+        <label for="teamID">Team ID:</label>
+        <input type="text" name="teamID" id="teamID" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="lgID">League ID:</label>
+        <input type="text" name="lgID" id="lgID" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="G">Games:</label>
+        <input type="number" name="G" id="G" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="AB">At Bats:</label>
+        <input type="number" name="AB" id="AB" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-success mt-3">Submit</button>
+</form>
+{% endblock %}
