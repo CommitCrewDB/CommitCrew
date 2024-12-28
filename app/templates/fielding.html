@@ -3,22 +3,71 @@
 Fielding
 {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='fielding.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 <h1 class="title text-center my-4">Fielding</h1>
 
-<!-- Search Form -->
-<form method="GET" action="{{ url_for('fielding_page') }}" class="search-form">
-    <input
-        type="text"
-        id="position"
-        name="position"
-        class="form-control d-inline-block"
-        style="width: 300px;"
-        placeholder="Search by position"
-        value="{{ request.args.get('position', '') }}"
-    />
-    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+<!-- Search and Filter Form -->
+<form method="get" action="{{ url_for('fielding_page') }}" class="search-form filter-form">
+    <div class="form-row">
+        <div class="form-group">
+            <label for="league">Leagues</label>
+            <div>
+                {% for league in leagues %}
+                <div class="form-check">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="league"
+                        value="{{ league.id }}"
+                        id="league-{{ league.id }}"
+                        {% if league.id in request.args.getlist('league') %}checked{% endif %}
+                    />
+                    <label class="form-check-label" for="league-{{ league.id }}">
+                        {{ league.name }}
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Player ID Search -->
+        <div class="form-group">
+            <input
+                type="text"
+                name="player_id"
+                class="form-control"
+                placeholder="Search by Player ID"
+                value="{{ request.args.get('player_id', '') }}"
+            />
+        </div>
+        <!-- Year Filter -->
+        <div class="form-group">
+            <input
+                type="number"
+                name="year"
+                class="form-control"
+                placeholder="Enter Year"
+                value="{{ request.args.get('year', '') }}"
+            />
+        </div>
+        <!-- Position Filter -->
+        <div class="form-group">
+            <input
+                type="text"
+                name="position"
+                class="form-control"
+                placeholder="Enter Position"
+                value="{{ request.args.get('position', '') }}"
+            />
+        </div>
+        <!-- Submit and Reset Buttons -->
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{{ url_for('fielding_page') }}" class="btn btn-secondary">Reset</a>
+        </div>
+    </div>
 </form>
 
 <div>

@@ -87,21 +87,33 @@ def add_team_page():
     return render_template("addteams.html")
 
 def fielding_page():
-    position_query = request.args.get("position", "")
+    player_id = request.args.get("player_id", "")
+    league = request.form.get("league")
+    year = request.args.get("year", "")
+    position = request.args.get("position", "")
     action = request.args.get("action")
 
-    if position_query:
-        fielding_records = Fielding.search_by_position(position_query)
-    elif action == "view_all_data":
-        fielding_records = Fielding.get_all_fielding()
+    leagues = Teams.get_all_leagues()
+
+    if league or player_id or year or position:
+        fielding_records = Fielding.filter_fielding(
+            leagues=league,
+            player_id=player_id,
+            year=year,
+            position=position
+        )
     else:
         fielding_records = []
 
     return render_template(
         "fielding.html",
         fielding_records=fielding_records,
-        position_query=position_query,
+        leagues=leagues,
+        player_id=player_id,
+        year=year,
+        position=position,
     )
+
 
 
 def pitching_options():
