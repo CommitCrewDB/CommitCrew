@@ -1,9 +1,9 @@
-from flask import render_template, request, redirect, url_for, flash
-from flask import app
+from flask import render_template, request, redirect, url_for, flash, jsonify, app
 from app.models.teams import Teams
 from app.models.fielding import Fielding
-from app.models.pitching import Pitching
+from app.models.pitching import create_connection
 from app.models.master import Master
+import logging
 
 
 
@@ -114,27 +114,6 @@ def fielding_page():
         position=position,
     )
 
-
-
-def pitching_options():
-    return render_template("pitching_options.html")
-
-def pitching_table():
-    action = request.args.get('action', 'view_all')
-    search_query = request.args.get('search', '')
-
-    if action == 'view_all':
-        pitching_data = Pitching.load_pitching_data()
-        return render_template("pitching.html", pitching_data=pitching_data)
-
-    elif action == 'search' and search_query:
-        # Search for specific data
-        pitching_data = Pitching.search_and_sort(search_query=search_query)
-        return render_template("pitching.html", pitching_data=pitching_data, search_query=search_query)
-
-    # Default behavior: return to pitching options
-    return redirect(url_for('pitching_options'))
-
 def master_options():
     return render_template("master_options.html")
 
@@ -156,3 +135,245 @@ def master_table():
 
 def about_page():
     return render_template("about.html")
+
+def pitching_page():
+    sort_by = request.args.get('sort_by', '')  # Default to no sorting
+    order = request.args.get('order', '')  # Default to no specific order
+
+    # Filtering parameters
+    search_name = request.args.get('search_name', '')
+    search_year = request.args.get('search_year', '')
+    search_league = request.args.get('search_league', '')
+    action = request.args.get('action', '')
+
+    # Pagination parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = 30
+
+    connection = create_connection()
+    if connection is None:
+        print("Database connection failed.")
+        return []
+
+    cursor = connection.cursor(dictionary=True)
+
+    # Get column names
+    cursor.execute("SHOW COLUMNS FROM pitching")
+    columns = [col['Field'] for col in cursor.fetchall() if col['Field'] != 'playerID']
+
+    data = []
+    total_records = 0
+    if action == 'get_data':
+        # Build the query with a join to get player names and league names
+        query = """
+            SELECT p.ID, pl.nameFirst, pl.nameLast, p.yearID, t.name AS teamName, l.league AS leagueName, p.W, p.L, p.ERA, p.SO AS strikeouts, p.BB AS walks, p.IPouts AS inningsPitched
+            FROM pitching p
+            INNER JOIN master pl ON p.playerID = pl.playerID
+            INNER JOIN teams t ON p.teamID = t.teamID
+            INNER JOIN leagues l ON p.lgID = l.lgID
+        """
+        conditions = []
+        if search_name:
+            conditions.append(f"(pl.nameFirst LIKE '%{search_name}%' OR pl.nameLast LIKE '%{search_name}%')")
+        if search_year:
+            conditions.append(f"p.yearID = '{search_year}'")
+        if search_league:
+            conditions.append(f"l.league LIKE '%{search_league}%'")
+
+        if conditions:
+            query += " WHERE " + " AND ".join(conditions)
+        
+        if sort_by and order:
+            query += f" ORDER BY {sort_by} {order.upper()}"
+        
+        query += f" LIMIT %s OFFSET %s"
+
+        print("Executing query:", query)
+        print("With parameters:", (per_page, (page - 1) * per_page))
+
+        cursor.execute(query, (per_page, (page - 1) * per_page))
+        data = cursor.fetchall()
+
+        # Get total number of records for pagination
+        cursor.execute("SELECT COUNT(*) FROM pitching")
+        total_records = cursor.fetchone()['COUNT(*)']
+
+    connection.close()
+
+    total_pages = (total_records + per_page - 1) // per_page
+
+    return render_template('pitching.html', data=data, columns=columns, page=page, total_pages=total_pages, search_name=search_name, search_year=search_year, search_league=search_league, sort_by=sort_by, order=order, action=action)
+
+def add_pitching_data():
+    if request.method == 'POST':
+        print("POST request received!")  # Debug
+        print("Form Data:", request.form)  # Debug
+
+        # Extract form data
+        playerID = request.form.get('playerID')
+        yearID = request.form.get('yearID')
+        teamID = request.form.get('teamID')
+        lgID = request.form.get('lgID')
+        stint = request.form.get('stint')
+        W = request.form.get('W')
+        L = request.form.get('L')
+        ERA = request.form.get('ERA')
+
+        # Debug: Print field values
+        print("Player ID:", playerID)
+        print("Year ID:", yearID)
+        print("Team ID:", teamID)
+        print("League ID:", lgID)
+        print("Stint:", stint)
+        print("Wins:", W)
+        print("Losses:", L)
+        print("ERA:", ERA)
+
+        try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed!")  # Debug
+                flash("Database connection failed.", "danger")
+                return redirect(url_for('add_pitching_data'))
+
+            with connection.cursor(dictionary=True) as cursor:
+                # Check for duplicate data
+                cursor.execute(
+                    "SELECT * FROM pitching WHERE playerID = %s AND yearID = %s AND teamID = %s AND lgID = %s AND stint = %s",
+                    (playerID, yearID, teamID, lgID, stint)
+                )
+                if cursor.fetchone():
+                    print("Duplicate data found!")  # Debug
+                    flash("Data already exists.", "danger")
+                    return redirect(url_for('add_pitching_data'))
+
+                # Insert new data
+                query = """
+                    INSERT INTO pitching (playerID, yearID, teamID, lgID, stint, W, L, ERA)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+
+                cursor.execute(query, (playerID, yearID, teamID, lgID, stint, W, L, ERA))
+                connection.commit()
+
+                print("Data successfully added!")  # Debug
+                flash("Data has been successfully added.", "success")
+                return redirect(url_for('pitching_page'))
+        except Exception as e:
+            print(f"Error occurred: {e}")  # Debug
+            flash(f"An error occurred: {e}", "danger")
+            return redirect(url_for('add_pitching_data'))
+
+    return render_template('addpitching.html')
+
+def update_pitching_data(id):
+    if request.method == 'POST':
+        print("POST request received for update!")  # Debug
+        print("Form Data:", request.form)  # Debug
+
+        # Extract form data
+        playerName = request.form.get('playerName')
+        yearID = request.form.get('yearID')
+        teamID = request.form.get('teamID')
+        lgID = request.form.get('lgID')
+        stint = request.form.get('stint')
+        W = request.form.get('W')
+        L = request.form.get('L')
+        ERA = request.form.get('ERA')
+
+        # Debug: Print field values
+        print("Player Name:", playerName)
+        print("Year ID:", yearID)
+        print("Team ID:", teamID)
+        print("League ID:", lgID)
+        print("Stint:", stint)
+        print("Wins:", W)
+        print("Losses:", L)
+        print("ERA:", ERA)
+
+        try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed!")  # Debug
+                flash("Database connection failed.", "danger")
+                return redirect(url_for('update_pitching_data', id=id))
+
+            with connection.cursor(dictionary=True) as cursor:
+                # Debug: Validate player name lookup
+                print(f"Looking for player: {playerName}")
+                cursor.execute("SELECT playerID FROM master WHERE CONCAT(nameFirst, ' ', nameLast) = %s", (playerName,))
+                player = cursor.fetchone()
+
+                if not player:
+                    print("Player not found!")  # Debug
+                    flash("Player name not found in the master table.", "danger")
+                    return redirect(url_for('update_pitching_data', id=id))
+
+                playerID = player['playerID']
+                print(f"Found playerID: {playerID}")
+
+                # Update data
+                query = """
+                    UPDATE pitching
+                    SET yearID = %s, teamID = %s, lgID = %s, stint = %s, W = %s, L = %s, ERA = %s
+                    WHERE playerID = %s AND id = %s
+                """
+                print("Executing query:", query)  # Debug
+                print("With values:", (yearID, teamID, lgID, stint, W, L, ERA, playerID, id))  # Debug
+                cursor.execute(query, (yearID, teamID, lgID, stint, W, L, ERA, playerID, id))
+                connection.commit()
+
+                print("Data successfully updated!")  # Debug
+                flash("Data has been successfully updated.", "success")
+                return redirect(url_for('pitching_page'))
+        except Exception as e:
+            print(f"Error occurred: {e}")  # Debug
+            flash(f"An error occurred: {e}", "danger")
+            return redirect(url_for('update_pitching_data', id=id))
+
+    # Fetch existing data to pre-fill the form
+    try:
+        connection = create_connection()
+        if connection is None:
+            print("Database connection failed!")  # Debug
+            flash("Database connection failed.", "danger")
+            return redirect(url_for('pitching_page'))
+
+        with connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT * FROM pitching WHERE id = %s", (id,))
+            data = cursor.fetchone()
+            if not data:
+                flash("Data not found.", "danger")
+                return redirect(url_for('pitching_page'))
+    except Exception as e:
+        print(f"Error occurred: {e}")  # Debug
+        flash(f"An error occurred: {e}", "danger")
+        return redirect(url_for('pitching_page'))
+
+    return render_template('updatepitching.html', data=data)
+
+def delete_pitching_data(id):
+    try:
+        connection = create_connection()
+        if connection is None:
+            print("Database connection failed!")  # Debug
+            flash("Database connection failed.", "danger")
+            return redirect(url_for('pitching_page'))
+
+        with connection.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT * FROM pitching WHERE id = %s", (id,))
+            data = cursor.fetchone()
+            if not data:
+                flash("Data not found.", "danger")
+                return redirect(url_for('pitching_page'))
+
+            cursor.execute("DELETE FROM pitching WHERE id = %s", (id,))
+            connection.commit()
+
+            print("Data successfully deleted!")  # Debug
+            flash("Data has been successfully deleted.", "success")
+    except Exception as e:
+        print(f"Error occurred: {e}")  # Debug
+        flash(f"An error occurred: {e}", "danger")
+
+    return redirect(url_for('pitching_page'))

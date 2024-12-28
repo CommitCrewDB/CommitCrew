@@ -12,8 +12,10 @@ def create_app():
     app.add_url_rule(rule="/teams/add", view_func=views.add_team_page, methods=["GET", "POST"])
     app.add_url_rule(rule="/fielding", view_func=views.fielding_page, methods=["GET", "POST"])
     app.add_url_rule(rule="/about", view_func=views.about_page)
-    app.add_url_rule(rule="/pitching-options/", view_func=views.pitching_options)
-    app.add_url_rule(rule="/pitching", view_func=views.pitching_table)
+    app.add_url_rule(rule="/pitching/add", view_func=views.add_pitching_data, methods= ["GET", "POST"])
+    app.add_url_rule(rule="/pitching", view_func=views.pitching_page)
+    app.add_url_rule(rule="/pitching/update/<int:id>", view_func=views.update_pitching_data, methods=["GET", "POST"])
+    app.add_url_rule(rule="/pitching/delete/<int:id>", view_func=views.delete_pitching_data, methods=["GET"])
     app.add_url_rule(rule="/master-options/", view_func=views.master_options)
     app.add_url_rule(rule="/master", view_func=views.master_table)
 

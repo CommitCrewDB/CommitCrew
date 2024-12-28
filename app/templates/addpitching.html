@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Add Pitching Data
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='pitching.css') }}">
+
+<div class="container">
+    <h1 class="text-center my-4">Add Pitching Data</h1>
+
+    <!-- Display flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="alert-container">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Form -->
+    <form method="POST" action="{{ url_for('add_pitching_data') }}">
+        <label for="playerID">Player ID:</label>
+        <input type="text" id="playerID" name="playerID" required>
+
+        <label for="yearID">Year:</label>
+        <input type="number" id="yearID" name="yearID" required>
+
+        <label for="teamID">Team ID:</label>
+        <input type="text" id="teamID" name="teamID" required>
+
+        <label for="lgID">League ID:</label>
+        <input type="text" id="lgID" name="lgID" required>
+
+        <label for="stint">Stint:</label>
+        <input type="number" id="stint" name="stint" required>
+
+        <label for="W">Wins:</label>
+        <input type="number" id="W" name="W" required>
+
+        <label for="L">Losses:</label>
+        <input type="number" id="L" name="L" required>
+
+        <label for="ERA">ERA:</label>
+        <input type="number" step="0.01" id="ERA" name="ERA" required>
+
+        <button type="submit" class="btn">Submit</button>
+        <button type="reset" class="btn">Reset</button>
+    </form>
+</div>
+{% endblock %}
