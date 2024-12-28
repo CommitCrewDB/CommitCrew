@@ -64,24 +64,42 @@ h1, h2, h3 {
 .btn-secondary:hover {
     background-color: #5a6268;
 }
+.search-box{
+    max-width: 81%;
+    margin: 20px auto;
+    padding: 13px;
+    background-color: none; 
+    border: none;
+    box-shadow: none;
+    width: 100%;
+    font-size: 16px;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+.search-box input {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 10px;
+}
 
 form, .form-control{
     max-width: 600px;
     margin: 20px auto;
     padding: 13px;
-    background-color: #ffffff; 
+    background-color: none; 
     border: 1px solid #dee2e6;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
     width: 100%;
     font-size: 16px;
     border-radius: 10px;
     box-sizing: border-box;
-    width: 100%;
 }
+
 /* On focus, apply a highlighted border */
 .form-control:focus {
     border-color: #0056b3; /* Blue border on focus */
     box-shadow: 0 0 5px rgba(0, 86, 179, 0.5); /* Blue glow effect */
+    border: 1px solid #dee2e6;
 }
 
 
@@ -175,14 +193,29 @@ form, .form-control{
     width: 100%;
 }
 
+.table-container {
+    border: none; 
+    border-radius: 10px;      /* Rounded corners */
+    padding: 20px;            /* Space inside the border */
+    margin: 20px auto;        /* Center the container */
+    max-width: 100%;           /* Optional: limit the container width */
+    display: grid;
+    flex-wrap: wrap;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 80%;
+    
+}
+
 .table tr:hover {
     background-color: #e9ecef; 
     transform: translateY(-2px); 
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease;    
 }
 
 /* Genel Checkbox ve Form Ayarları */
 .form-check {
+    font-size: 16px;
     display: flex;
     align-items: center;
     margin-bottom: 10px;
@@ -227,14 +260,13 @@ form, .form-control{
 
 /* Filter Form Genel Düzen */
 .filter-form {
-    background-color: #ffffff;
+    background-color: none;
     padding: 20px;
     margin: 20px auto;
-    border: 1px solid #ddd;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 90%;
-    width: 70%;
+    max-width: 80%;
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
@@ -316,5 +348,21 @@ form, .form-control{
     .filter-form .form-group {
         gap: 10px;
     }
+}
+
+.info-container {
+    background-color: #f8f9fa; /* Light background for contrast */
+    padding: 15px;
+    margin: 20px auto;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+    max-width: 78.5%;
+    width: 100%;
+    line-height: 1.5;
+}
+.info-container p {
+    margin: 10px 0;
 }
 

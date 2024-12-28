@@ -240,6 +240,10 @@ class Teams:
                 query += " ORDER BY name ASC"
             elif sort_by == "team_name_desc":
                 query += " ORDER BY name DESC"
+            elif sort_by == "rank_asc":
+                query += " ORDER BY teamRank ASC"
+            elif sort_by == "rank_desc":
+                query += " ORDER BY teamRank DESC"
 
             cursor.execute(query, tuple(params))
             teams = [Teams(*row) for row in cursor.fetchall()]
