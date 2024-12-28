@@ -16,6 +16,10 @@ def create_app():
     app.add_url_rule(rule="/pitching", view_func=views.pitching_page)
     app.add_url_rule(rule="/pitching/update/<int:id>", view_func=views.update_pitching_data, methods=["GET", "POST"])
     app.add_url_rule(rule="/pitching/delete/<int:id>", view_func=views.delete_pitching_data, methods=["GET"])
+    app.add_url_rule(rule="/batting", view_func=views.batting_page)
+    app.add_url_rule(rule="/batting/add", view_func=views.add_batting_record, methods=["GET", "POST"])
+    app.add_url_rule(rule="/batting/update/<int:record_id>", view_func=views.update_batting_record, methods=["GET", "POST"])
+    app.add_url_rule(rule="/batting/delete/<int:record_id>", view_func=views.delete_batting_record, methods=["GET", "POST"])
     app.add_url_rule(rule="/master-options/", view_func=views.master_options)
     app.add_url_rule(rule="/master", view_func=views.master_table)
 

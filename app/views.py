@@ -2,10 +2,9 @@ from flask import render_template, request, redirect, url_for, flash, jsonify, a
 from app.models.teams import Teams
 from app.models.fielding import Fielding
 from app.models.pitching import create_connection
+from app.models.batting import Batting
 from app.models.master import Master
 import logging
-
-
 
 def home_page():
     return render_template("home.html")
@@ -113,6 +112,104 @@ def fielding_page():
         year=year,
         position=position,
     )
+
+def batting_page():
+    year_query = request.args.get("year", "")
+    team_query = request.args.get("team", "")
+    league_query = request.args.getlist("league")
+    sort_by = request.args.get("sort_by", "")
+    sort_order = request.args.get("sort_order", "asc")
+    action = request.args.get("action", "")
+
+    leagues = Batting.get_leagues()
+    active_leagues = [league for league in leagues if league["active"] == "Y"]
+    inactive_leagues = [league for league in leagues if league["active"] != "Y"]
+
+    if action == "view_all_data":
+        batting_records = Batting.get_all_batting()
+    elif year_query or team_query or league_query or sort_by:
+        batting_records = Batting.search_batting(
+            year=year_query,
+            team=team_query,
+            leagues=league_query,
+            sort_by=sort_by,
+            sort_order=sort_order
+        )
+    else:
+        batting_records = []
+
+    return render_template(
+        "batting.html",
+        batting_records=batting_records,
+        year_query=year_query,
+        team_query=team_query,
+        league_query=league_query,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        active_leagues=active_leagues,
+        inactive_leagues=inactive_leagues,
+    )
+
+def add_batting_record():
+    if request.method == "POST":
+        try:
+            player_id = request.form.get("playerID")
+            year_id = request.form.get("yearID")
+            stint = request.form.get("stint")
+            team_id = request.form.get("teamID")
+            lg_id = request.form.get("lgID")
+            stats = {
+                "G": request.form.get("G"),
+                "AB": request.form.get("AB"),
+                "R": request.form.get("R"),
+                "H": request.form.get("H"),
+                "HR": request.form.get("HR"),
+                "RBI": request.form.get("RBI"),
+                "SB": request.form.get("SB"),
+            }
+
+            Batting.insert(player_id, year_id, stint, team_id, lg_id, **stats)
+            flash("Batting record added successfully!", "success")
+            return redirect(url_for("batting_page"))
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
+
+    return render_template("batting-add.html")
+
+def update_batting_record(record_id):
+    if request.method == "POST":
+        try:
+            stats = {
+                "G": request.form.get("G"),
+                "AB": request.form.get("AB"),
+                "R": request.form.get("R"),
+                "H": request.form.get("H"),
+                "HR": request.form.get("HR"),
+                "RBI": request.form.get("RBI"),
+                "SB": request.form.get("SB"),
+            }
+
+            Batting.update(record_id, **stats)
+            flash("Batting record updated successfully!", "success")
+            return redirect(url_for("batting_page"))
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
+
+    record = Batting.get_by_id(record_id)
+
+    if not record:
+        flash("Record not found!", "danger")
+        return redirect(url_for("batting_page"))
+
+    return render_template("batting-update.html", record=record)
+
+def delete_batting_record(record_id):
+    try:
+        Batting.delete(record_id)
+        flash("Batting record deleted successfully!", "success")
+    except Exception as e:
+        flash(f"An error occurred: {e}", "danger")
+    return redirect(url_for("batting_page"))
 
 def master_options():
     return render_template("master_options.html")
