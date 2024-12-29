@@ -184,6 +184,7 @@ Fielding
 </script>
 
 <!-- Table for Top Fielding Players -->
+{% if top_fielding_players %}
 <div class="scrollable-table">
     <table class="table table-striped">
 
@@ -217,7 +218,9 @@ Fielding
         </tbody>
     </table>
 </div>
-
+{% else %}
+<p class="text-center">No records to display. Use the filters or buttons above to load data.</p>
+{% endif %}
 
 
 {% endblock %}
