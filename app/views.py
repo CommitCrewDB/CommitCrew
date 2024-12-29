@@ -427,7 +427,7 @@ def update_player_page(player_id):
     else:
         # Güncelleme formunu görüntülemek için oyuncu verilerini al
         player = Master.get_player_by_id(player_id)
-        return render_template('updatemaster.html', player=player)
+        return render_template('update_master.html', player=player)
 
 
 def about_page():
