@@ -180,17 +180,13 @@ def add_batting_record():
             player_id = request.form.get("playerID")
             year_id = request.form.get("yearID")
             stint = request.form.get("stint")
-            team_id = request.form.get("teamID")
-            lg_id = request.form.get("lgID")
-            stats = {
-                "G": request.form.get("G"),
-                "AB": request.form.get("AB"),
-                "R": request.form.get("R"),
-                "H": request.form.get("H"),
-                "HR": request.form.get("HR"),
-                "RBI": request.form.get("RBI"),
-                "SB": request.form.get("SB"),
-            }
+            team_id = request.form.get("teamID") or None
+            lg_id = request.form.get("lgID") or None
+            stat_fields = [
+                "G", "AB", "R", "H", "2B", "3B", "HR", "RBI", 
+                "SB", "CS", "BB", "SO", "IBB", "HBP", "SH", "SF", "GIDP"
+            ]
+            stats = {field: request.form.get(field) or 0 for field in stat_fields if field in request.form}
 
             Batting.insert(player_id, year_id, stint, team_id, lg_id, **stats)
             flash("Batting record added successfully!", "success")
@@ -203,15 +199,27 @@ def add_batting_record():
 def update_batting_record(record_id):
     if request.method == "POST":
         try:
-            stats = {
-                "G": request.form.get("G"),
-                "AB": request.form.get("AB"),
-                "R": request.form.get("R"),
-                "H": request.form.get("H"),
-                "HR": request.form.get("HR"),
-                "RBI": request.form.get("RBI"),
-                "SB": request.form.get("SB"),
-            }
+            allowed_fields = [
+                "G", "AB", "R", "H", "2B", "3B", "HR", "RBI", 
+                "SB", "CS", "BB", "SO", "IBB", "HBP", "SH", "SF", "GIDP"
+            ]
+            record = Batting.get_by_id(record_id)
+
+            if not record:
+                flash("Record not found!", "danger")
+                return redirect(url_for("batting_page"))
+
+            stats = {}
+            for field in allowed_fields:
+                new_value = request.form.get(field) or 0
+                existing_value = record.get(field) or 0
+
+                if str(new_value) != str(existing_value):
+                    stats[field] = new_value
+
+            if not stats:
+                flash("No changes detected. Record not updated.", "info")
+                return redirect(url_for("update_batting_record", record_id=record_id))
 
             Batting.update(record_id, **stats)
             flash("Batting record updated successfully!", "success")
@@ -228,11 +236,14 @@ def update_batting_record(record_id):
     return render_template("batting-update.html", record=record)
 
 def delete_batting_record(record_id):
-    try:
-        Batting.delete(record_id)
-        flash("Batting record deleted successfully!", "success")
-    except Exception as e:
-        flash(f"An error occurred: {e}", "danger")
+    if request.method == "POST":
+        try:
+            Batting.delete(record_id)
+            flash("Batting record deleted successfully!", "success")
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
+    else:
+        flash("Invalid request method for deletion.", "danger")
     return redirect(url_for("batting_page"))
 
 def master_options():

@@ -4,7 +4,24 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='batting.css') }}">
 
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="messages">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="text-right my-3">
+    <a href="{{ url_for('batting_page') }}" class="btn btn-secondary">Back to Batting Page</a>
+</div>
+
 <h2>Add Batting Record</h2>
+
+<!-- Add Batting Record Form -->
 <form method="POST" action="{{ url_for('add_batting_record') }}">
     <div class="form-group">
         <label for="playerID">Player ID:</label>
@@ -28,12 +45,118 @@
     </div>
     <div class="form-group">
         <label for="G">Games:</label>
-        <input type="number" name="G" id="G" class="form-control">
+        <input type="number" name="G" id="G" value="0" class="form-control" min="0">
     </div>
     <div class="form-group">
         <label for="AB">At Bats:</label>
-        <input type="number" name="AB" id="AB" class="form-control">
+        <input type="number" name="AB" id="AB" value="0" class="form-control" min="0">
     </div>
-    <button type="submit" class="btn btn-success mt-3">Submit</button>
+    <div class="form-group">
+        <label for="R">Runs:</label>
+        <input type="number" name="R" id="R" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="H">Hits:</label>
+        <input type="number" name="H" id="H" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="2B">Doubles:</label>
+        <input type="number" name="2B" id="2B" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="3B">Triples:</label>
+        <input type="number" name="3B" id="3B" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="HR">Home Runs:</label>
+        <input type="number" name="HR" id="HR" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="RBI">Runs Batted In:</label>
+        <input type="number" name="RBI" id="RBI" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SB">Stolen Bases:</label>
+        <input type="number" name="SB" id="SB" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="CS">Caught Stealing:</label>
+        <input type="number" name="CS" id="CS" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="BB">Base on Balls:</label>
+        <input type="number" name="BB" id="BB" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SO">Strikeouts:</label>
+        <input type="number" name="SO" id="SO" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="IBB">Intentional Walks:</label>
+        <input type="number" name="IBB" id="IBB" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="HBP">Hit by Pitch:</label>
+        <input type="number" name="HBP" id="HBP" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SH">Sacrifice Hits:</label>
+        <input type="number" name="SH" id="SH" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SF">Sacrifice Flies:</label>
+        <input type="number" name="SF" id="SF" value="0" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="GIDP">Grounded Into Double Plays:</label>
+        <input type="number" name="GIDP" id="GIDP" value="0" class="form-control" min="0">
+    </div>
+    <div class="text-center mt-4">
+        <button type="button" class="btn btn-success" onclick="openAddModal(this.form)">Submit</button>
+    </div>
 </form>
+
+<!-- Add Confirmation Modal -->
+<div id="addModal" class="modal" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Add</h5>
+                <button type="button" class="close" aria-label="Close" onclick="closeAddModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to add this new batting record?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmAddButton">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentForm;
+
+    function openAddModal(form) {
+        currentForm = form;
+        const modal = document.getElementById("addModal");
+        modal.style.display = "flex";
+    }
+
+    function closeAddModal() {
+        const modal = document.getElementById("addModal");
+        modal.style.display = "none";
+    }
+
+    document.getElementById("confirmAddButton").addEventListener("click", function () {
+        if (currentForm) {
+            currentForm.submit();
+        }
+        closeAddModal();
+    });
+</script>
+
 {% endblock %}

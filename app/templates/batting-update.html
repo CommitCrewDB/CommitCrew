@@ -4,36 +4,159 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='batting.css') }}">
 
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="messages">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="text-right my-3">
+    <a href="{{ url_for('batting_page') }}" class="btn btn-secondary">Back to Batting Page</a>
+</div>
+
 <h2>Update Batting Record</h2>
+
+<!-- Update Batting Record Form -->
 <form method="POST" action="{{ url_for('update_batting_record', record_id=record.ID) }}">
     <div class="form-group">
         <label for="playerID">Player ID:</label>
-        <input type="text" name="playerID" id="playerID" value="{{ record.playerID }}" class="form-control" required>
+        <input type="text" name="playerID" id="playerID" value="{{ record.playerID }}" class="form-control" disabled>
     </div>
     <div class="form-group">
         <label for="yearID">Year:</label>
-        <input type="number" name="yearID" id="yearID" value="{{ record.yearID }}" class="form-control" required>
+        <input type="number" name="yearID" id="yearID" value="{{ record.yearID }}" class="form-control" disabled>
     </div>
     <div class="form-group">
         <label for="stint">Stint:</label>
-        <input type="number" name="stint" id="stint" value="{{ record.stint }}" class="form-control" required>
+        <input type="number" name="stint" id="stint" value="{{ record.stint }}" class="form-control" disabled>
     </div>
     <div class="form-group">
         <label for="teamID">Team ID:</label>
-        <input type="text" name="teamID" id="teamID" value="{{ record.teamID }}" class="form-control">
+        <input type="text" name="teamID" id="teamID" value="{{ record.teamID }}" class="form-control" disabled>
     </div>
     <div class="form-group">
         <label for="lgID">League ID:</label>
-        <input type="text" name="lgID" id="lgID" value="{{ record.lgID }}" class="form-control">
+        <input type="text" name="lgID" id="lgID" value="{{ record.lgID }}" class="form-control" disabled>
     </div>
     <div class="form-group">
         <label for="G">Games:</label>
-        <input type="number" name="G" id="G" value="{{ record.G }}" class="form-control">
+        <input type="number" name="G" id="G" value="{{ record.G }}" class="form-control" min="0">
     </div>
     <div class="form-group">
         <label for="AB">At Bats:</label>
-        <input type="number" name="AB" id="AB" value="{{ record.AB }}" class="form-control">
+        <input type="number" name="AB" id="AB" value="{{ record.AB }}" class="form-control" min="0">
     </div>
-    <button type="submit" class="btn btn-warning mt-3">Update</button>
+    <div class="form-group">
+        <label for="R">Runs:</label>
+        <input type="number" name="R" id="R" value="{{ record.R }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="H">Hits:</label>
+        <input type="number" name="H" id="H" value="{{ record.H }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="2B">Doubles:</label>
+        <input type="number" name="2B" id="2B" value="{{ record['2B'] }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="3B">Triples:</label>
+        <input type="number" name="3B" id="3B" value="{{ record['3B'] }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="HR">Home Runs:</label>
+        <input type="number" name="HR" id="HR" value="{{ record.HR }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="RBI">Runs Batted In:</label>
+        <input type="number" name="RBI" id="RBI" value="{{ record.RBI }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SB">Stolen Bases:</label>
+        <input type="number" name="SB" id="SB" value="{{ record.SB }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="CS">Caught Stealing:</label>
+        <input type="number" name="CS" id="CS" value="{{ record.CS }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="BB">Base on Balls:</label>
+        <input type="number" name="BB" id="BB" value="{{ record.BB }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SO">Strikeouts:</label>
+        <input type="number" name="SO" id="SO" value="{{ record.SO }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="IBB">Intentional Walks:</label>
+        <input type="number" name="IBB" id="IBB" value="{{ record.IBB }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="HBP">Hit by Pitch:</label>
+        <input type="number" name="HBP" id="HBP" value="{{ record.HBP }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SH">Sacrifice Hits:</label>
+        <input type="number" name="SH" id="SH" value="{{ record.SH }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="SF">Sacrifice Flies:</label>
+        <input type="number" name="SF" id="SF" value="{{ record.SF }}" class="form-control" min="0">
+    </div>
+    <div class="form-group">
+        <label for="GIDP">Grounded Into Double Plays:</label>
+        <input type="number" name="GIDP" id="GIDP" value="{{ record.GIDP }}" class="form-control" min="0">
+    </div>
+    <div class="text-center mt-4">
+        <button type="button" class="btn btn-success" onclick="openUpdateModal(this.form)">Submit</button>
+    </div>
 </form>
+
+<!-- Update Confirmation Modal -->
+<div id="updateModal" class="modal" tabindex="-1" role="dialog" style="display: none;">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Update</h5>
+                <button type="button" class="close" aria-label="Close" onclick="closeUpdateModal()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to update this batting record?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeUpdateModal()">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirmUpdateButton">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentForm;
+
+    function openUpdateModal(form) {
+        currentForm = form;
+        const modal = document.getElementById("updateModal");
+        modal.style.display = "flex";
+    }
+
+    function closeUpdateModal() {
+        const modal = document.getElementById("updateModal");
+        modal.style.display = "none";
+    }
+
+    document.getElementById("confirmUpdateButton").addEventListener("click", function () {
+        if (currentForm) {
+            currentForm.submit();
+        }
+        closeUpdateModal();
+    });
+</script>
+
 {% endblock %}
