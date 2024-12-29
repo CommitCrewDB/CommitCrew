@@ -82,12 +82,12 @@ h1, h2, h3 {
 }
 
 .btn-secondary {
-    background-color: #002d62;
+    background-color: #6c757d;
     color: #fff;
 }
 
 .btn-secondary:hover {
-    background-color: #001b40;
+    background-color: #5a6268;
 }
 
 .btn-success {
@@ -126,10 +126,25 @@ h1, h2, h3 {
 }
 
 .add-data-btn {
-    font-size: 1rem;
-    padding: 0.7rem 1.5rem;
+    display: inline-block; /* Ensures the button is inline and doesn't stretch */
+    margin: 10px; /* Adds space around the button */
+    padding: 8px 16px; /* Makes the button compact */
+    background-color: #00743f; /* Green color */
+    color: white; /* White text */
+    font-size: 14px; /* Small font size */
+    font-weight: bold; /* Bold text */
+    border: none; /* Removes border */
+    border-radius: 4px; /* Rounds the corners */
+    cursor: pointer; /* Changes cursor to pointer */
+    position: absolute; /* Allows positioning */
+    right: 20px; /* Aligns it to the right side */
+    top: 20px; /* Positions it vertically */
+    transition: background-color 0.3s ease; /* Adds hover effect */
 }
 
+.add-data-btn:hover {
+    background-color: #005c30; /* Darker green on hover */
+}
 /* Table Styling */
 .table-container {
     overflow-x: auto;
@@ -265,7 +280,7 @@ h1, h2, h3 {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 1.5rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     width: 60%; /* Make it occupy a reasonable width */
