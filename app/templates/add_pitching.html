@@ -1,69 +1,72 @@
 {% extends "layout.html" %}
 {% block title %}Add Pitching Data{% endblock %}
 {% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='addpitching.css') }}">
 <h2>Add Pitching Data</h2>
 <form method="post" action="{{ url_for('add_pitching_page') }}" class="add-form">
-    <label for="playerID">Player ID:</label>
-    <input type="text" id="playerID" name="playerID" placeholder="Enter Player ID (e.g., smithjo01)" required>
-    
-    <label for="yearID">Year:</label>
-    <input type="text" id="yearID" name="yearID" placeholder="e.g., 2023" required>
-    
-    <label for="teamID">Team ID:</label>
-    <input type="text" id="teamID" name="teamID" placeholder="e.g., NYY" required>
-    
-    <label for="lgID">League:</label>
-    <input type="text" id="lgID" name="lgID" placeholder="e.g., AL" required>
-    
-    <label for="stint">Stint:</label>
-    <input type="number" id="stint" name="stint" placeholder="e.g., 1" required>
-    
-    <label for="W">Wins:</label>
-    <input type="number" id="W" name="W" placeholder="e.g., 10">
-    
-    <label for="L">Losses:</label>
-    <input type="number" id="L" name="L" placeholder="e.g., 5">
-    
-    <label for="ERA">ERA:</label>
-    <input type="text" id="ERA" name="ERA" placeholder="e.g., 3.25">
-    
-    <label for="G">Games:</label>
-    <input type="number" id="G" name="G" placeholder="e.g., 25">
-    
-    <label for="GS">Games Started:</label>
-    <input type="number" id="GS" name="GS" placeholder="e.g., 20">
-    
-    <label for="CG">Complete Games:</label>
-    <input type="number" id="CG" name="CG" placeholder="e.g., 1">
-    
-    <label for="SHO">Shutouts:</label>
-    <input type="number" id="SHO" name="SHO" placeholder="e.g., 0">
-    
-    <label for="SV">Saves:</label>
-    <input type="number" id="SV" name="SV" placeholder="e.g., 3">
-    
-    <label for="IPouts">Innings Pitched Outs:</label>
-    <input type="number" id="IPouts" name="IPouts" placeholder="e.g., 75">
-    
-    <label for="H">Hits:</label>
-    <input type="number" id="H" name="H" placeholder="e.g., 50">
-    
-    <label for="ER">Earned Runs:</label>
-    <input type="number" id="ER" name="ER" placeholder="e.g., 25">
-    
-    <label for="HR">Home Runs:</label>
-    <input type="number" id="HR" name="HR" placeholder="e.g., 10">
-    
-    <label for="BB">Walks:</label>
-    <input type="number" id="BB" name="BB" placeholder="e.g., 15">
-    
-    <label for="SO">Strikeouts:</label>
-    <input type="number" id="SO" name="SO" placeholder="e.g., 60">
-    
-    <label for="BAOpp">Opponent Batting Average:</label>
-    <input type="text" id="BAOpp" name="BAOpp" placeholder="e.g., 0.245">
-    
-    <button type="submit" class="btn btn-primary">Add</button>
+    <div class="form-container">
+        <label for="playerID">Player ID:</label>
+        <input type="text" id="playerID" name="playerID" placeholder="Enter Player ID (e.g., smithjo01)" required>
+
+        <label for="yearID">Year:</label>
+        <input type="text" id="yearID" name="yearID" placeholder="e.g., 2023" required>
+
+        <label for="teamID">Team ID:</label>
+        <input type="text" id="teamID" name="teamID" placeholder="e.g., NYY" required>
+
+        <label for="lgID">League:</label>
+        <input type="text" id="lgID" name="lgID" placeholder="e.g., AL" required>
+
+        <label for="stint">Stint:</label>
+        <input type="number" id="stint" name="stint" placeholder="e.g., 1" required>
+
+        <label for="W">Wins:</label>
+        <input type="number" id="W" name="W" placeholder="e.g., 10">
+
+        <label for="L">Losses:</label>
+        <input type="number" id="L" name="L" placeholder="e.g., 5">
+
+        <label for="ERA">ERA:</label>
+        <input type="text" id="ERA" name="ERA" placeholder="e.g., 3.25">
+
+        <label for="G">Games:</label>
+        <input type="number" id="G" name="G" placeholder="e.g., 25">
+
+        <label for="GS">Games Started:</label>
+        <input type="number" id="GS" name="GS" placeholder="e.g., 20">
+
+        <label for="CG">Complete Games:</label>
+        <input type="number" id="CG" name="CG" placeholder="e.g., 1">
+
+        <label for="SHO">Shutouts:</label>
+        <input type="number" id="SHO" name="SHO" placeholder="e.g., 0">
+
+        <label for="SV">Saves:</label>
+        <input type="number" id="SV" name="SV" placeholder="e.g., 3">
+
+        <label for="IPouts">Innings Pitched Outs:</label>
+        <input type="number" id="IPouts" name="IPouts" placeholder="e.g., 75">
+
+        <label for="H">Hits:</label>
+        <input type="number" id="H" name="H" placeholder="e.g., 50">
+
+        <label for="ER">Earned Runs:</label>
+        <input type="number" id="ER" name="ER" placeholder="e.g., 25">
+
+        <label for="HR">Home Runs:</label>
+        <input type="number" id="HR" name="HR" placeholder="e.g., 10">
+
+        <label for="BB">Walks:</label>
+        <input type="number" id="BB" name="BB" placeholder="e.g., 15">
+
+        <label for="SO">Strikeouts:</label>
+        <input type="number" id="SO" name="SO" placeholder="e.g., 60">
+
+        <label for="BAOpp">Opponent Batting Average:</label>
+        <input type="text" id="BAOpp" name="BAOpp" placeholder="e.g., 0.245">
+
+        <button type="submit" class="btn btn-primary">Add</button>
+    </div>
 </form>
 
 {% endblock %}

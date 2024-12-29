@@ -2,6 +2,8 @@
 {% block title %}
 Teams{% endblock %}
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 <link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
@@ -102,64 +104,68 @@ Teams{% endblock %}
         <!-- Submit and Reset Buttons -->
         <div class="form-group btn-block">
             <button type="submit" class="btn btn-primary btn-block">Filter</button>
-            <button type="reset" class="btn btn-secondary btn-block">Reset</button>
+            <a href="{{ url_for('teams_page') }}" class="btn btn-secondary">Reset</a>
+        </div>
+        <div>
             <form method="get" action="/teams">
-                <input type="hidden" name="action" value="view_all">
-                <button type="submit" class="btn btn-primary">View All</button>
+                <input type="hidden" name="action" value="view_all" style="text-align: center; margin-top: 10px;">
+                <button type="submit" class="btn btn-primary btn-sm">View All</button>
             </form>
         </div>
-        {% if teams %}
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Year</th>
-                        <th>League</th>
-                        <th>Team</th>
-                        <th>Rank</th>
-                        <th>Franchise</th>
-                        <th>Division</th>
-                        <th>GamesPlayed</th>
-                        <th>Wins</th>
-                        <th>Losses</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for team in teams %}
-                    <tr>
-                        <td>{{ team.Year }}</td>
-                        <td>{{ team.League }}</td>
-                        <td>{{ team.Team }}</td>
-                        <td>{{ team.Rank }}</td>
-                        <td>{{ team.Franchise }}</td>
-                        <td>{{ team.TeamDivision }}</td>
-                        <td>{{ team.GamesPlayed }}</td>
-                        <td>{{ team.Wins }}</td>
-                        <td>{{ team.Losses }}</td>
-                        <td>
-                            <div>
-                                <form method="POST" action="/teams" style="display:inline;">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="team_id" value="{{ team.TeamID }}">
-                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
-                                </form>     
-                            </div>   
-                            <div class="mt-2">
-                                <a href="{{ url_for('update_team_page', team_id=team.TeamID) }}" class="btn btn-warning btn-sm btn-block">
-                                    <i class="fas fa-edit"></i> Update
-                                </a>
-                            </div>                                                          
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% elif request.args.get('search') %}
-            <p>No results found. Try searching for a different team name.</p>
-        {% endif %}
     </div>
 </form>
-
+{% if teams %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>League</th>
+                <th>Team</th>
+                <th>Rank</th>
+                <th>Franchise</th>
+                <th>Division</th>
+                <th>GamesPlayed</th>
+                <th>Wins</th>
+                <th>Losses</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for team in teams %}
+            <tr>
+                <td>{{ team.Year }}</td>
+                <td>{{ team.League }}</td>
+                <td>{{ team.Team }}</td>
+                <td>{{ team.Rank }}</td>
+                <td>{{ team.Franchise }}</td>
+                <td>{{ team.TeamDivision }}</td>
+                <td>{{ team.GamesPlayed }}</td>
+                <td>{{ team.Wins }}</td>
+                <td>{{ team.Losses }}</td>
+                <td style="text-align: center; vertical-align: middle; white-space: nowrap;">
+                    <!-- Update Button -->
+                    <form action="{{ url_for('update_team_page', team_id=team.ID) }}" method="get" style="display:inline; border: none; margin: 0; padding: 0;">
+                        <button type="submit" class="btn btn-dark btn-sm" style="margin-right: 5px;">
+                            <i class="fas fa-edit"></i> Update
+                        </button>
+                    </form>
+                
+                    <!-- Delete Button -->
+                    <form method="POST" action="{{ url_for('delete_team', team_id=team.ID) }}" style="display:inline; border: none; margin: 0; padding: 0;">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </form>
+                </td>
+                
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% elif request.args.get('search') %}
+    <p>No results found. Try searching for a different team name.</p>
+{% endif %}
 
 <div class="table-container">
     <!-- "Top Teams by League" Button -->

@@ -82,6 +82,63 @@ h1, h2, h3 {
     padding: 10px;
 }
 
+.scrollable-table {
+    overflow-y: auto; 
+    overflow-x: auto; 
+    max-height: 800px;
+    border: 1px solid #ddd;
+    margin-top: 20px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 5px;
+    background-color: white;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse; 
+}
+.table th, .table td  {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.table th {
+    background-color: #002d62;
+    color: white;
+    font-weight: bold;
+}
+
+.table tr:hover {
+    background-color: #f1f1f1;
+}
+
+
+/*
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    color: white;
+    position: sticky;
+    top: 0; 
+    background: rgb(85, 19, 19);
+    z-index: 1; 
+}
+
+.table tbody tr:hover {
+    background-color: #f1f1f1; 
+}
+*/
+button {
+    margin-top: 10px;
+}
+
 form, .form-control{
     max-width: 600px;
     margin: 20px auto;
@@ -107,32 +164,6 @@ form, .form-control{
 .form-control::placeholder {
     color: #6c757d; /* Lighter color for placeholder text */
     font-style: italic; /* Italicize the placeholder text */
-}
-
-.table {
-    width: 90%;
-    margin: 20px auto;
-    border-collapse: collapse;
-    background-color: #ffffff; 
-    border: 1px solid #dee2e6;
-    border-radius: 10px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.table th, .table td  {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.table th {
-    background-color: #002d62;
-    color: white;
-    font-weight: bold;
-}
-
-.table tr:hover {
-    background-color: #f1f1f1;
 }
 
 .alert {

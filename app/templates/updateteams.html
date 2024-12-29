@@ -1,16 +1,12 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Update Team
+Update Team Record
 {% endblock %}
 
 {% block content %}
-<h1 class="text-center my-4">Update Team</h1>
+<h1 class="text-center my-4">Update Team Record</h1>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
-
-
-<!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div>
@@ -21,33 +17,40 @@ Update Team
   {% endif %}
 {% endwith %}
 
-<form method="POST" action="{{ url_for('update_team_page', team_id=team.teamID) }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+
+<form method="POST" action="{{ url_for('update_team_page', team_id=team.ID) }}">
+    <div class="form-group">
+        <label for="year">Year</label>
+        <input type="number" class="form-control" id="year" name="year" value="{{ team.Year }}" required>
+    </div>
+    <div class="form-group">
+        <label for="league">League</label>
+        <input type="text" class="form-control" id="league" name="league" value="{{ team.League }}" required>
+    </div>
     <div class="form-group">
         <label for="team_name">Team Name</label>
         <input type="text" class="form-control" id="team_name" name="team_name" value="{{ team.Team }}" required>
     </div>
     <div class="form-group">
-        <label for="rank">Rank</label>
-        <input type="number" class="form-control" id="rank" name="rank" value="{{ team.Rank }}" required>
-    </div>    
+        <label for="team_id">Team ID</label>
+        <input type="text" class="form-control" id="team_id" name="team_id" value="{{ team.TeamID }}" required>
+    </div>
     <div class="form-group">
-        <label for="team_division">Team Division</label>
-        <input type="text" class="form-control" id="team_division" name="team_division" value="{{ team.TeamDivision }}" required>
-    </div>    
-    <div class="form-group">
-        <label for="games_played">Games Played</label>
-        <input type="number" class="form-control" id="games_played" name="games_played" value="{{ team.GamesPlayed }}" required>
-    </div>    
+        <label for="franchise">Franchise</label>
+        <input type="text" class="form-control" id="franchise" name="franchise" value="{{ team.Franchise }}">
+    </div>
     <div class="form-group">
         <label for="wins">Wins</label>
-        <input type="number" class="form-control" id="wins" name="wins" value="{{ team.Wins }}" required>
+        <input type="number" class="form-control" id="wins" name="wins" value="{{ team.Wins }}">
     </div>
     <div class="form-group">
         <label for="losses">Losses</label>
-        <input type="number" class="form-control" id="losses" name="losses" value="{{ team.Losses }}" required>
+        <input type="number" class="form-control" id="losses" name="losses" value="{{ team.Losses }}">
     </div>
     <button type="submit" class="btn btn-primary">Update Team</button>
 </form>
+
 
 <div class="text-left my-3">
     <a href="{{ url_for('teams_page') }}" class="btn btn-secondary">Back to Teams</a>

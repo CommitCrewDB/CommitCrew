@@ -1,70 +1,72 @@
 {% extends "layout.html" %}
 {% block title %}Update Pitching Data{% endblock %}
 {% block content %}
-<h2 class="form-title">Update Pitching Data</h2>
+<link rel="stylesheet" href="{{ url_for('static', filename='addpitching.css') }}">
+<h2>Update Pitching Data</h2>
+<form method="post" action="{{ url_for('update_pitching_data', id=data['id']) }}" class="add-form">
+    <div class="form-container">
+        <label for="playerID">Player ID:</label>
+        <input type="text" id="playerID" name="playerID" value="{{ data['playerID'] }}" required>
 
-<form method="post" action="{{ url_for('update_pitching_data', id=data['id']) }}" class="update-form">
-    <label for="playerID">Player ID:</label>
-    <input type="text" id="playerID" name="playerID" value="{{ data['playerID'] }}" required>
-    
-    <label for="yearID">Year:</label>
-    <input type="text" id="yearID" name="yearID" value="{{ data['yearID'] }}" required>
-    
-    <label for="teamID">Team ID:</label>
-    <input type="text" id="teamID" name="teamID" value="{{ data['teamID'] }}" required>
-    
-    <label for="lgID">League:</label>
-    <input type="text" id="lgID" name="lgID" value="{{ data['lgID'] }}" required>
-    
-    <label for="stint">Stint:</label>
-    <input type="number" id="stint" name="stint" value="{{ data['stint'] }}" required>
-    
-    <label for="W">Wins:</label>
-    <input type="number" id="W" name="W" value="{{ data['W'] }}">
-    
-    <label for="L">Losses:</label>
-    <input type="number" id="L" name="L" value="{{ data['L'] }}">
-    
-    <label for="ERA">ERA:</label>
-    <input type="text" id="ERA" name="ERA" value="{{ data['ERA'] }}">
-    
-    <label for="G">Games:</label>
-    <input type="number" id="G" name="G" value="{{ data['G'] }}">
-    
-    <label for="GS">Games Started:</label>
-    <input type="number" id="GS" name="GS" value="{{ data['GS'] }}">
-    
-    <label for="CG">Complete Games:</label>
-    <input type="number" id="CG" name="CG" value="{{ data['CG'] }}">
-    
-    <label for="SHO">Shutouts:</label>
-    <input type="number" id="SHO" name="SHO" value="{{ data['SHO'] }}">
-    
-    <label for="SV">Saves:</label>
-    <input type="number" id="SV" name="SV" value="{{ data['SV'] }}">
-    
-    <label for="IPouts">Innings Pitched Outs:</label>
-    <input type="number" id="IPouts" name="IPouts" value="{{ data['IPouts'] }}">
-    
-    <label for="H">Hits:</label>
-    <input type="number" id="H" name="H" value="{{ data['H'] }}">
-    
-    <label for="ER">Earned Runs:</label>
-    <input type="number" id="ER" name="ER" value="{{ data['ER'] }}">
-    
-    <label for="HR">Home Runs:</label>
-    <input type="number" id="HR" name="HR" value="{{ data['HR'] }}">
-    
-    <label for="BB">Walks:</label>
-    <input type="number" id="BB" name="BB" value="{{ data['BB'] }}">
-    
-    <label for="SO">Strikeouts:</label>
-    <input type="number" id="SO" name="SO" value="{{ data['SO'] }}">
-    
-    <label for="BAOpp">Opponent Batting Average:</label>
-    <input type="text" id="BAOpp" name="BAOpp" value="{{ data['BAOpp'] }}">
-    
-    <button type="submit" class="btn btn-primary">Save</button>
+        <label for="yearID">Year:</label>
+        <input type="text" id="yearID" name="yearID" value="{{ data['yearID'] }}" required>
+
+        <label for="teamID">Team ID:</label>
+        <input type="text" id="teamID" name="teamID" value="{{ data['teamID'] }}" required>
+
+        <label for="lgID">League:</label>
+        <input type="text" id="lgID" name="lgID" value="{{ data['lgID'] }}" required>
+
+        <label for="stint">Stint:</label>
+        <input type="number" id="stint" name="stint" value="{{ data['stint'] }}" required>
+
+        <label for="W">Wins:</label>
+        <input type="number" id="W" name="W" value="{{ data['W'] }}">
+
+        <label for="L">Losses:</label>
+        <input type="number" id="L" name="L" value="{{ data['L'] }}">
+
+        <label for="ERA">ERA:</label>
+        <input type="text" id="ERA" name="ERA" value="{{ data['ERA'] }}">
+
+        <label for="G">Games:</label>
+        <input type="number" id="G" name="G" value="{{ data['G'] }}">
+
+        <label for="GS">Games Started:</label>
+        <input type="number" id="GS" name="GS" value="{{ data['GS'] }}">
+
+        <label for="CG">Complete Games:</label>
+        <input type="number" id="CG" name="CG" value="{{ data['CG'] }}">
+
+        <label for="SHO">Shutouts:</label>
+        <input type="number" id="SHO" name="SHO" value="{{ data['SHO'] }}">
+
+        <label for="SV">Saves:</label>
+        <input type="number" id="SV" name="SV" value="{{ data['SV'] }}">
+
+        <label for="IPouts">Innings Pitched Outs:</label>
+        <input type="number" id="IPouts" name="IPouts" value="{{ data['IPouts'] }}">
+
+        <label for="H">Hits:</label>
+        <input type="number" id="H" name="H" value="{{ data['H'] }}">
+
+        <label for="ER">Earned Runs:</label>
+        <input type="number" id="ER" name="ER" value="{{ data['ER'] }}">
+
+        <label for="HR">Home Runs:</label>
+        <input type="number" id="HR" name="HR" value="{{ data['HR'] }}">
+
+        <label for="BB">Walks:</label>
+        <input type="number" id="BB" name="BB" value="{{ data['BB'] }}">
+
+        <label for="SO">Strikeouts:</label>
+        <input type="number" id="SO" name="SO" value="{{ data['SO'] }}">
+
+        <label for="BAOpp">Opponent Batting Average:</label>
+        <input type="text" id="BAOpp" name="BAOpp" value="{{ data['BAOpp'] }}">
+
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
 </form>
 
 {% endblock %}
