@@ -20,7 +20,8 @@ def create_connection():
         return None
 
 class Teams:
-    def __init__(self, Year, League, TeamID, Team, Franchise, TeamDivision, Rank, GamesPlayed, HomeGames, Wins, Losses):
+    def __init__(self, ID, Year, League, TeamID, Team, Franchise, TeamDivision, Rank, GamesPlayed, HomeGames, Wins, Losses):
+        self.ID = ID
         self.Year = Year
         self.League = League
         self.TeamID = TeamID
@@ -44,7 +45,7 @@ class Teams:
 
             query = """
                 SELECT 
-                    yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
+                    ID, yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
                 FROM teams
             """
             cursor.execute(query)
@@ -180,27 +181,6 @@ class Teams:
                 connection.close()
 
     @staticmethod
-    def delete_team(team_id):
-        connection = create_connection()
-        if connection is None:
-            print("Database connection failed.")
-            return
-
-        try:
-            cursor = connection.cursor()
-            query = "DELETE FROM teams WHERE teamID = %s"
-            cursor.execute(query, (team_id,))
-            connection.commit()
-            print(f"Team with teamID {team_id} deleted successfully.")
-        except mysql.connector.Error as err:
-            print(f"SQL Error: {err}")
-        finally:
-            if connection.is_connected():
-                cursor.close()
-                connection.close()
-
-
-    @staticmethod
     def filter_teams(leagues=None, year=None, team_name=None, sort_by=None):
         try:
             connection = create_connection()
@@ -274,51 +254,47 @@ class Teams:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
-        
-    @staticmethod
-    def update_team(team_id, updated_data):
-        connection = create_connection()
-        if connection is None:
-            raise Exception("Database connection failed.")
-        cursor = connection.cursor()
-        query = """
-            UPDATE teams
-            SET name = %s, teamRank = %s, divID = %s, G = %s, W = %s, L = %s
-            WHERE teamID = %s
-        """
-        params = (
-            updated_data["Team"],
-            updated_data["Rank"],
-            updated_data["TeamDivision"],
-            updated_data["GamesPlayed"],
-            updated_data["Wins"],
-            updated_data["Losses"],
-            team_id,
-        )
-        cursor.execute(query, params)
-        connection.commit()
-        cursor.close()
-        connection.close()
 
     @staticmethod
     def get_team_by_id(team_id):
         connection = create_connection()
         cursor = connection.cursor(dictionary=True)
-        query = "SELECT * FROM teams WHERE TeamID = %s"
-        try:
-            cursor.execute(query, (team_id,))
-            team = cursor.fetchone() 
-            return team
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-        finally:
-            while cursor.nextset():
-                pass
-            cursor.close()
-            connection.close()
+        cursor.execute("SELECT * FROM teams WHERE ID = %s", (team_id,))
+        team = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        return team
 
-                
+    @staticmethod
+    def update_team(team_id, updated_data):
+        connection = create_connection()
+        cursor = connection.cursor()
+        query = """
+            UPDATE teams
+            SET yearID = %s, lgID = %s, name = %s, franchID = %s, W = %s, L = %s
+            WHERE ID = %s
+        """
+        cursor.execute(
+            query,
+            (
+                updated_data["Year"],
+                updated_data["League"],
+                updated_data["Team"],
+                updated_data["Franchise"],
+                updated_data["Wins"],
+                updated_data["Losses"],
+                team_id,
+            ),
+        )
+        connection.commit()
+        cursor.close()
+        connection.close()
 
-    
-
-
+    @staticmethod
+    def delete_team(team_id):
+        connection = create_connection()
+        cursor = connection.cursor()
+        cursor.execute("DELETE FROM teams WHERE ID = %s", (team_id,))
+        connection.commit()
+        cursor.close()
+        connection.close()

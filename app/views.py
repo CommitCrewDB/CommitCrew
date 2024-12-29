@@ -89,25 +89,34 @@ def add_team_page():
     return render_template("addteams.html")
 
 def update_team_page(team_id):
-    if request.method == 'POST':
-        # Form verilerini al ve güncelle
+    if request.method == "POST":
         updated_data = {
-            "Team": request.form.get("team_name", ""),
-            "Rank": request.form.get("rank", 0),
-            "Wins": request.form.get("wins", 0),
-            "Losses": request.form.get("losses", 0),
-            "TeamDivision": request.form.get("team_division", "N/A"),
-            "GamesPlayed": request.form.get("games_played", 0),
+            "Year": request.form.get("year"),
+            "League": request.form.get("league"),
+            "TeamID": request.form.get("team_id"),
+            "Team": request.form.get("team_name"),
+            "Franchise": request.form.get("franchise"),
+            "Wins": request.form.get("wins"),
+            "Losses": request.form.get("losses"),
         }
+        try:
+            Teams.update_team(team_id, updated_data)
+            flash("Team updated successfully!", "success")
+            return redirect(url_for("teams_page"))
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
 
+    team = Teams.get_team_by_id(team_id)
+    return render_template("updateteams.html", team=team)
 
-        Teams.update_team(team_id, updated_data)
-        flash("Team updated successfully!", "success")
-        return redirect(url_for('teams_page'))
-    else:
-        # Güncelleme formunu görüntülemek için takım verilerini al
-        team = Teams.get_team_by_id(team_id)
-        return render_template('updateteams.html', team=team)
+def delete_team(team_id):
+    try:
+        Teams.delete_team(team_id)
+        flash("Team deleted successfully!", "success")
+    except Exception as e:
+        flash(f"An error occurred while deleting the team: {e}", "danger")
+    return redirect(url_for("teams_page"))
+
 
 def fielding_page():
     player_id = request.args.get("player_id", "")
@@ -187,13 +196,12 @@ def update_fielding_page(record_id):
         except Exception as e:
             flash(f"An error occurred: {e}", "danger")
 
-    # Fetch existing record data
     record = Fielding.get_record_by_id(record_id)
     return render_template("updatefielding.html", record=record)
 
 def delete_fielding_record(record_id):
     try:
-        Fielding.delete_record(record_id)  # Implement this in your Fielding model
+        Fielding.delete_record(record_id) 
         flash("Fielding record deleted successfully!", "success")
     except Exception as e:
         flash(f"An error occurred while deleting the record: {e}", "danger")
