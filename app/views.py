@@ -145,12 +145,17 @@ def batting_page():
     sort_order = request.args.get("sort_order", "asc")
     action = request.args.get("action", "")
 
+    page = int(request.args.get("page", 1))
+    per_page = int(request.args.get("per_page", 50))
+    offset = (page - 1) * per_page
+
     leagues = Batting.get_leagues()
     active_leagues = [league for league in leagues if league["active"] == "Y"]
     inactive_leagues = [league for league in leagues if league["active"] != "Y"]
 
     if action == "view_all_data":
-        batting_records = Batting.get_all_batting()
+        total_records = Batting.get_total_batting_records()
+        batting_records = Batting.get_paginated_batting(offset, per_page)
     elif year_query or team_query or league_query or sort_by:
         batting_records = Batting.search_batting(
             year=year_query,
@@ -159,8 +164,15 @@ def batting_page():
             sort_by=sort_by,
             sort_order=sort_order
         )
+        total_records = len(batting_records)
+        batting_records = batting_records[offset:offset + per_page]
     else:
         batting_records = []
+        total_records = 0
+
+    total_pages = (total_records + per_page - 1) // per_page
+    start_page = max(1, page - 2)
+    end_page = min(total_pages, page + 2)
 
     return render_template(
         "batting.html",
@@ -172,6 +184,12 @@ def batting_page():
         sort_order=sort_order,
         active_leagues=active_leagues,
         inactive_leagues=inactive_leagues,
+        current_page=page,
+        per_page=per_page,
+        total_pages=total_pages,
+        start_page=start_page,
+        end_page=end_page,
+        action=action,
     )
 
 def add_batting_record():

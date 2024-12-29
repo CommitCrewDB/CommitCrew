@@ -3,6 +3,37 @@ from app.db_init import get_db
 
 class Batting:
     @staticmethod
+    def get_paginated_batting(offset, limit):
+        """
+        Fetch paginated batting records.
+        """
+        connection = get_db()
+        cursor = connection.cursor(dictionary=True)
+        query = """
+            SELECT 
+                batting.*, 
+                master.nameFirst, 
+                master.nameLast 
+            FROM batting 
+            LEFT JOIN master ON batting.playerID = master.playerID
+            LIMIT %s OFFSET %s
+        """
+        cursor.execute(query, (limit, offset))
+        return cursor.fetchall()
+
+    @staticmethod
+    def get_total_batting_records():
+        """
+        Get the total count of batting records.
+        """
+        connection = get_db()
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT COUNT(*) AS total FROM batting"
+        cursor.execute(query)
+        result = cursor.fetchone()
+        return result["total"]
+
+    @staticmethod
     def get_all_batting():
         connection = get_db()
         cursor = connection.cursor(dictionary=True)

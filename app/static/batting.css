@@ -467,6 +467,50 @@ form, .form-control{
     gap: 10px;
 }
 
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pagination-list {
+    list-style: none;
+    display: flex;
+    gap: 5px;
+    padding: 0;
+}
+
+.pagination-item {
+    display: inline;
+}
+
+.pagination-link {
+    padding: 8px 12px;
+    text-decoration: none;
+    color: #002d62;
+    font-weight: bold;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.pagination-link:hover {
+    background-color: #002d62;
+    color: #ffffff;
+}
+
+.pagination-ellipsis {
+    padding: 8px 12px;
+    color: #6c757d;
+}
+
+.pagination-item.active .pagination-link {
+    background-color: #002d62;
+    color: #ffffff;
+    pointer-events: none;
+    cursor: default;
+}
+
 @media (max-width: 768px) {
     .filter-form .form-group {
         flex: 1 1 calc(50% - 20px);

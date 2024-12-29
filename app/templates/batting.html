@@ -286,6 +286,46 @@
     </div>
 </div>
 
+<div class="pagination">
+    <ul class="pagination-list">
+        {% if current_page > 1 %}
+        <li class="pagination-item">
+            <a href="{{ url_for('batting_page', page=1, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">First</a>
+        </li>
+        <li class="pagination-item">
+            <a href="{{ url_for('batting_page', page=current_page-1, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Previous</a>
+        </li>
+        {% endif %}
+
+        {% if start_page > 1 %}
+        <li class="pagination-item">
+            <span class="pagination-ellipsis">...</span>
+        </li>
+        {% endif %}
+
+        {% for p in range(start_page, end_page + 1) %}
+        <li class="pagination-item {% if current_page == p %}active{% endif %}">
+            <a href="{{ url_for('batting_page', page=p, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">{{ p }}</a>
+        </li>
+        {% endfor %}
+
+        {% if end_page < total_pages %}
+        <li class="pagination-item">
+            <span class="pagination-ellipsis">...</span>
+        </li>
+        {% endif %}
+
+        {% if current_page < total_pages %}
+        <li class="pagination-item">
+            <a href="{{ url_for('batting_page', page=current_page+1, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Next</a>
+        </li>
+        <li class="pagination-item">
+            <a href="{{ url_for('batting_page', page=total_pages, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Last</a>
+        </li>
+        {% endif %}
+    </ul>
+</div>
+
 <script>
     let deleteForm;
 
