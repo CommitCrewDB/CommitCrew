@@ -4,7 +4,25 @@
     gap: 2rem;
     margin: 2rem;
 }
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    margin: 0;
+    padding: 0;
+}
 
+h1, h2 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+}
+
+h1, h2, h3 {
+    color: #002d62; 
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: 'Trebuchet MS', sans-serif;
+}
 /* Sidebar */
 .sidebar {
     width: 300px;
@@ -55,21 +73,21 @@
 }
 
 .btn-primary {
-    background-color: #ba0c2f;
+    background-color: #002d62;
     color: #fff;
 }
 
 .btn-primary:hover {
-    background-color: #91091e;
+    background-color: #001b40;
 }
 
 .btn-secondary {
-    background-color: #00274d;
+    background-color: #002d62;
     color: #fff;
 }
 
 .btn-secondary:hover {
-    background-color: #001a33;
+    background-color: #001b40;
 }
 
 .btn-success {
@@ -82,21 +100,21 @@
 }
 
 .btn-warning {
-    background-color: #ffc107;
-    color: black;
+    background-color: #002d62;
+    color: white;
 }
 
 .btn-warning:hover {
-    background-color: #e0a800;
+    background-color: #001b40;
 }
 
 .btn-danger {
-    background-color: #dc3545;
+    background-color: #6c757d;
     color: white;
 }
 
 .btn-danger:hover {
-    background-color: #b52a37;
+    background-color: #5a6268;
 }
 
 /* Table Header */
@@ -211,7 +229,7 @@
 /* Centered Title Styling */
 .pitching-title {
     font-size: 3rem; /* Larger font for emphasis */
-    color: #ba0c2f;
+    color: #002d62;
     text-transform: uppercase;
     font-weight: bold;
     cursor: pointer;
@@ -222,7 +240,7 @@
 /* Add Data Button Styling */
 .add-data-btn {
     padding: 0.7rem 1.5rem;
-    background-color: #002d62;
+    background-color: #00743f;
     color: white;
     font-size: 1.1rem;
     border: none;
@@ -232,7 +250,7 @@
 }
 
 .add-data-btn:hover {
-    background-color: #001b40; /* Darker green on hover */
+    background-color: #005c30; 
 }
 
 
@@ -252,7 +270,7 @@
 /* Centered Title Styling */
 .pitching-title {
     font-size: 3rem;
-    color: #ba0c2f;
+    color: #002d62;
     text-transform: uppercase;
     font-weight: bold;
     cursor: pointer;
@@ -317,51 +335,6 @@
 
 .hidden {
     display: none;
-}
-
-.leaderboard h3 {
-    color: #ba0c2f;
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-}
-
-.leaderboard table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1rem;
-}
-
-.leaderboard table th,
-.leaderboard table td {
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    text-align: center;
-}
-
-.leaderboard table th {
-    background-color: #ba0c2f;
-    color: white;
-    font-weight: bold;
-}
-
-.leaderboard table tbody tr:hover {
-    background-color: #f7f7f7;
-}
-
-.leaderboard button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 6px;
-    background-color: #dc3545;
-    color: white;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.leaderboard button:hover {
-    background-color: #b52a37;
 }
 
 
