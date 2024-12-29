@@ -1,7 +1,6 @@
 import os
 import mysql.connector
 from dotenv import load_dotenv
-import jsonify
 
 load_dotenv()
 
@@ -49,7 +48,7 @@ class Pitching:
             return [], 0
 
         query = f"""
-            SELECT id, playerID, yearID, stint, teamID, lgID, W, L, ERA, G, GS, CG, SHO, SV, IPouts, H, ER, HR, BB, SO, BAOpp
+            SELECT DISTINCT id, playerID, yearID, stint, teamID, lgID, W, L, ERA, G, GS, CG, SHO, SV, IPouts, H, ER, HR, BB, SO, BAOpp
             FROM pitching
             ORDER BY {sort_by} {order}
             LIMIT {limit} OFFSET {offset}

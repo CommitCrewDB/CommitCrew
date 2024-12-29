@@ -55,12 +55,13 @@
     
             <!-- Filter Form Buttons -->
             <div class="form-buttons">
-                <button type="submit" class="btn btn-secondary filter-btn">Apply Filters</button>
-                <button type="reset" class="btn btn-danger reset-btn">Reset Filters</button>
+                <button type="submit" class="btn btn-primary filter-btn">Apply Filters</button>
+                <button type="reset" class="btn btn-secondary reset-btn">Reset Filters</button>
+                <button class="btn btn-primary show-data-btn" onclick="location.href='{{ url_for('pitching_page', show_data=1) }}'">Show Data</button>
             </div>
         </form>
-    
-        <button class="btn btn-primary show-data-btn" onclick="location.href='{{ url_for('pitching_page', show_data=1) }}'">Show Data</button>
+        <button class="btn btn-secondary add-btn" onclick="location.href='{{ url_for('add_pitching_page') }}';"> Add New Data </button>
+        
     </aside>
 
     <!-- Main Content -->
@@ -69,12 +70,10 @@
         <!-- Info Box -->
         <div class="page-header">
             <h1 class="pitching-title">Pitching</h1>
-            <button class="btn btn-success add-data-btn" onclick="location.href='{{ url_for('add_pitching_page') }}'">
-                Add New Data
-            </button>
         </div> 
+
         <div id="pitching-info" class="pitching-info">
-            <p>Pitching refers to the act of throwing the baseball toward home plate to start a play. It is one of the most important skills in baseball.</p>
+            <p>Pitching is a critical skill in baseball, serving as the starting point for every play. It requires precision, strategy, and physical ability to deliver the ball toward home plate while challenging the batter. Below is a detailed table showcasing pitching statistics, providing insights into the performance and contributions of various players to the game.</p>
         </div>
 
         {% if data %}
@@ -101,7 +100,6 @@
                         <th>Home Runs</th>
                         <th>Walks</th>
                         <th>Strikeouts</th>
-                        <th>Opponent Batting Average</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -127,7 +125,6 @@
                         <td>{{ row.HR }}</td>
                         <td>{{ row.BB }}</td>
                         <td>{{ row.SO }}</td>
-                        <td>{{ row.BAOpp }}</td>
                         <td>
                             <a href="{{ url_for('update_pitching_data', id=row.id) }}" class="btn btn-warning">Update</a>
                             <a href="{{ url_for('delete_pitching_data', id=row.id) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this row?');">Delete</a>

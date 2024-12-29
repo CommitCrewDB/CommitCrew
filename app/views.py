@@ -444,73 +444,6 @@ def update_player_page(player_id):
 def about_page():
     return render_template("about.html")
 
-def pitching_page():
-    sort_by = request.args.get('sort_by', '')  # Default to no sorting
-    order = request.args.get('order', '')  # Default to no specific order
-
-    # Filtering parameters
-    search_name = request.args.get('search_name', '')
-    search_year = request.args.get('search_year', '')
-    search_league = request.args.get('search_league', '')
-    action = request.args.get('action', '')
-
-    # Pagination parameters
-    page = request.args.get('page', 1, type=int)
-    per_page = 30
-
-    connection = create_connection()
-    if connection is None:
-        print("Database connection failed.")
-        return []
-
-    cursor = connection.cursor(dictionary=True)
-
-    # Get column names
-    cursor.execute("SHOW COLUMNS FROM pitching")
-    columns = [col['Field'] for col in cursor.fetchall() if col['Field'] != 'playerID']
-
-    data = []
-    total_records = 0
-    if action == 'get_data':
-        # Build the query with a join to get player names and league names
-        query = """
-            SELECT p.ID, pl.nameFirst, pl.nameLast, p.yearID, t.name AS teamName, l.league AS leagueName, p.W, p.L, p.ERA, p.SO AS strikeouts, p.BB AS walks, p.IPouts AS inningsPitched
-            FROM pitching p
-            INNER JOIN master pl ON p.playerID = pl.playerID
-            INNER JOIN teams t ON p.teamID = t.teamID
-            INNER JOIN leagues l ON p.lgID = l.lgID
-        """
-        conditions = []
-        if search_name:
-            conditions.append(f"(pl.nameFirst LIKE '%{search_name}%' OR pl.nameLast LIKE '%{search_name}%')")
-        if search_year:
-            conditions.append(f"p.yearID = '{search_year}'")
-        if search_league:
-            conditions.append(f"l.league LIKE '%{search_league}%'")
-
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
-        
-        if sort_by and order:
-            query += f" ORDER BY {sort_by} {order.upper()}"
-        
-        query += f" LIMIT %s OFFSET %s"
-
-        print("Executing query:", query)
-        print("With parameters:", (per_page, (page - 1) * per_page))
-
-        cursor.execute(query, (per_page, (page - 1) * per_page))
-        data = cursor.fetchall()
-
-        # Get total number of records for pagination
-        cursor.execute("SELECT COUNT(*) FROM pitching")
-        total_records = cursor.fetchone()['COUNT(*)']
-
-    connection.close()
-
-    total_pages = (total_records + per_page - 1) // per_page
-
-    return render_template('pitching.html', data=data, columns=columns, page=page, total_pages=total_pages, search_name=search_name, search_year=search_year, search_league=search_league, sort_by=sort_by, order=order, action=action)
 
 def pitching_page():
     # Fetch query parameters
@@ -555,19 +488,6 @@ def pitching_page():
         if order.lower() not in ["asc", "desc"]:
             order = "asc"
 
-        # Fetch leaderboard data: Top 10 ERA
-        leaderboard_query = """
-            SELECT pl.nameFirst, pl.nameLast, t.name AS teamName, p.ERA
-            FROM pitching p
-            INNER JOIN master pl ON p.playerID = pl.playerID
-            INNER JOIN teams t ON p.teamID = t.teamID
-            WHERE p.ERA IS NOT NULL
-            ORDER BY p.ERA ASC
-            LIMIT 10
-        """
-        cursor.execute(leaderboard_query)
-        leaderboard_data = cursor.fetchall()
-
         if show_data:  # Fetch data only when "Show Data" is clicked
             # Base query for fetching results
             query = """
@@ -576,17 +496,16 @@ def pitching_page():
                     p.W, p.L, p.ERA, p.G, p.GS, p.CG, p.SHO, p.SV, 
                     p.IPouts, p.H, p.ER, p.HR, p.BB, p.SO, p.BAOpp
                 FROM pitching p
-                INNER JOIN master pl ON p.playerID = pl.playerID
-                INNER JOIN teams t ON p.teamID = t.teamID
-                INNER JOIN leagues l ON p.lgID = l.lgID
+                LEFT JOIN master pl ON p.playerID = pl.playerID
+                LEFT JOIN teams t ON p.teamID = t.teamID
+                AND p.yearID = t.yearID
+                AND p.lgID = t.lgID
+                LEFT JOIN leagues l ON p.lgID = l.lgID
                 WHERE 1=1
             """
             count_query = """
                 SELECT COUNT(*) AS total
                 FROM pitching p
-                INNER JOIN master pl ON p.playerID = pl.playerID
-                INNER JOIN teams t ON p.teamID = t.teamID
-                INNER JOIN leagues l ON p.lgID = l.lgID
                 WHERE 1=1
             """
             params = []
