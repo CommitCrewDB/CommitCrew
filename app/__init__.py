@@ -17,15 +17,17 @@ def create_app():
     app.add_url_rule(rule="/fielding/update/<int:record_id>", view_func=views.update_fielding_page, methods=["GET", "POST"])
     app.add_url_rule(rule="/fielding/delete/<int:record_id>", view_func=views.delete_fielding_record, methods=["POST"])
     app.add_url_rule(rule="/about", view_func=views.about_page)
-    app.add_url_rule(rule="/pitching/add", view_func=views.add_pitching_data, methods= ["GET", "POST"])
+    app.add_url_rule(rule="/pitching/add", view_func=views.add_pitching_page, methods= ["GET", "POST"])
     app.add_url_rule(rule="/pitching", view_func=views.pitching_page)
     app.add_url_rule(rule="/pitching/update/<int:id>", view_func=views.update_pitching_data, methods=["GET", "POST"])
-    app.add_url_rule(rule="/pitching/delete/<int:id>", view_func=views.delete_pitching_data, methods=["GET"])
+    app.add_url_rule(rule="/pitching/delete/<int:id>", view_func=views.delete_pitching_data)
     app.add_url_rule(rule="/batting", view_func=views.batting_page)
     app.add_url_rule(rule="/batting/add", view_func=views.add_batting_record, methods=["GET", "POST"])
     app.add_url_rule(rule="/batting/update/<int:record_id>", view_func=views.update_batting_record, methods=["GET", "POST"])
     app.add_url_rule(rule="/batting/delete/<int:record_id>", view_func=views.delete_batting_record, methods=["POST"])
-    app.add_url_rule(rule="/master-options/", view_func=views.master_options)
-    app.add_url_rule(rule="/master", view_func=views.master_table)
+    app.add_url_rule(rule="/master", view_func=views.master_page, methods=["GET", "POST"])
+    app.add_url_rule(rule="/master/add", view_func=views.add_player_page, methods=["GET", "POST"])
+    app.add_url_rule(rule="/master/update/<string:player_id>", view_func=views.update_player_page, methods=["GET", "POST"])
+
 
     return app

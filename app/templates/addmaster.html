@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Add Player
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center my-4">Add a New Player</h1>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- Add Player Form -->
+<form method="POST" action="/master/add">
+    <div class="form-group">
+        <label for="nameFirst">First Name</label>
+        <input type="text" class="form-control" id="nameFirst" name="nameFirst" placeholder="Enter First Name" required>
+    </div>
+    <div class="form-group">
+        <label for="nameLast">Last Name</label>
+        <input type="text" class="form-control" id="nameLast" name="nameLast" placeholder="Enter Last Name" required>
+    </div>
+    <div class="form-group">
+        <label for="birthYear">Birth Year</label>
+        <input type="number" class="form-control" id="birthYear" name="birthYear" placeholder="Enter Birth Year" required>
+    </div>
+    <div class="form-group">
+        <label for="birthMonth">Birth Month</label>
+        <input type="number" class="form-control" id="birthMonth" name="birthMonth" placeholder="Enter Birth Month (1-12)" required>
+    </div>
+    <div class="form-group">
+        <label for="birthDay">Birth Day</label>
+        <input type="number" class="form-control" id="birthDay" name="birthDay" placeholder="Enter Birth Day (1-31)" required>
+    </div>
+    <div class="form-group">
+        <label for="weight">Weight (lbs)</label>
+        <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter Weight" required>
+    </div>
+    <div class="form-group">
+        <label for="height">Height (inches)</label>
+        <input type="number" class="form-control" id="height" name="height" placeholder="Enter Height" required>
+    </div>
+    <div class="form-group">
+        <label for="bats">Bats</label>
+        <input type="text" class="form-control" id="bats" name="bats" placeholder="Enter Batting Hand (R/L/S)" required>
+    </div>
+    <div class="form-group">
+        <label for="throws">Throws</label>
+        <input type="text" class="form-control" id="throws" name="throws" placeholder="Enter Throwing Hand (R/L)" required>
+    </div>
+    <div class="form-group">
+        <label for="debut">Debut Date</label>
+        <input type="date" class="form-control" id="debut" name="debut" required>
+    </div>
+    <div class="form-group">
+        <label for="finalGame">Final Game Date</label>
+        <input type="date" class="form-control" id="finalGame" name="finalGame">
+    </div>
+    <div class="form-group">
+        <label for="bbrefID">BBRef ID</label>
+        <input type="text" class="form-control" id="bbrefID" name="bbrefID" placeholder="Enter BBRef ID">
+    </div>
+    <div class="form-group">
+        <label for="retroID">Retro ID</label>
+        <input type="text" class="form-control" id="retroID" name="retroID" placeholder="Enter Retro ID">
+    </div>
+    <button type="submit" class="btn btn-primary">Add Player</button>
+</form>
+
+<div class="text-left my-3">
+    <a href="{{ url_for('master_page') }}" class="btn btn-secondary">Back to Players</a>
+</div>
+
+{% endblock %}

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lahman Baseball Data - {% block title %}Default Title{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}"/>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
 </head>
 <body>
     <header>
@@ -15,7 +17,7 @@
                 <li><a href="{{ url_for('fielding_page') }}">Fielding</a></li>
                 <li><a href="{{ url_for('pitching_page') }}">Pitching</a></li>
                 <li><a href="{{ url_for('batting_page') }}">Batting</a></li>
-                <li><a href="{{ url_for('master_options') }}">Master</a></li>
+                <li><a href="{{ url_for('master_page') }}">Master</a></li>
                 <li><a href="{{ url_for('about_page') }}">About Us</a></li>
             </ul>
         </nav>

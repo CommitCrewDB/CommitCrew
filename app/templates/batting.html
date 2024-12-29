@@ -108,7 +108,7 @@
     <!-- Team Filter Input -->
     <div class="form-group">
         <label for="team">Team:</label>
-        <input type="text" name="team" id="team" value="{{ team_query }}" placeholder="Enter teamID">
+        <input type="text" name="team" id="team" value="{{ team_query }}" placeholder="Enter ID or name">
     </div>
 
     <!-- League Filter Selection -->
@@ -135,6 +135,12 @@
             </optgroup>
         </select>
     </div>          
+    
+    <!-- Player Filter Input -->
+    <div class="form-group">
+        <label for="player">Player:</label>
+        <input type="text" name="player" id="player" value="{{ player_query }}" placeholder="Enter ID or name">
+    </div>
 
     <!-- Sort By Filter Selection -->
     <div class="form-group">
@@ -176,7 +182,7 @@
     <div class="form-buttons">
         <div class="left-buttons">
             <button type="submit" class="btn btn-primary">Search</button>
-            <button type="reset" class="btn btn-secondary">Reset</button>
+            <button type="button" class="btn btn-secondary" onclick="resetFilters()">Reset</button>
         </div>
         <div class="right-button">
             <button type="submit" class="btn btn-primary" name="action" value="view_all_data">View All</button>
@@ -195,7 +201,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Player Name</th>
+                <th>Player</th>
                 <th>Year</th>
                 <th>Team</th>
                 <th>League</th>
@@ -224,9 +230,9 @@
             {% if batting_records %}
             {% for record in batting_records %}
             <tr>
-                <td>{{ record.nameFirst }} {{ record.nameLast }}</td>
+                <td>{{ record.nameFirst }} {{ record.nameLast }} ({{ record.playerID }})</td>
                 <td>{{ record.yearID }}</td>
-                <td>{{ record.teamID }}</td>
+                <td>{{ record.teamName }} ({{ record.teamID }})</td>
                 <td>{{ record.lgID }}</td>
                 <td>{{ record.stint }}</td>
                 <td>{{ record.G }}</td>
@@ -290,10 +296,10 @@
     <ul class="pagination-list">
         {% if current_page > 1 %}
         <li class="pagination-item">
-            <a href="{{ url_for('batting_page', page=1, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">First</a>
+            <a href="{{ url_for('batting_page', page=1, per_page=per_page, year=year_query, team=team_query, league=league_query, player=player_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">First</a>
         </li>
         <li class="pagination-item">
-            <a href="{{ url_for('batting_page', page=current_page-1, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Previous</a>
+            <a href="{{ url_for('batting_page', page=current_page-1, per_page=per_page, year=year_query, team=team_query, league=league_query, player=player_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Previous</a>
         </li>
         {% endif %}
 
@@ -305,7 +311,7 @@
 
         {% for p in range(start_page, end_page + 1) %}
         <li class="pagination-item {% if current_page == p %}active{% endif %}">
-            <a href="{{ url_for('batting_page', page=p, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">{{ p }}</a>
+            <a href="{{ url_for('batting_page', page=p, per_page=per_page, year=year_query, team=team_query, league=league_query, player=player_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">{{ p }}</a>
         </li>
         {% endfor %}
 
@@ -317,14 +323,29 @@
 
         {% if current_page < total_pages %}
         <li class="pagination-item">
-            <a href="{{ url_for('batting_page', page=current_page+1, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Next</a>
+            <a href="{{ url_for('batting_page', page=current_page+1, per_page=per_page, year=year_query, team=team_query, league=league_query, player=player_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Next</a>
         </li>
         <li class="pagination-item">
-            <a href="{{ url_for('batting_page', page=total_pages, per_page=per_page, year=year_query, team=team_query, league=league_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Last</a>
+            <a href="{{ url_for('batting_page', page=total_pages, per_page=per_page, year=year_query, team=team_query, league=league_query, player=player_query, sort_by=sort_by, sort_order=sort_order, action=action) }}" class="pagination-link">Last</a>
         </li>
         {% endif %}
     </ul>
 </div>
+
+<script>
+    function resetFilters() {
+        const inputs = document.querySelectorAll('.filter-form input, .filter-form select');
+        inputs.forEach(input => {
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                input.checked = false;
+            } else {
+                input.value = '';
+            }
+        });
+        const baseUrl = window.location.href.split('?')[0];
+        window.location.href = baseUrl;
+    }
+</script>
 
 <script>
     let deleteForm;
