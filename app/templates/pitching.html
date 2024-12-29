@@ -1,140 +1,204 @@
 {% extends "layout.html" %}
-
-{% block title %}
-Pitching{% endblock %}
+{% block title %}Pitching Data{% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='pitching.css') }}">
-
-<div class="container">
-    <h1 class="page-header">Pitching Table</h1>
-
-    <div class="button-group">
-        <button class="info-btn" onclick="toggleDescription()">What is Pitching?</button>
-        <a class="btn add-data-btn" href="{{ url_for('add_pitching_data') }}">I want to add data</a>
-    </div>
-
-    <div id="description" class="description-popup">
-        <p>Pitching in baseball is the act of throwing a baseball toward home plate to start a play. The pitcher typically stands on the pitcher's mound and throws the ball to the catcher, who is positioned behind home plate.</p>
-        <button class="close-btn" onclick="toggleDescription()">Close</button>
-    </div>
-
-    <!-- Display flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="alert-container">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
-    <form method="get" action="{{ url_for('pitching_page') }}" class="filter-form" id="filter-form">
-        <label for="sort_by">Sort By:</label>
-        <select name="sort_by" id="sort_by">
-            <option value="" {% if sort_by == '' %}selected{% endif %}>Default</option>
-            <option value="yearID" {% if sort_by == 'yearID' %}selected{% endif %}>Year</option>
-            <option value="W" {% if sort_by == 'W' %}selected{% endif %}>Wins</option>
-            <option value="L" {% if sort_by == 'L' %}selected{% endif %}>Losses</option>
-            <option value="ERA" {% if sort_by == 'ERA' %}selected{% endif %}>ERA</option>
-        </select>
-
-        <label for="order">Order:</label>
-        <select name="order" id="order">
-            <option value="" {% if order == '' %}selected{% endif %}>Default</option>
-            <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
-            <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
-        </select>
-
-        <label for="search">Search:</label>
-        <input type="text" name="search_name" id="search_name" placeholder="Name" value="{{ search_name }}">
-        <input type="text" name="search_year" id="search_year" placeholder="Year" value="{{ search_year }}">
-        <input type="text" name="search_league" id="search_league" placeholder="League Name" value="{{ search_league }}">
-
-        <button type="submit" name="action" value="get_data" class="btn">Get Data</button>
-    </form>
-
-    {% if data %}
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Year</th>
-                    <th>Team Name</th>
-                    <th>League Name</th>
-                    <th>Wins</th>
-                    <th>Losses</th>
-                    <th>ERA</th>
-                    <th>Strikeouts</th>
-                    <th>Walks</th>
-                    <th>Innings Pitched</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in data %}
-                    <tr>
-                        <td>{{ row['nameFirst'] }}</td>
-                        <td>{{ row['nameLast'] }}</td>
-                        <td>{{ row['yearID'] }}</td>
-                        <td>{{ row['teamName'] }}</td>
-                        <td>{{ row['leagueName'] }}</td>
-                        <td>{{ row['W'] }}</td>
-                        <td>{{ row['L'] }}</td>
-                        <td>{{ row['ERA'] }}</td>
-                        <td>{{ row['strikeouts'] }}</td>
-                        <td>{{ row['walks'] }}</td>
-                        <td>{{ row['inningsPitched'] }}</td>
-                        <td>
-                            <a class="btn update-btn" href="{{ url_for('update_pitching_data', id=row['ID']) }}">Update</a>
-                            <a class="btn delete-btn" href="{{ url_for('delete_pitching_data', id=row['ID']) }}">Delete</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div class="pagination">
-            {% if page > 1 %}
-                <a href="{{ url_for('pitching_page', page=page-1, sort_by=sort_by, order=order, search_name=search_name, search_year=search_year, search_league=search_league, action=action) }}" class="btn">Previous</a>
-            {% endif %}
-            Page {{ page }} of {{ total_pages }}
-            {% if page < total_pages %}
-                <a href="{{ url_for('pitching_page', page=page+1, sort_by=sort_by, order=order, search_name=search_name, search_year=search_year, search_league=search_league, action=action) }}" class="btn">Next</a>
-            {% endif %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert-container">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
         </div>
     {% endif %}
+{% endwith %}
+<link rel="stylesheet" href="{{ url_for('static', filename='pitching.css') }}">
+
+<div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h3>Filters & Options</h3>
+        <form method="get" action="{{ url_for('pitching_page') }}" class="filter-form" id="filter-form" onsubmit="showLoading()">
+            <input type="hidden" name="show_data" value="1">
+    
+            <!-- Year Filter -->
+            <label for="year">Year:</label>
+            <input type="text" id="year" name="year" value="{{ year }}" placeholder="e.g., 2021">
+    
+            <!-- Player Name Filter -->
+            <label for="playerName">Player Name:</label>
+            <input type="text" id="playerName" name="playerName" value="{{ player_name }}" placeholder="e.g., John">
+    
+            <!-- League Dropdown -->
+            <label for="league">Choose League:</label>
+            <select name="league" id="league" class="form-select">
+                <option value="" {% if not league %}selected{% endif %}>All Leagues</option>
+                {% for lg in leagues %}
+                <option value="{{ lg.lgID }}" {% if lg.lgID == league %}selected{% endif %}>{{ lg.league }} ({{ lg.lgID }})</option>
+                {% endfor %}
+            </select>
+    
+            <!-- Sort and Order Options -->
+            <label for="sort_by">Sort By:</label>
+            <select name="sort_by" id="sort_by">
+                <option value="yearID" {% if sort_by == 'yearID' %}selected{% endif %}>Year</option>
+                <option value="W" {% if sort_by == 'W' %}selected{% endif %}>Wins</option>
+                <option value="ERA" {% if sort_by == 'ERA' %}selected{% endif %}>ERA</option>
+            </select>
+    
+            <label for="order">Order:</label>
+            <select name="order" id="order">
+                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+            </select>
+    
+            <!-- Filter Form Buttons -->
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-secondary filter-btn">Apply Filters</button>
+                <button type="reset" class="btn btn-danger reset-btn">Reset Filters</button>
+            </div>
+        </form>
+    
+        <button class="btn btn-primary show-data-btn" onclick="location.href='{{ url_for('pitching_page', show_data=1) }}'">Show Data</button>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="content">
+
+        <!-- Info Box -->
+        <div class="page-header">
+            <h1 class="pitching-title">Pitching</h1>
+            <button class="btn btn-success add-data-btn" onclick="location.href='{{ url_for('add_pitching_page') }}'">
+                Add New Data
+            </button>
+        </div> 
+        <div id="pitching-info" class="pitching-info">
+            <p>Pitching refers to the act of throwing the baseball toward home plate to start a play. It is one of the most important skills in baseball.</p>
+        </div>
+
+        {% if data %}
+        <div class="table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Player Name</th>
+                        <th>Year</th>
+                        <th>Stint</th>
+                        <th>Team Name</th>
+                        <th>League Name</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>ERA</th>
+                        <th>Games</th>
+                        <th>Games Started</th>
+                        <th>Complete Games</th>
+                        <th>Shutouts</th>
+                        <th>Saves</th>
+                        <th>IP Outs</th>
+                        <th>Hits</th>
+                        <th>Earned Runs</th>
+                        <th>Home Runs</th>
+                        <th>Walks</th>
+                        <th>Strikeouts</th>
+                        <th>Opponent Batting Average</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                    <tr>
+                        <td>{{ row.nameFirst }} {{ row.nameLast }}</td>
+                        <td>{{ row.yearID }}</td>
+                        <td>{{ row.stint }}</td>
+                        <td>{{ row.teamName }}</td>
+                        <td>{{ row.leagueName }}</td>
+                        <td>{{ row.W }}</td>
+                        <td>{{ row.L }}</td>
+                        <td>{{ row.ERA }}</td>
+                        <td>{{ row.G }}</td>
+                        <td>{{ row.GS }}</td>
+                        <td>{{ row.CG }}</td>
+                        <td>{{ row.SHO }}</td>
+                        <td>{{ row.SV }}</td>
+                        <td>{{ row.IPouts }}</td>
+                        <td>{{ row.H }}</td>
+                        <td>{{ row.ER }}</td>
+                        <td>{{ row.HR }}</td>
+                        <td>{{ row.BB }}</td>
+                        <td>{{ row.SO }}</td>
+                        <td>{{ row.BAOpp }}</td>
+                        <td>
+                            <a href="{{ url_for('update_pitching_data', id=row.id) }}" class="btn btn-warning">Update</a>
+                            <a href="{{ url_for('delete_pitching_data', id=row.id) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this row?');">Delete</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls">
+            {% if page > 1 %}
+                <a href="{{ url_for('pitching_page', page=page-1, show_data=1, year=year, playerName=player_name, sort_by=sort_by, order=order, league=league) }}" class="btn btn-secondary">Previous</a>
+            {% endif %}
+            <span>Page {{ page }} of {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="{{ url_for('pitching_page', page=page+1, show_data=1, year=year, playerName=player_name, sort_by=sort_by, order=order, league=league) }}" class="btn btn-secondary">Next</a>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
 <script>
-function toggleDescription() {
-    const description = document.getElementById('description');
-    if (description.style.display === 'block') {
-        description.style.display = 'none';
-    } else {
-        description.style.display = 'block';
+    function showPitchingInfo() {
+        document.getElementById("pitching-info").classList.remove("hidden");
     }
-}
 
-document.addEventListener('DOMContentLoaded', function() {
-    const rows = document.querySelectorAll('.data-table tbody tr');
-    rows.forEach(row => {
-        row.addEventListener('mouseover', function() {
-            this.style.backgroundColor = '#f0f8ff';
-        });
-        row.addEventListener('mouseout', function() {
-            this.style.backgroundColor = '';
-        });
-    });
+    function hidePitchingInfo() {
+        document.getElementById("pitching-info").classList.add("hidden");
+    }
 
-    const filterForm = document.getElementById('filter-form');
-    filterForm.addEventListener('submit', function() {
-        filterForm.classList.add('submitted');
-        setTimeout(() => filterForm.classList.remove('submitted'), 1000);
-    });
+    document.addEventListener('DOMContentLoaded', function () {
+    // Reset Button Functionality
+    const resetButton = document.querySelector('button[type="reset"]');
+    const formInputs = document.querySelectorAll('.filter-form input, .filter-form select');
+
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            formInputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+        });
+    }
+
+    // Filter Feedback Validation
+    const filterForm = document.querySelector('#filter-form');
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', (event) => {
+            const yearInput = document.querySelector('#year');
+            const yearValue = yearInput.value.trim();
+
+            if (yearValue && isNaN(yearValue)) {
+                event.preventDefault();
+                alert('Year must be a numeric value.');
+            }
+        });
+    }
+
+    // Smooth Scrolling to Results
+    const resultsTable = document.querySelector('table.table');
+    if (resultsTable) {
+        resultsTable.scrollIntoView({ behavior: 'smooth' });
+    }
 });
 </script>
+
 {% endblock %}

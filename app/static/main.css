@@ -5,7 +5,11 @@ body {
     color: #333; /* Dark gray for text */
     line-height: 1.6;
 }
-
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* Ensures it occupies full height */
+}
 /* About Us Section */
 .about-us {
     text-align: center;

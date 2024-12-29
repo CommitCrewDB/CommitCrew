@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify, app
 from app.models.teams import Teams
 from app.models.fielding import Fielding
-from app.models.pitching import create_connection
+from app.models.pitching import create_connection, Pitching
 from app.models.batting import Batting
 from app.models.master import Master
 import logging
@@ -504,153 +504,185 @@ def pitching_page():
 
     return render_template('pitching.html', data=data, columns=columns, page=page, total_pages=total_pages, search_name=search_name, search_year=search_year, search_league=search_league, sort_by=sort_by, order=order, action=action)
 
-def add_pitching_data():
-    if request.method == 'POST':
-        print("POST request received!")  # Debug
-        print("Form Data:", request.form)  # Debug
+def pitching_page():
+    # Fetch query parameters
+    year = request.args.get("year", "").strip()
+    player_name = request.args.get("playerName", "").strip()
+    league = request.args.get("league", "").strip()
+    sort_by = request.args.get("sort_by", "yearID")  # Default sort column
+    order = request.args.get("order", "asc")  # Default sort order
+    page = request.args.get("page", 1, type=int)  # Current page number
+    per_page = 10  # Number of rows per page
+    show_data = request.args.get("show_data", None)
 
-        # Extract form data
-        playerID = request.form.get('playerID')
-        yearID = request.form.get('yearID')
-        teamID = request.form.get('teamID')
-        lgID = request.form.get('lgID')
-        stint = request.form.get('stint')
-        W = request.form.get('W')
-        L = request.form.get('L')
-        ERA = request.form.get('ERA')
+    results = []
+    total_records = 0
+    leaderboard_data = []
+    leagues = []
 
-        # Debug: Print field values
-        print("Player ID:", playerID)
-        print("Year ID:", yearID)
-        print("Team ID:", teamID)
-        print("League ID:", lgID)
-        print("Stint:", stint)
-        print("Wins:", W)
-        print("Losses:", L)
-        print("ERA:", ERA)
-
-        try:
-            connection = create_connection()
-            if connection is None:
-                print("Database connection failed!")  # Debug
-                flash("Database connection failed.", "danger")
-                return redirect(url_for('add_pitching_data'))
-
-            with connection.cursor(dictionary=True) as cursor:
-                # Check for duplicate data
-                cursor.execute(
-                    "SELECT * FROM pitching WHERE playerID = %s AND yearID = %s AND teamID = %s AND lgID = %s AND stint = %s",
-                    (playerID, yearID, teamID, lgID, stint)
-                )
-                if cursor.fetchone():
-                    print("Duplicate data found!")  # Debug
-                    flash("Data already exists.", "danger")
-                    return redirect(url_for('add_pitching_data'))
-
-                # Insert new data
-                query = """
-                    INSERT INTO pitching (playerID, yearID, teamID, lgID, stint, W, L, ERA)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                """
-
-                cursor.execute(query, (playerID, yearID, teamID, lgID, stint, W, L, ERA))
-                connection.commit()
-
-                print("Data successfully added!")  # Debug
-                flash("Data has been successfully added.", "success")
-                return redirect(url_for('pitching_page'))
-        except Exception as e:
-            print(f"Error occurred: {e}")  # Debug
-            flash(f"An error occurred: {e}", "danger")
-            return redirect(url_for('add_pitching_data'))
-
-    return render_template('addpitching.html')
-
-def update_pitching_data(id):
-    if request.method == 'POST':
-        print("POST request received for update!")  # Debug
-        print("Form Data:", request.form)  # Debug
-
-        # Extract form data
-        playerName = request.form.get('playerName')
-        yearID = request.form.get('yearID')
-        teamID = request.form.get('teamID')
-        lgID = request.form.get('lgID')
-        stint = request.form.get('stint')
-        W = request.form.get('W')
-        L = request.form.get('L')
-        ERA = request.form.get('ERA')
-
-        # Debug: Print field values
-        print("Player Name:", playerName)
-        print("Year ID:", yearID)
-        print("Team ID:", teamID)
-        print("League ID:", lgID)
-        print("Stint:", stint)
-        print("Wins:", W)
-        print("Losses:", L)
-        print("ERA:", ERA)
-
-        try:
-            connection = create_connection()
-            if connection is None:
-                print("Database connection failed!")  # Debug
-                flash("Database connection failed.", "danger")
-                return redirect(url_for('update_pitching_data', id=id))
-
-            with connection.cursor(dictionary=True) as cursor:
-                # Debug: Validate player name lookup
-                print(f"Looking for player: {playerName}")
-                cursor.execute("SELECT playerID FROM master WHERE CONCAT(nameFirst, ' ', nameLast) = %s", (playerName,))
-                player = cursor.fetchone()
-
-                if not player:
-                    print("Player not found!")  # Debug
-                    flash("Player name not found in the master table.", "danger")
-                    return redirect(url_for('update_pitching_data', id=id))
-
-                playerID = player['playerID']
-                print(f"Found playerID: {playerID}")
-
-                # Update data
-                query = """
-                    UPDATE pitching
-                    SET yearID = %s, teamID = %s, lgID = %s, stint = %s, W = %s, L = %s, ERA = %s
-                    WHERE playerID = %s AND id = %s
-                """
-                print("Executing query:", query)  # Debug
-                print("With values:", (yearID, teamID, lgID, stint, W, L, ERA, playerID, id))  # Debug
-                cursor.execute(query, (yearID, teamID, lgID, stint, W, L, ERA, playerID, id))
-                connection.commit()
-
-                print("Data successfully updated!")  # Debug
-                flash("Data has been successfully updated.", "success")
-                return redirect(url_for('pitching_page'))
-        except Exception as e:
-            print(f"Error occurred: {e}")  # Debug
-            flash(f"An error occurred: {e}", "danger")
-            return redirect(url_for('update_pitching_data', id=id))
-
-    # Fetch existing data to pre-fill the form
     try:
+        # Establish database connection
         connection = create_connection()
         if connection is None:
-            print("Database connection failed!")  # Debug
             flash("Database connection failed.", "danger")
-            return redirect(url_for('pitching_page'))
+            return redirect(url_for("pitching_page"))
 
-        with connection.cursor(dictionary=True) as cursor:
-            cursor.execute("SELECT * FROM pitching WHERE id = %s", (id,))
-            data = cursor.fetchone()
-            if not data:
-                flash("Data not found.", "danger")
-                return redirect(url_for('pitching_page'))
+        cursor = connection.cursor(dictionary=True)
+
+        # Fetch league names
+        league_query = """
+            SELECT DISTINCT lgID, league
+            FROM leagues
+        """
+        cursor.execute(league_query)
+        leagues = cursor.fetchall()
+
+        # Validate sort_by and order inputs
+        valid_sort_columns = [
+            "yearID", "playerID", "W", "L", "ERA", "G", "GS", "CG", "SHO", "SV",
+            "IPouts", "H", "ER", "HR", "BB", "SO", "BAOpp"
+        ]
+        if sort_by not in valid_sort_columns:
+            sort_by = "yearID"
+        if order.lower() not in ["asc", "desc"]:
+            order = "asc"
+
+        # Fetch leaderboard data: Top 10 ERA
+        leaderboard_query = """
+            SELECT pl.nameFirst, pl.nameLast, t.name AS teamName, p.ERA
+            FROM pitching p
+            INNER JOIN master pl ON p.playerID = pl.playerID
+            INNER JOIN teams t ON p.teamID = t.teamID
+            WHERE p.ERA IS NOT NULL
+            ORDER BY p.ERA ASC
+            LIMIT 10
+        """
+        cursor.execute(leaderboard_query)
+        leaderboard_data = cursor.fetchall()
+
+        if show_data:  # Fetch data only when "Show Data" is clicked
+            # Base query for fetching results
+            query = """
+                SELECT 
+                    p.id, pl.nameFirst, pl.nameLast, p.yearID, p.stint, t.name AS teamName, l.league AS leagueName, 
+                    p.W, p.L, p.ERA, p.G, p.GS, p.CG, p.SHO, p.SV, 
+                    p.IPouts, p.H, p.ER, p.HR, p.BB, p.SO, p.BAOpp
+                FROM pitching p
+                INNER JOIN master pl ON p.playerID = pl.playerID
+                INNER JOIN teams t ON p.teamID = t.teamID
+                INNER JOIN leagues l ON p.lgID = l.lgID
+                WHERE 1=1
+            """
+            count_query = """
+                SELECT COUNT(*) AS total
+                FROM pitching p
+                INNER JOIN master pl ON p.playerID = pl.playerID
+                INNER JOIN teams t ON p.teamID = t.teamID
+                INNER JOIN leagues l ON p.lgID = l.lgID
+                WHERE 1=1
+            """
+            params = []
+            count_params = []
+
+            # Add filter for year if provided
+            if year:
+                query += " AND p.yearID = %s"
+                count_query += " AND p.yearID = %s"
+                params.append(year)
+                count_params.append(year)
+
+            # Add filter for playerName if provided
+            if player_name:
+                query += " AND (pl.nameFirst LIKE %s OR pl.nameLast LIKE %s)"
+                count_query += " AND (pl.nameFirst LIKE %s OR pl.nameLast LIKE %s)"
+                params.extend([f"%{player_name}%", f"%{player_name}%"])
+                count_params.extend([f"%{player_name}%", f"%{player_name}%"])
+
+            # Add filter for league if provided
+            if league:
+                query += " AND l.lgID = %s"
+                count_query += " AND l.lgID = %s"
+                params.append(league)
+                count_params.append(league)
+
+            # Sorting and Pagination
+            query += f" ORDER BY {sort_by} {order.upper()} LIMIT %s OFFSET %s"
+            offset = (page - 1) * per_page
+            params.extend([per_page, offset])
+
+            # Execute main query
+            cursor.execute(query, params)
+            results = cursor.fetchall()
+
+            # Execute count query
+            cursor.execute(count_query, count_params)
+            total_records = cursor.fetchone()["total"]
+
+        # Calculate total pages
+        total_pages = (total_records + per_page - 1) // per_page
+
     except Exception as e:
-        print(f"Error occurred: {e}")  # Debug
         flash(f"An error occurred: {e}", "danger")
+        print(f"Error: {e}")
+    finally:
+        if connection:
+            connection.close()
+
+    # Render template
+    return render_template(
+        "pitching.html",
+        data=results,
+        year=year,
+        player_name=player_name,
+        sort_by=sort_by,
+        order=order,
+        page=page,
+        total_pages=total_pages,
+        leaderboard=leaderboard_data,
+        leagues=leagues,
+    )
+
+
+def add_pitching_page():
+    if request.method == 'POST':
+        try:
+            data = {
+                'playerID': request.form.get('playerID'),
+                'yearID': request.form.get('yearID'),
+                'stint': request.form.get('stint'),
+                'teamID': request.form.get('teamID'),
+                'lgID': request.form.get('lgID'),
+                'W': request.form.get('W') or 0,
+                'L': request.form.get('L') or 0,
+                'ERA': request.form.get('ERA') or 0.0,
+                'G': request.form.get('G') or 0,
+                'GS': request.form.get('GS') or 0,
+                'CG': request.form.get('CG') or 0,
+                'SHO': request.form.get('SHO') or 0,
+                'SV': request.form.get('SV') or 0,
+                'IPouts': request.form.get('IPouts') or 0,
+                'H': request.form.get('H') or 0,
+                'ER': request.form.get('ER') or 0,
+                'HR': request.form.get('HR') or 0,
+                'BB': request.form.get('BB') or 0,
+                'SO': request.form.get('SO') or 0,
+                'BAOpp': request.form.get('BAOpp') or 0.0,
+            }
+
+            print(f"Form data received: {data}")  # Debug message
+            
+            success = Pitching.add_pitching(data)
+            if success:
+                flash("Successfully added a new record!", "success")
+            else:
+                flash("Failed to add pitching data.", "danger")
+        except Exception as e:
+            flash(f"An error occurred while adding the record: {e}", "danger")
+            print(f"Error: {e}")  # Debug message
+
         return redirect(url_for('pitching_page'))
 
-    return render_template('updatepitching.html', data=data)
+    return render_template('add_pitching.html')
 
 def delete_pitching_data(id):
     try:
@@ -675,5 +707,64 @@ def delete_pitching_data(id):
     except Exception as e:
         print(f"Error occurred: {e}")  # Debug
         flash(f"An error occurred: {e}", "danger")
+
+    return redirect(url_for('pitching_page'))
+
+def update_pitching_data(id):
+    if request.method == 'GET':
+        try:
+            connection = create_connection()
+            if not connection:
+                flash("Database connection failed.", "danger")
+                return redirect(url_for('pitching_page'))
+
+            # Fetch the existing data for the given ID
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute("SELECT DISTINCT id, playerID, yearID, teamID, lgID, stint, W, L, ERA, G, GS, CG, SHO, SV, IPouts, H, ER, HR, BB, SO, BAOpp  FROM pitching WHERE id = %s", (id,))
+                data = cursor.fetchone()
+
+            if not data:
+                flash("No data found for the given ID.", "danger")
+                return redirect(url_for('pitching_page'))
+
+            # Debugging: Ensure fetched data includes 'id'
+            print(f"Fetched data for ID {id}: {data}")
+
+            return render_template('update_pitching.html', data=data)
+
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
+            print(f"Error: {e}")
+            return redirect(url_for('pitching_page'))
+
+    elif request.method == 'POST':
+        updated_data = {
+            "playerID": request.form.get("playerID"),
+            "yearID": request.form.get("yearID"),
+            "teamID": request.form.get("teamID"),
+            "lgID": request.form.get("lgID"),
+            "stint": request.form.get("stint"),
+            "W": request.form.get("W"),
+            "L": request.form.get("L"),
+            "ERA": request.form.get("ERA"),
+            "G": request.form.get("G"),
+            "GS": request.form.get("GS"),
+            "CG": request.form.get("CG"),
+            "SHO": request.form.get("SHO"),
+            "SV": request.form.get("SV"),
+            "IPouts": request.form.get("IPouts"),
+            "H": request.form.get("H"),
+            "ER": request.form.get("ER"),
+            "HR": request.form.get("HR"),
+            "BB": request.form.get("BB"),
+            "SO": request.form.get("SO"),
+            "BAOpp": request.form.get("BAOpp"),
+        }
+        # Call the Pitching update function
+        success = Pitching.update_pitching(record_id=id, updated_data=updated_data)
+        if success:
+            flash("Data updated successfully!", "success")
+        else:
+            flash("Failed to update data.", "danger")
 
     return redirect(url_for('pitching_page'))
