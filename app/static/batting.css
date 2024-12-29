@@ -110,6 +110,9 @@ h1, h2, h3 {
 }
 
 .filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
     background-color: none;
     padding: 20px;
     margin: 20px auto;
@@ -117,16 +120,15 @@ h1, h2, h3 {
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 80%;
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 20px;
-    animation: fadeIn 0.5s ease-in;
 }
 
 .filter-form .form-group {
+    flex: 1 1 calc(33.333% - 20px);
     display: flex;
     flex-direction: column;
     gap: 5px;
+    min-width: 200px;
 }
 
 .filter-form label {
@@ -159,7 +161,7 @@ h1, h2, h3 {
 }
 
 .filter-form .form-buttons {
-    grid-column: span 5;
+    flex: 1 1 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -465,11 +467,19 @@ form, .form-control{
     gap: 10px;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+@media (max-width: 768px) {
+    .filter-form .form-group {
+        flex: 1 1 calc(50% - 20px);
     }
-    to {
-        opacity: 1;
+}
+
+@media (max-width: 480px) {
+    .filter-form .form-group {
+        flex: 1 1 100%;
+    }
+
+    .filter-form .form-buttons {
+        flex-direction: column; 
+        gap: 10px;
     }
 }
