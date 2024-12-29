@@ -454,23 +454,21 @@ def about_page():
 
 
 def pitching_page():
-    # Fetch query parameters
     year = request.args.get("year", "").strip()
     player_name = request.args.get("playerName", "").strip()
     league = request.args.get("league", "").strip()
-    sort_by = request.args.get("sort_by", "yearID")  # Default sort column
-    order = request.args.get("order", "asc")  # Default sort order
-    page = request.args.get("page", 1, type=int)  # Current page number
-    per_page = 10  # Number of rows per page
+    sort_by = request.args.get("sort_by", "yearID")
+    order = request.args.get("order", "asc")
+    page = request.args.get("page", 1, type=int)
+    per_page = 10
     show_data = request.args.get("show_data", None)
 
     results = []
     total_records = 0
-    leaderboard_data = []
+    total_pages = 0
     leagues = []
 
     try:
-        # Establish database connection
         connection = create_connection()
         if connection is None:
             flash("Database connection failed.", "danger")
@@ -486,7 +484,6 @@ def pitching_page():
         cursor.execute(league_query)
         leagues = cursor.fetchall()
 
-        # Validate sort_by and order inputs
         valid_sort_columns = [
             "yearID", "playerID", "W", "L", "ERA", "G", "GS", "CG", "SHO", "SV",
             "IPouts", "H", "ER", "HR", "BB", "SO", "BAOpp"
@@ -496,8 +493,7 @@ def pitching_page():
         if order.lower() not in ["asc", "desc"]:
             order = "asc"
 
-        if show_data:  # Fetch data only when "Show Data" is clicked
-            # Base query for fetching results
+        if show_data:
             query = """
                 SELECT 
                     p.id, pl.nameFirst, pl.nameLast, p.yearID, p.stint, t.name AS teamName, l.league AS leagueName, 
@@ -506,54 +502,56 @@ def pitching_page():
                 FROM pitching p
                 LEFT JOIN master pl ON p.playerID = pl.playerID
                 LEFT JOIN teams t ON p.teamID = t.teamID
-                AND p.yearID = t.yearID
-                AND p.lgID = t.lgID
+                    AND p.yearID = t.yearID
+                    AND p.lgID = t.lgID
                 LEFT JOIN leagues l ON p.lgID = l.lgID
                 WHERE 1=1
             """
             count_query = """
                 SELECT COUNT(*) AS total
                 FROM pitching p
+                LEFT JOIN master pl ON p.playerID = pl.playerID
+                LEFT JOIN teams t ON p.teamID = t.teamID
+                    AND p.yearID = t.yearID
+                    AND p.lgID = t.lgID
+                LEFT JOIN leagues l ON p.lgID = l.lgID
                 WHERE 1=1
             """
             params = []
             count_params = []
 
-            # Add filter for year if provided
-            if year:
+            # Add year filter
+            if year.isdigit():
+                year = int(year)
                 query += " AND p.yearID = %s"
                 count_query += " AND p.yearID = %s"
                 params.append(year)
                 count_params.append(year)
 
-            # Add filter for playerName if provided
+            # Add filters for player name and league
             if player_name:
                 query += " AND (pl.nameFirst LIKE %s OR pl.nameLast LIKE %s)"
                 count_query += " AND (pl.nameFirst LIKE %s OR pl.nameLast LIKE %s)"
                 params.extend([f"%{player_name}%", f"%{player_name}%"])
                 count_params.extend([f"%{player_name}%", f"%{player_name}%"])
 
-            # Add filter for league if provided
             if league:
-                query += " AND l.lgID = %s"
-                count_query += " AND l.lgID = %s"
+                query += " AND l.league = %s"
+                count_query += " AND l.league = %s"
                 params.append(league)
                 count_params.append(league)
 
             # Sorting and Pagination
-            query += f" ORDER BY {sort_by} {order.upper()} LIMIT %s OFFSET %s"
             offset = (page - 1) * per_page
+            query += f" ORDER BY {sort_by} {order.upper()} LIMIT %s OFFSET %s"
             params.extend([per_page, offset])
 
-            # Execute main query
             cursor.execute(query, params)
             results = cursor.fetchall()
 
-            # Execute count query
             cursor.execute(count_query, count_params)
             total_records = cursor.fetchone()["total"]
 
-        # Calculate total pages
         total_pages = (total_records + per_page - 1) // per_page
 
     except Exception as e:
@@ -563,7 +561,6 @@ def pitching_page():
         if connection:
             connection.close()
 
-    # Render template
     return render_template(
         "pitching.html",
         data=results,
@@ -573,7 +570,6 @@ def pitching_page():
         order=order,
         page=page,
         total_pages=total_pages,
-        leaderboard=leaderboard_data,
         leagues=leagues,
     )
 
