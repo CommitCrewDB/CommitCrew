@@ -1,8 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}
-Welcome
-{% endblock %}
+{% block title %}Welcome{% endblock %}
 
 {% block content %}
 <section class="hero">
@@ -18,28 +16,154 @@ Welcome
 
 <section class="features">
     <div class="feature">
-        <!-- <img src="{{ url_for('static', filename='images/teams.jpg') }}" alt="Teams" class="feature-img"> -->
+        <div class="feature-icon">
+            <img src="{{ url_for('static', filename='images/teams-icon.png') }}" alt="Teams Icon">
+        </div>
         <h2>Teams</h2>
         <p>Discover the history and performance of teams in various leagues.</p>
         <a href="{{ url_for('teams_page') }}" class="btn">Explore Teams</a>
     </div>
     <div class="feature">
-        <!-- <img src="{{ url_for('static', filename='images/fielding.jpg') }}" alt="Fielding" class="feature-img"> -->
+        <div class="feature-icon">
+            <img src="{{ url_for('static', filename='images/fielding-icon.png') }}" alt="Fielding Icon">
+        </div>
         <h2>Fielding</h2>
         <p>Dive into player fielding statistics and defensive records.</p>
         <a href="{{ url_for('fielding_page') }}" class="btn">View Fielding Stats</a>
     </div>
     <div class="feature">
-        <img src="{{ url_for('static', filename='images/pitching.webp') }}" alt="Pitching" class="feature-img">
+        <div class="feature-icon">
+            <img src="{{ url_for('static', filename='images/pitching-icon.png') }}" alt="Pitching Icon">
+        </div>
         <h2>Pitching</h2>
         <p>Analyze pitching records and discover the greatest pitchers in history.</p>
         <a href="{{ url_for('pitching_page') }}" class="btn">View Pitching Stats</a>
     </div>
-     <div class="feature">
-        <!-- <img src="{{ url_for('static', filename='images/master.jpg') }}" alt="Master" class="feature-img"> -->
+    <div class="feature">
+        <div class="feature-icon">
+            <img src="{{ url_for('static', filename='images/master-icon.png') }}" alt="Master Icon">
+        </div>
         <h2>Master</h2>
         <p>Explore detailed player information from the Master dataset.</p>
-        <a href= class="btn">View Master Data</a>
+        <a href="{{ url_for('master_page') }}" class="btn">View Master Data</a>
+    </div>
+    <div class="feature">
+        <div class="feature-icon">
+            <img src="{{ url_for('static', filename='images/master-icon.png') }}" alt="Master Icon">
+        </div>
+        <h2>Batting</h2>
+        <p>Explore detailed player information from the Batting dataset.</p>
+        <a href="{{ url_for('batting_page') }}" class="btn">View Batting Data</a>
     </div>
 </section>
+
+<style>
+.hero {
+    text-align: center;
+    padding: 50px 20px;
+    background: linear-gradient(135deg, #ba0c2f, #00274d);
+    color: white;
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.hero-content .btn {
+    padding: 10px 20px;
+    background-color: #fff;
+    color: #ba0c2f;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.hero-content .btn:hover {
+    background-color: #f1f1f1;
+}
+
+.features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 20px;
+    background-color: #f8f9fa;
+}
+
+.feature {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    width: calc(25% - 40px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-icon {
+    margin-bottom: 10px;
+}
+
+.feature-icon img {
+    width: 50px;
+    height: 50px;
+}
+
+.feature:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.feature h2 {
+    color: #00274d;
+    margin-bottom: 15px;
+}
+
+.feature p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.feature .btn {
+    padding: 8px 15px;
+    background-color: #ba0c2f;
+    color: white;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.feature .btn:hover {
+    background-color: #91091e;
+}
+
+@media (max-width: 768px) {
+    .features {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .feature {
+        width: 100%;
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+}
+</style>
+
 {% endblock %}
