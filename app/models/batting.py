@@ -13,9 +13,13 @@ class Batting:
             SELECT 
                 batting.*, 
                 master.nameFirst, 
-                master.nameLast 
+                master.nameLast, 
+                teams.name AS teamName 
             FROM batting 
             LEFT JOIN master ON batting.playerID = master.playerID
+            LEFT JOIN teams ON batting.teamID = teams.teamID
+                AND batting.yearID = teams.yearID
+                AND batting.lgID = teams.lgID
             LIMIT %s OFFSET %s
         """
         cursor.execute(query, (limit, offset))
@@ -41,24 +45,32 @@ class Batting:
             SELECT 
                 batting.*, 
                 master.nameFirst, 
-                master.nameLast 
+                master.nameLast, 
+                teams.name AS teamName 
             FROM batting 
             LEFT JOIN master ON batting.playerID = master.playerID
+            LEFT JOIN teams ON batting.teamID = teams.teamID
+                AND batting.yearID = teams.yearID
+                AND batting.lgID = teams.lgID
         """
         cursor.execute(query)
         return cursor.fetchall()
 
     @staticmethod
-    def search_batting(year=None, team=None, leagues=None, sort_by=None, sort_order="asc"):
+    def search_batting(year=None, team=None, leagues=None, player=None, sort_by=None, sort_order="asc"):
         connection = get_db()
         cursor = connection.cursor(dictionary=True)
         query = """
             SELECT 
                 batting.*, 
                 master.nameFirst, 
-                master.nameLast 
+                master.nameLast, 
+                teams.name AS teamName 
             FROM batting 
             LEFT JOIN master ON batting.playerID = master.playerID
+            LEFT JOIN teams ON batting.teamID = teams.teamID
+                AND batting.yearID = teams.yearID
+                AND batting.lgID = teams.lgID
             WHERE 1=1
         """
         params = []
@@ -67,12 +79,21 @@ class Batting:
             query += " AND batting.yearID = %s"
             params.append(year)
         if team:
-            query += " AND batting.teamID = %s"
-            params.append(team)
+            query += " AND (batting.teamID = %s OR teams.name LIKE %s)"
+            params.extend([team, f"%{team}%"])
         if leagues:
             query += " AND batting.lgID IN (%s)" % ', '.join(['%s'] * len(leagues))
             params.extend(leagues)
-
+        if player:
+            query += """
+                AND (
+                    master.playerID = %s OR 
+                    master.nameFirst LIKE %s OR 
+                    master.nameLast LIKE %s OR 
+                    CONCAT(master.nameFirst, ' ', master.nameLast) LIKE %s
+                )
+            """
+            params.extend([player, f"%{player}%", f"%{player}%", f"%{player}%"])
         if sort_by:
             query += f" ORDER BY {sort_by} {sort_order.upper()}"
 

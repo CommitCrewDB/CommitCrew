@@ -203,6 +203,7 @@ def batting_page():
     year_query = request.args.get("year", "")
     team_query = request.args.get("team", "")
     league_query = request.args.getlist("league")
+    player_query = request.args.get("player", "")
     sort_by = request.args.get("sort_by", "")
     sort_order = request.args.get("sort_order", "asc")
     action = request.args.get("action", "")
@@ -218,11 +219,12 @@ def batting_page():
     if action == "view_all_data":
         total_records = Batting.get_total_batting_records()
         batting_records = Batting.get_paginated_batting(offset, per_page)
-    elif year_query or team_query or league_query or sort_by:
+    elif year_query or team_query or league_query or player_query or sort_by:
         batting_records = Batting.search_batting(
             year=year_query,
             team=team_query,
             leagues=league_query,
+            player=player_query,
             sort_by=sort_by,
             sort_order=sort_order
         )
@@ -242,6 +244,7 @@ def batting_page():
         year_query=year_query,
         team_query=team_query,
         league_query=league_query,
+        player_query=player_query,
         sort_by=sort_by,
         sort_order=sort_order,
         active_leagues=active_leagues,
