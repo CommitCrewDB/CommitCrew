@@ -3,10 +3,14 @@
 Fielding
 {% endblock %}
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='fielding.css') }}">
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
 <h1 class="title text-center my-4">Fielding</h1>
+
+<div class="text-right my-3">
+    <a href="{{ url_for('add_fielding_page') }}" class="btn btn-success">Add New Fielding Record</a>
+</div>
 
 <!-- Search and Filter Form -->
 <form method="get" action="{{ url_for('fielding_page') }}" class="search-form filter-form">
@@ -67,16 +71,15 @@ Fielding
             <button type="submit" class="btn btn-primary">Filter</button>
             <a href="{{ url_for('fielding_page') }}" class="btn btn-secondary">Reset</a>
         </div>
+        <div>
+            <form method="GET" action="{{ url_for('fielding_page') }}" style="text-align: center; margin-top: 10px;">
+                <input type="hidden" name="action" value="view_all_data">
+                <button type="submit" class="btn btn-primary btn-sm">Show All Data</button>
+            </form>
+        </div>
+        
     </div>
 </form>
-
-<div>
-    <form method="GET" action="{{ url_for('fielding_page') }}" style="text-align: center; margin-top: 10px;">
-        <input type="hidden" name="action" value="view_all_data">
-        <button type="submit" class="btn btn-primary btn-sm">Show All Data</button>
-    </form>
-</div>
-
 {% if fielding_records %}
     <div class="scrollable-table">
         <table class="table table-striped">
@@ -100,6 +103,7 @@ Fielding
                     <th>Stolen Bases Against</th>
                     <th>Caught Stealing</th>
                     <th>Zone Rating</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -123,6 +127,15 @@ Fielding
                         <td>{{ record.SB }}</td>
                         <td>{{ record.CS }}</td>
                         <td>{{ record.ZR }}</td>
+                        <td>
+                            <!-- Update Button -->
+                            <a href="{{ url_for('update_fielding_page', record_id=record.ID) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Update
+                            </a> 
+                            <form method="POST" action="{{ url_for('delete_fielding_record', record_id=record.ID) }}" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
+                            </form>                                    
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -131,4 +144,15 @@ Fielding
 {% else %}
     <p class="text-center">No records to display. Use the search or Show All Data button.</p>
 {% endif %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+
 {% endblock %}

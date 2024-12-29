@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Update Fielding Record
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center my-4">Update Fielding Record</h1>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('update_fielding_page', record_id=record.ID) }}">
+    <div class="form-group">
+        <label for="playerID">Player ID</label>
+        <input type="text" class="form-control" id="playerID" name="player_id" value="{{ record.playerID }}" required>
+    </div>
+    <div class="form-group">
+        <label for="yearID">Year</label>
+        <input type="number" class="form-control" id="yearID" name="year" value="{{ record.yearID }}" required>
+    </div>
+    <div class="form-group">
+        <label for="stint">Stint</label>
+        <input type="number" class="form-control" id="stint" name="stint" value="{{ record.stint }}" required>
+    </div>
+    <div class="form-group">
+        <label for="teamID">Team</label>
+        <input type="text" class="form-control" id="teamID" name="team_id" value="{{ record.teamID }}" required>
+    </div>
+    <div class="form-group">
+        <label for="leagueID">League</label>
+        <input type="text" class="form-control" id="leagueID" name="league" value="{{ record.lgID }}" required>
+    </div>
+    <div class="form-group">
+        <label for="position">Position</label>
+        <input type="text" class="form-control" id="position" name="position" value="{{ record.POS }}" required>
+    </div>
+    <div class="form-group">
+        <label for="games">Games Played</label>
+        <input type="number" class="form-control" id="games" name="games" value="{{ record.G }}" required>
+    </div>
+    <div class="form-group">
+        <label for="putOuts">Put Outs</label>
+        <input type="number" class="form-control" id="putOuts" name="po" value="{{ record.PO }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Fielding Record</button>
+</form>
+
+<div class="text-left my-3">
+    <a href="{{ url_for('fielding_page') }}" class="btn btn-secondary">Back to Fielding Records</a>
+</div>
+
+{% endblock %}

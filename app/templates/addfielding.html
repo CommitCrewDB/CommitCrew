@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Add New Fielding Record
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center my-4">Add New Fielding Record</h1>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<form method="POST" action="/fielding/add">
+    <div class="form-group">
+        <label for="playerID">Player ID</label>
+        <input type="text" class="form-control" id="playerID" name="player_id" placeholder="Enter Player ID" required>
+    </div>
+    <div class="form-group">
+        <label for="yearID">Year</label>
+        <input type="number" class="form-control" id="yearID" name="year" placeholder="Enter Year" required>
+    </div>
+    <div class="form-group">
+        <label for="yearID">Stint</label>
+        <input type="number" class="form-control" id="stint" name="stint" placeholder="Enter Stint" required>
+    </div>
+    <div class="form-group">
+        <label for="position">Position</label>
+        <input type="text" class="form-control" id="pos" name="position" placeholder="Enter Position" required>
+    </div>
+    <div class="form-group">
+        <label for="teamID">Team</label>
+        <input type="text" class="form-control" id="teamID" name="team_id" placeholder="Enter Team" required>
+    </div>
+    <div class="form-group">
+        <label for="leagueID">League</label>
+        <input type="text" class="form-control" id="lgID" name="league" placeholder="Enter League" required>
+    </div>
+    <div class="form-group">
+        <label for="games">Games Played</label>
+        <input type="number" class="form-control" id="g" name="games" placeholder="Enter Games Played" required>
+    </div>
+    <div class="form-group">
+        <label for="putOuts">Put Outs</label>
+        <input type="number" class="form-control" id="po" name="po" placeholder="Enter Put Outs" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Add Fielding Record</button>
+</form>
+
+<div class="text-left my-3">
+    <a href="{{ url_for('fielding_page') }}" class="btn btn-secondary">Back to Fielding Records</a>
+</div>
+
+{% endblock %}

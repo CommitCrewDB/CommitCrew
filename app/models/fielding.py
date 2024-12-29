@@ -21,13 +21,12 @@ def create_connection():
 
 
 class Fielding:
-    def __init__(self, ID, playerID, yearID, stint, teamID, team_ID, lgID, POS, G, GS, InnOuts, PO, A, E, DP, PB, WP, SB, CS, ZR):
+    def __init__(self, ID, playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, PO, A, E, DP, PB, WP, SB, CS, ZR):
         self.ID = ID
         self.playerID = playerID
         self.yearID = yearID
         self.stint = stint
         self.teamID = teamID
-        self.team_ID = team_ID
         self.lgID = lgID
         self.POS = POS
         self.G = G
@@ -41,7 +40,7 @@ class Fielding:
         self.WP = WP
         self.SB = SB
         self.CS = CS
-        self.ZR = ZR
+        self.ZR = ZR or 0
 
     @staticmethod
     def get_all_fielding():
@@ -55,11 +54,14 @@ class Fielding:
             query = """
                 SELECT 
                     playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, 
-                    PO, A, E, DP, PB, WP, SB, CS, ZR
+                    PO, A, E, DP, PB, WP, SB
                 FROM fielding
             """
             cursor.execute(query)
-            fielding_records = cursor.fetchall()
+            fielding_records = []
+
+            for row in cursor.fetchall():
+                fielding_records.append(Fielding(*row))
 
             cursor.close()
             connection.close()
@@ -80,12 +82,12 @@ class Fielding:
             query = """
                 SELECT 
                     playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, 
-                    PO, A, E, DP, PB, WP, SB, CS, ZR
+                    PO, A, E, DP, PB, WP, SB
                 FROM fielding
                 WHERE POS LIKE %s
             """
             cursor.execute(query, (f"%{position}%",))
-            fielding_records = cursor.fetchall()
+            fielding_records = [Fielding(*row) for row in cursor.fetchall()]
 
             cursor.close()
             connection.close()
@@ -95,19 +97,20 @@ class Fielding:
             return []
             
     @staticmethod
-    def filter_fielding(player_id=None, year=None, position=None, leagues=None, ):
+    def filter_fielding(player_id=None, year=None, position=None, leagues=None):
         try:
             connection = create_connection()
             if connection is None:
                 print("Database connection failed.")
-                return
-            cursor = connection.cursor(dictionary=True)
+                return []
+            cursor = connection.cursor()
 
             query = """
-                SELECT playerID, yearID, teamID, lgID, POS, G, PO, A, E
+                SELECT ID, playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, PO, A, E, DP, PB, WP, SB, CS, ZR
                 FROM fielding
                 WHERE 1=1
             """
+
             params = []
             if leagues:
                 query += " AND lgID IN ({})".format(",".join(["%s"] * len(leagues)))
@@ -122,8 +125,8 @@ class Fielding:
                 query += " AND POS = %s"
                 params.append(position)
 
-            cursor.execute(query, params)
-            results = cursor.fetchall()
+            cursor.execute(query, tuple(params))
+            results = [Fielding(*row) for row in cursor.fetchall()]
 
             cursor.close()
             connection.close()
@@ -131,6 +134,64 @@ class Fielding:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
+
+
+    @staticmethod
+    def add_fielding_record(fielding_data):
+        try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()
+
+            # Check if the record already exists
+            check_query = """
+                SELECT 1 FROM fielding
+                WHERE playerID = %s AND yearID = %s AND stint = %s AND teamID = %s
+            """
+            cursor.execute(check_query, (
+                fielding_data["player_id"],
+                fielding_data["year"],
+                fielding_data["stint"],
+                fielding_data["team_id"],
+            ))
+            if cursor.fetchone():
+                raise ValueError("Duplicate record: Fielding record already exists.")
+
+            # Insert new record
+            query = """
+                INSERT INTO fielding (
+                    playerID, yearID, stint, teamID, lgID, POS, G, PO
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(query, (
+                fielding_data["player_id"],
+                fielding_data["year"],
+                fielding_data["stint"],
+                fielding_data["team_id"],
+                fielding_data["league"],
+                fielding_data["position"],
+                fielding_data["games"],
+                fielding_data["po"],
+            ))
+            connection.commit()
+            print("Fielding record added successfully.")
+        except mysql.connector.IntegrityError as e:
+            print(f"Integrity Error: {e}")
+            raise e
+        except ValueError as ve:
+            print(f"Validation Error: {ve}")
+            raise ve
+        except mysql.connector.Error as err:
+            print(f"SQL Error: {err}")
+            raise err
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
+
 
     @staticmethod
     def get_all_leagues():
@@ -151,3 +212,74 @@ class Fielding:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
+    @staticmethod
+    def get_record_by_id(record_id):
+        try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return None
+            cursor = connection.cursor(dictionary=True)
+            query = "SELECT * FROM fielding WHERE ID = %s"
+            cursor.execute(query, (record_id,))
+            record = cursor.fetchone()
+            return record
+        except Exception as e:
+            print(f"Error: {e}")
+            raise e
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
+    
+    @staticmethod
+    def update_record(record_id, updated_data):
+        try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()
+            query = """
+                UPDATE fielding
+                SET playerID = %s, yearID = %s, stint = %s, teamID = %s, lgID = %s, POS = %s, G = %s, PO = %s
+                WHERE ID = %s
+            """
+            cursor.execute(query, (
+                updated_data["playerID"],
+                updated_data["yearID"],
+                updated_data["stint"],
+                updated_data["teamID"],
+                updated_data["lgID"],
+                updated_data["POS"],
+                updated_data["G"],
+                updated_data["PO"],
+                record_id,
+            ))
+            connection.commit()
+        except Exception as e:
+            print(f"Error: {e}")
+            raise e
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()
+
+    @staticmethod
+    def delete_record(record_id):
+        try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return
+            cursor = connection.cursor()
+            query = "DELETE FROM fielding WHERE ID = %s"
+            cursor.execute(query, (record_id,))
+            connection.commit()
+        except Exception as e:
+            print(f"Error: {e}")
+            raise e
+        finally:
+            if connection.is_connected():
+                cursor.close()
+                connection.close()

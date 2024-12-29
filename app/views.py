@@ -111,12 +111,13 @@ def update_team_page(team_id):
 
 def fielding_page():
     player_id = request.args.get("player_id", "")
-    league = request.form.get("league")
+    league = request.args.getlist("league")
     year = request.args.get("year", "")
     position = request.args.get("position", "")
     action = request.args.get("action")
 
     leagues = Teams.get_all_leagues()
+    fielding_records = []
 
     if league or player_id or year or position:
         fielding_records = Fielding.filter_fielding(
@@ -125,8 +126,7 @@ def fielding_page():
             year=year,
             position=position
         )
-    else:
-        fielding_records = []
+    
 
     return render_template(
         "fielding.html",
@@ -136,6 +136,68 @@ def fielding_page():
         year=year,
         position=position,
     )
+
+def add_fielding_page():
+    if request.method == "POST":
+        player_id = request.form.get("player_id")
+        year = request.form.get("year")
+        stint = request.form.get("stint")
+        team_id = request.form.get("team_id")
+        league = request.form.get("league")
+        position = request.form.get("position")
+        games = request.form.get("games")
+        po = request.form.get("po")
+
+        try:
+            fielding_data = {
+                "player_id": player_id,
+                "year": year,
+                "stint": stint,
+                "team_id": team_id,
+                "league": league,
+                "position": position,
+                "games": games,
+                "po": po,
+            }
+            Fielding.add_fielding_record(fielding_data)
+            flash("Fielding record added successfully!", "success")
+            return redirect(url_for("fielding_page"))
+        except ValueError as ve:
+            flash(str(ve), "warning")  # Flash specific validation error
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
+    return render_template("addfielding.html")
+
+def update_fielding_page(record_id):
+    if request.method == "POST":
+        updated_data = {
+            "playerID": request.form.get("player_id"),
+            "yearID": request.form.get("year"),
+            "stint": request.form.get("stint"),
+            "teamID": request.form.get("team_id"),
+            "lgID": request.form.get("league"),
+            "POS": request.form.get("position"),
+            "G": request.form.get("games"),
+            "PO": request.form.get("po"),
+        }
+        try:
+            Fielding.update_record(record_id, updated_data)
+            flash("Fielding record updated successfully!", "success")
+            return redirect(url_for("fielding_page"))
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
+
+    # Fetch existing record data
+    record = Fielding.get_record_by_id(record_id)
+    return render_template("updatefielding.html", record=record)
+
+def delete_fielding_record(record_id):
+    try:
+        Fielding.delete_record(record_id)  # Implement this in your Fielding model
+        flash("Fielding record deleted successfully!", "success")
+    except Exception as e:
+        flash(f"An error occurred while deleting the record: {e}", "danger")
+    return redirect(url_for("fielding_page"))
 
 def batting_page():
     year_query = request.args.get("year", "")
