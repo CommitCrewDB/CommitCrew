@@ -155,4 +155,67 @@ Fielding
 {% endwith %}
 
 
+<div class="form-group">
+    <label for="year">Select Year</label>
+    <input
+        type="number"
+        name="year"
+        id="year"
+        class="form-control"
+        placeholder="Enter year"
+        value="{{ request.args.get('year', '') }}"
+    />
+    <!-- Button to Fetch Top Fielding Players -->
+    <div>
+        <form method="GET" action="{{ url_for('fielding_page') }}" style="text-align: center; margin-top: 10px;">
+            <input type="hidden" name="action" value="view_top_players">
+            <input type="hidden" id="hidden-year" name="year" value="{{ request.args.get('year', '') }}">
+            <button type="submit" class="btn btn-primary btn-sm">
+                Top Fielding Players in entered year
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- JavaScript to Sync Year Input -->
+<script>
+    document.getElementById("year").addEventListener("input", function () {
+        document.getElementById("hidden-year").value = this.value;
+    });
+</script>
+
+<!-- Table for Top Fielding Players -->
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Player ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Year</th>
+            <th>League</th>
+            <th>Position</th>
+            <th>Total Putouts</th>
+            <th>Total Assists</th>
+            <th>Games Played</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for player in top_fielding_players %}
+        <tr>
+            <td>{{ player.playerID }}</td>
+            <td>{{ player.nameFirst }}</td>
+            <td>{{ player.nameLast }}</td>
+            <td>{{ player.yearID }}</td>
+            <td>{{ player.lgID }}</td>
+            <td>{{ player.POS }}</td>
+            <td>{{ player.total_putouts }}</td>
+            <td>{{ player.total_assists }}</td>
+            <td>{{ player.games_played }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+
 {% endblock %}

@@ -1,7 +1,7 @@
 import os
 import mysql.connector
 from dotenv import load_dotenv
-import jsonify
+from flask import jsonify
 
 load_dotenv()
 
