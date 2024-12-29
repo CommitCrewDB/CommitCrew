@@ -99,16 +99,19 @@
 
 <!-- Filter/Search Form -->
 <form method="GET" action="{{ url_for('batting_page') }}" class="filter-form">
+    <!-- Year Filter Input -->
     <div class="form-group">
         <label for="year">Year:</label>
-        <input type="number" name="year" id="year" value="{{ year_query }}" placeholder="Enter year" step="1">
+        <input type="number" name="year" id="year" value="{{ year_query }}" placeholder="Enter year" step="1" min="1871">
     </div>
 
+    <!-- Team Filter Input -->
     <div class="form-group">
         <label for="team">Team:</label>
         <input type="text" name="team" id="team" value="{{ team_query }}" placeholder="Enter teamID">
     </div>
 
+    <!-- League Filter Selection -->
     <div class="form-group">
         <label for="league">League:</label>
         <select name="league" id="league" class="form-select" multiple>
@@ -133,17 +136,34 @@
         </select>
     </div>          
 
+    <!-- Sort By Filter Selection -->
     <div class="form-group">
         <label for="sort_by">Sort By:</label>
         <select name="sort_by" id="sort_by">
             <option value="" class="form-option" {% if not sort_by %}selected{% endif %}>None</option>
             <option value="yearID" class="form-option" {% if sort_by == "yearID" %}selected{% endif %}>Year</option>
             <option value="teamID" class="form-option" {% if sort_by == "teamID" %}selected{% endif %}>Team</option>
-            <option value="RBI" class="form-option" {% if sort_by == "RBI" %}selected{% endif %}>RBI</option>
+            <option value="G" class="form-option" {% if sort_by == "G" %}selected{% endif %}>Games</option>
+            <option value="AB" class="form-option" {% if sort_by == "AB" %}selected{% endif %}>At Bats</option>
+            <option value="R" class="form-option" {% if sort_by == "R" %}selected{% endif %}>Runs</option>
+            <option value="H" class="form-option" {% if sort_by == "H" %}selected{% endif %}>Hits</option>
+            <option value="2B" class="form-option" {% if sort_by == "2B" %}selected{% endif %}>Doubles</option>
+            <option value="3B" class="form-option" {% if sort_by == "3B" %}selected{% endif %}>Triples</option>
             <option value="HR" class="form-option" {% if sort_by == "HR" %}selected{% endif %}>Home Runs</option>
+            <option value="RBI" class="form-option" {% if sort_by == "RBI" %}selected{% endif %}>RBI</option>
+            <option value="SB" class="form-option" {% if sort_by == "SB" %}selected{% endif %}>Stolen Bases</option>
+            <option value="CS" class="form-option" {% if sort_by == "CS" %}selected{% endif %}>Caught Stealing</option>
+            <option value="BB" class="form-option" {% if sort_by == "BB" %}selected{% endif %}>Base on Balls</option>
+            <option value="SO" class="form-option" {% if sort_by == "SO" %}selected{% endif %}>Strikeouts</option>
+            <option value="IBB" class="form-option" {% if sort_by == "IBB" %}selected{% endif %}>Intentional Walks</option>
+            <option value="HBP" class="form-option" {% if sort_by == "HBP" %}selected{% endif %}>Hit by Pitch</option>
+            <option value="SH" class="form-option" {% if sort_by == "SH" %}selected{% endif %}>Sacrifice Hits</option>
+            <option value="SF" class="form-option" {% if sort_by == "SF" %}selected{% endif %}>Sacrifice Flies</option>
+            <option value="GIDP" class="form-option" {% if sort_by == "GIDP" %}selected{% endif %}>Grounded Into Double Plays</option>
         </select>
     </div>
 
+    <!-- Sort Order Selection -->
     <div class="form-group">
         <label for="sort_order">Sort Order:</label>
         <select name="sort_order" id="sort_order">
@@ -152,6 +172,7 @@
         </select>
     </div>
 
+    <!-- Submit and Reset Buttons -->
     <div class="form-buttons">
         <div class="left-buttons">
             <button type="submit" class="btn btn-primary">Search</button>
