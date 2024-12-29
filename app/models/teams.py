@@ -44,7 +44,7 @@ class Teams:
 
             query = """
                 SELECT 
-                    yearID, lgID, name, franchID, divID, teamRank, G, Ghome, W, L 
+                    yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
                 FROM teams
             """
             cursor.execute(query)
@@ -69,7 +69,7 @@ class Teams:
             cursor = connection.cursor()  
 
             query = """
-                SELECT yearID, lgID,teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
+                SELECT yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
                 FROM teams
                 WHERE name LIKE %s
             """
@@ -255,9 +255,6 @@ class Teams:
             print(f"Error: {err}")
             return []
 
-            
-            
-        
     @staticmethod
     def get_all_leagues():
         try:
@@ -277,6 +274,50 @@ class Teams:
         except mysql.connector.Error as err:
             print(f"Error: {err}")
             return []
+        
+    @staticmethod
+    def update_team(team_id, updated_data):
+        connection = create_connection()
+        if connection is None:
+            raise Exception("Database connection failed.")
+        cursor = connection.cursor()
+        query = """
+            UPDATE teams
+            SET name = %s, teamRank = %s, divID = %s, G = %s, W = %s, L = %s
+            WHERE teamID = %s
+        """
+        params = (
+            updated_data["Team"],
+            updated_data["Rank"],
+            updated_data["TeamDivision"],
+            updated_data["GamesPlayed"],
+            updated_data["Wins"],
+            updated_data["Losses"],
+            team_id,
+        )
+        cursor.execute(query, params)
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+    @staticmethod
+    def get_team_by_id(team_id):
+        connection = create_connection()
+        cursor = connection.cursor(dictionary=True)
+        query = "SELECT * FROM teams WHERE TeamID = %s"
+        try:
+            cursor.execute(query, (team_id,))
+            team = cursor.fetchone() 
+            return team
+        except mysql.connector.Error as err:
+            print(f"Error: {err}")
+        finally:
+            while cursor.nextset():
+                pass
+            cursor.close()
+            connection.close()
+
+                
 
     
 

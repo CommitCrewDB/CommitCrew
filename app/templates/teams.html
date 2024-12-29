@@ -11,66 +11,6 @@ Teams{% endblock %}
     <a href="{{ url_for('add_team_page') }}" class="btn btn-success">Add New Team</a>
 </div>
 
-<!-- Search Form -->
-<form method="get" action="/teams" class="search-form search-box">
-    <input
-        type="text"
-        name="search"
-        value="{{ request.args.get('search', '') }}"
-        class="form-control d-inline-block"
-        style="width: 300px;"
-        placeholder="Search by team name"
-    />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-</form>
-
-
-{% if teams %}
-    <h2>Search Results</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Year</th>
-                <th>League</th>
-                <th>Team</th>
-                <th>Rank</th>
-                <th>Franchise</th>
-                <th>Division</th>
-                <th>Wins</th>
-                <th>Losses</th>
-                <th>Actions</th>
-                <th>GamesPlayed</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for team in teams %}
-            <tr>
-                <td>{{ team.Year }}</td>
-                <td>{{ team.League }}</td>
-                <td>{{ team.Team }}</td>
-                <td>{{ team.Rank }}</td>
-                <td>{{ team.Franchise }}</td>
-                <td>{{ team.TeamDivision }}</td>
-                <td>{{ team.Wins }}</td>
-                <td>{{ team.Losses }}</td>
-                <td>{{ team.GamesPlayed }}</td>
-                <td>
-                    <form method="POST" action="/teams" style="display:inline;">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="team_id" value="{{ team.TeamID }}">
-                        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
-                    </form>                                                                        
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-{% elif request.args.get('search') %}
-    <p>No results found. Try searching for a different team name.</p>
-{% endif %}
-
-
 <div class="info-container">
     <p>
         This page displays data from the <strong>Lahman Baseball Database</strong>, specifically from the 
@@ -163,7 +103,60 @@ Teams{% endblock %}
         <div class="form-group btn-block">
             <button type="submit" class="btn btn-primary btn-block">Filter</button>
             <button type="reset" class="btn btn-secondary btn-block">Reset</button>
+            <form method="get" action="/teams">
+                <input type="hidden" name="action" value="view_all">
+                <button type="submit" class="btn btn-primary">View All</button>
+            </form>
         </div>
+        {% if teams %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Year</th>
+                        <th>League</th>
+                        <th>Team</th>
+                        <th>Rank</th>
+                        <th>Franchise</th>
+                        <th>Division</th>
+                        <th>GamesPlayed</th>
+                        <th>Wins</th>
+                        <th>Losses</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                    <tr>
+                        <td>{{ team.Year }}</td>
+                        <td>{{ team.League }}</td>
+                        <td>{{ team.Team }}</td>
+                        <td>{{ team.Rank }}</td>
+                        <td>{{ team.Franchise }}</td>
+                        <td>{{ team.TeamDivision }}</td>
+                        <td>{{ team.GamesPlayed }}</td>
+                        <td>{{ team.Wins }}</td>
+                        <td>{{ team.Losses }}</td>
+                        <td>
+                            <div>
+                                <form method="POST" action="/teams" style="display:inline;">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="team_id" value="{{ team.TeamID }}">
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
+                                </form>     
+                            </div>   
+                            <div class="mt-2">
+                                <a href="{{ url_for('update_team_page', team_id=team.TeamID) }}" class="btn btn-warning btn-sm btn-block">
+                                    <i class="fas fa-edit"></i> Update
+                                </a>
+                            </div>                                                          
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% elif request.args.get('search') %}
+            <p>No results found. Try searching for a different team name.</p>
+        {% endif %}
     </div>
 </form>
 

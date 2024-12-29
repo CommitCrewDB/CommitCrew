@@ -20,6 +20,9 @@ def teams_page():
     leagues = Teams.get_all_leagues()
 
     teams = []
+    if action == 'view_all':
+        teams = Teams.get_all_teams()
+        return render_template("teams.html", teams=teams, leagues=leagues)
     if league_filters or year_filter or team_name_filter or sort_by:
         teams = Teams.filter_teams(
             leagues=league_filters,
@@ -84,6 +87,27 @@ def add_team_page():
             flash(f"An error occurred: {e}", "danger")
 
     return render_template("addteams.html")
+
+def update_team_page(team_id):
+    if request.method == 'POST':
+        # Form verilerini al ve güncelle
+        updated_data = {
+            "Team": request.form.get("team_name", ""),
+            "Rank": request.form.get("rank", 0),
+            "Wins": request.form.get("wins", 0),
+            "Losses": request.form.get("losses", 0),
+            "TeamDivision": request.form.get("team_division", "N/A"),
+            "GamesPlayed": request.form.get("games_played", 0),
+        }
+
+
+        Teams.update_team(team_id, updated_data)
+        flash("Team updated successfully!", "success")
+        return redirect(url_for('teams_page'))
+    else:
+        # Güncelleme formunu görüntülemek için takım verilerini al
+        team = Teams.get_team_by_id(team_id)
+        return render_template('updateteams.html', team=team)
 
 def fielding_page():
     player_id = request.args.get("player_id", "")

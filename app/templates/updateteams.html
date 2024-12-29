@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Update Team
+{% endblock %}
+
+{% block content %}
+<h1 class="text-center my-4">Update Team</h1>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='teams.css') }}">
+
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('update_team_page', team_id=team.teamID) }}">
+    <div class="form-group">
+        <label for="team_name">Team Name</label>
+        <input type="text" class="form-control" id="team_name" name="team_name" value="{{ team.Team }}" required>
+    </div>
+    <div class="form-group">
+        <label for="rank">Rank</label>
+        <input type="number" class="form-control" id="rank" name="rank" value="{{ team.Rank }}" required>
+    </div>    
+    <div class="form-group">
+        <label for="team_division">Team Division</label>
+        <input type="text" class="form-control" id="team_division" name="team_division" value="{{ team.TeamDivision }}" required>
+    </div>    
+    <div class="form-group">
+        <label for="games_played">Games Played</label>
+        <input type="number" class="form-control" id="games_played" name="games_played" value="{{ team.GamesPlayed }}" required>
+    </div>    
+    <div class="form-group">
+        <label for="wins">Wins</label>
+        <input type="number" class="form-control" id="wins" name="wins" value="{{ team.Wins }}" required>
+    </div>
+    <div class="form-group">
+        <label for="losses">Losses</label>
+        <input type="number" class="form-control" id="losses" name="losses" value="{{ team.Losses }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Update Team</button>
+</form>
+
+<div class="text-left my-3">
+    <a href="{{ url_for('teams_page') }}" class="btn btn-secondary">Back to Teams</a>
+</div>
+
+{% endblock %}
