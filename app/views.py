@@ -123,19 +123,23 @@ def fielding_page():
     league = request.args.getlist("league")
     year = request.args.get("year", "")
     position = request.args.get("position", "")
-    action = request.args.get("action")
+    action = request.args.get("action", "")
 
     leagues = Teams.get_all_leagues()
     fielding_records = []
+    top_fielding_players = []
 
-    if league or player_id or year or position:
+    if action == "view_all_data":
+        fielding_records = Fielding.get_all_fielding()
+    elif action == "view_top_players":
+        top_fielding_players = Fielding.get_top_fielding_players(year)
+    elif player_id or league or year or position:
         fielding_records = Fielding.filter_fielding(
             leagues=league,
             player_id=player_id,
             year=year,
             position=position
         )
-    
 
     return render_template(
         "fielding.html",
@@ -144,6 +148,7 @@ def fielding_page():
         player_id=player_id,
         year=year,
         position=position,
+        top_fielding_players=top_fielding_players
     )
 
 def add_fielding_page():
@@ -206,6 +211,9 @@ def delete_fielding_record(record_id):
     except Exception as e:
         flash(f"An error occurred while deleting the record: {e}", "danger")
     return redirect(url_for("fielding_page"))
+
+
+
 
 def batting_page():
     year_query = request.args.get("year", "")

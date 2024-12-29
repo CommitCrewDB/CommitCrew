@@ -283,3 +283,47 @@ class Fielding:
             if connection.is_connected():
                 cursor.close()
                 connection.close()
+    @staticmethod
+    def get_top_fielding_players(year):
+        try:
+            connection = create_connection()
+            if connection is None:
+                print("Database connection failed.")
+                return []
+            
+            query = """
+                SELECT 
+                    f.playerID, 
+                    m.nameFirst, 
+                    m.nameLast, 
+                    f.yearID, 
+                    f.lgID, 
+                    f.POS, 
+                    SUM(f.PO) AS total_putouts, 
+                    SUM(f.A) AS total_assists, 
+                    SUM(f.G) AS games_played
+                FROM 
+                    fielding AS f
+                JOIN 
+                    master AS m ON f.playerID = m.playerID
+                WHERE 
+                    f.yearID = %s
+                GROUP BY 
+                    f.POS, f.playerID, f.lgID
+                ORDER BY 
+                    total_putouts DESC, total_assists DESC
+            """
+            
+            with connection.cursor(dictionary=True) as cursor:
+                cursor.execute(query, (year,))
+                results = cursor.fetchall()
+            
+            connection.close()
+            return results
+
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            return []
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return []
