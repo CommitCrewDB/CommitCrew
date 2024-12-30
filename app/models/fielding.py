@@ -42,59 +42,6 @@ class Fielding:
         self.CS = CS
         self.ZR = ZR or 0
 
-    @staticmethod
-    def get_all_fielding():
-        try:
-            connection = create_connection()
-            if connection is None:
-                print("Database connection failed.")
-                return
-            cursor = connection.cursor() 
-
-            query = """
-                SELECT 
-                    playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, 
-                    PO, A, E, DP, PB, WP, SB
-                FROM fielding
-            """
-            cursor.execute(query)
-            fielding_records = []
-
-            for row in cursor.fetchall():
-                fielding_records.append(Fielding(*row))
-
-            cursor.close()
-            connection.close()
-            return fielding_records
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return []
-
-    @staticmethod
-    def search_by_position(position):
-        try:
-            connection = create_connection()
-            if connection is None:
-                print("Database connection failed.")
-                return
-            cursor = connection.cursor() 
-
-            query = """
-                SELECT 
-                    playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, 
-                    PO, A, E, DP, PB, WP, SB
-                FROM fielding
-                WHERE POS LIKE %s
-            """
-            cursor.execute(query, (f"%{position}%",))
-            fielding_records = [Fielding(*row) for row in cursor.fetchall()]
-
-            cursor.close()
-            connection.close()
-            return fielding_records
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return []
             
     @staticmethod
     def filter_fielding(player_id=None, year=None, position=None, leagues=None, sort_by=None, sort_order="asc"):
