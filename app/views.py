@@ -121,6 +121,7 @@ def fielding_page():
     year = request.args.get("year", "")
     position = request.args.get("position", "")
     sort_by = request.args.get("sort_by", "")
+    sort_order = request.args.get("sort_order", "asc")
     action = request.args.get("action", "")
 
     leagues = Teams.get_all_leagues()
