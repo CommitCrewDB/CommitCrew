@@ -487,10 +487,9 @@ def pitching_page():
 
         cursor = connection.cursor(dictionary=True)
 
-
+        # Fetch leagues once
         cursor.execute("SELECT DISTINCT league FROM leagues")
         leagues = [row["league"] for row in cursor.fetchall()]
-
 
         valid_sort_columns = [
             "yearID", "playerID", "W", "L", "ERA", "G", "GS", "CG", "SHO", "SV",
@@ -504,7 +503,8 @@ def pitching_page():
         if show_data:
             query = """
                 SELECT 
-                    p.id, pl.nameFirst, pl.nameLast, p.yearID, p.stint, t.name AS teamName, l.league AS leagueName, 
+                    p.id, pl.nameFirst, pl.nameLast, p.yearID, p.stint, 
+                    t.name AS teamName, l.league AS leagueName, 
                     p.W, p.L, p.ERA, p.G, p.GS, p.CG, p.SHO, p.SV, 
                     p.IPouts, p.H, p.ER, p.HR, p.BB, p.SO, p.BAOpp
                 FROM pitching p
@@ -518,7 +518,7 @@ def pitching_page():
             count_query = """
                 SELECT COUNT(*) AS total
                 FROM pitching p
-                INNER JOIN leagues l ON p.lgID = l.lgID
+                LEFT JOIN leagues l ON p.lgID = l.lgID
                 WHERE 1=1
             """
             params = []
@@ -532,13 +532,14 @@ def pitching_page():
                 params.append(year)
                 count_params.append(year)
 
-            # Add filters for player name and league
+            # Add player name filter
             if player_name:
                 query += " AND (pl.nameFirst LIKE %s OR pl.nameLast LIKE %s)"
                 count_query += " AND (pl.nameFirst LIKE %s OR pl.nameLast LIKE %s)"
                 params.extend([f"%{player_name}%", f"%{player_name}%"])
                 count_params.extend([f"%{player_name}%", f"%{player_name}%"])
 
+            # Add league filter
             if league:
                 query += " AND l.league = %s"
                 count_query += " AND l.league = %s"
@@ -549,8 +550,7 @@ def pitching_page():
             offset = (page - 1) * per_page
             query += f" ORDER BY {sort_by} {order.upper()} LIMIT %s OFFSET %s"
             params.extend([per_page, offset])
-            cursor.execute("SELECT DISTINCT league FROM leagues")
-            leagues = [row["league"] for row in cursor.fetchall()]
+
             cursor.execute(query, params)
             results = cursor.fetchall()
 
@@ -571,12 +571,14 @@ def pitching_page():
         data=results,
         year=year,
         player_name=player_name,
+        league=league,
         sort_by=sort_by,
         order=order,
         page=page,
         total_pages=total_pages,
         leagues=leagues,
     )
+
 
 
 def add_pitching_page():
