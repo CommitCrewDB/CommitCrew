@@ -3,6 +3,7 @@
 Fielding
 {% endblock %}
 {% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='fielding.css') }}">
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
@@ -11,6 +12,32 @@ Fielding
 <div class="text-right my-3">
     <a href="{{ url_for('add_fielding_page') }}" class="btn btn-success">Add New Fielding Record</a>
 </div>
+
+<div class="info-container">
+    <p>
+        This page displays data from the <strong>Lahman Baseball Database</strong>, specifically from the 
+        <strong>Fielding</strong> table. This table provides detailed statistics about players' defensive 
+        performances, including metrics like <strong>games played, innings, putouts, assists, errors</strong>, 
+        and more.
+    </p>
+    <p>
+        Use the filters below to narrow down your search and explore specific players, leagues, positions, or years. 
+        You can also sort the data by metrics like games, innings, or year for easier analysis.
+    </p>
+    <ul>
+        <li><strong>Player ID:</strong> The unique identifier for each player.</li>
+        <li><strong>Year:</strong> The year the performance data is recorded.</li>
+        <li><strong>League:</strong> The league the player participated in.</li>
+        <li><strong>Position:</strong> The defensive position played by the player.</li>
+        <li><strong>Games:</strong> The number of games the player participated in.</li>
+        <li><strong>Innings:</strong> Total innings (in outs) played defensively.</li>
+        <li><strong>Putouts:</strong> The number of outs directly recorded by the player.</li>
+        <li><strong>Assists:</strong> The number of assists made by the player.</li>
+        <li><strong>Errors:</strong> The number of fielding errors committed.</li>
+        <li><strong>Double Plays:</strong> The number of double plays the player participated in.</li>
+    </ul>
+</div>
+
 
 <!-- Search and Filter Form -->
 <form method="get" action="{{ url_for('fielding_page') }}" class="search-form filter-form">
@@ -66,6 +93,24 @@ Fielding
                 value="{{ request.args.get('position', '') }}"
             />
         </div>
+        <div class="form-group">
+            <label for="sort_by">Sort By</label>
+            <select name="sort_by" id="sort_by" class="form-control">
+                <option value="">Select</option>
+                <option value="games" {% if request.args.get('sort_by') == 'games' %}selected{% endif %}>Games</option>
+                <option value="innings" {% if request.args.get('sort_by') == 'innings' %}selected{% endif %}>Innings</option>
+                <option value="year" {% if request.args.get('sort_by') == 'year' %}selected{% endif %}>Year</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="sort_order">Order</label>
+            <select name="sort_order" id="sort_order" class="form-control">
+                <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>Ascending</option>
+                <option value="desc" {% if request.args.get('sort_order') == 'desc' %}selected{% endif %}>Descending</option>
+            </select>
+        </div>
+          
         <!-- Submit and Reset Buttons -->
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Filter</button>
@@ -121,13 +166,18 @@ Fielding
                         <td>{{ record.CS }}</td>
                         <td>{{ record.ZR }}</td>
                         <td>
-                            <!-- Update Button -->
-                            <a href="{{ url_for('update_fielding_page', record_id=record.ID) }}" class="btn btn-warning btn-sm">
-                                <i class="fas fa-edit"></i> Update
-                            </a> 
-                            <form method="POST" action="{{ url_for('delete_fielding_record', record_id=record.ID) }}" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
-                            </form>                                    
+                            <form action="{{ url_for('update_fielding_page', record_id=record.ID) }}" method="get" style="display:inline; border: none; margin: 0; padding: 0;">
+                                <button type="submit" class="btn btn-dark btn-sm" style="margin-right: 5px; background-color: #002d62;">
+                                    <i class="fas fa-edit"></i> Update
+                                </button>
+                            </form>
+                        
+                            <!-- Delete Button -->
+                            <form method="POST" action="{{ url_for('delete_fielding_record', record_id=record.ID) }}" style="display:inline; border: none; margin: 0; padding: 0;">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash-alt"></i>  Delete
+                                </button>
+                            </form>                             
                         </td>
                     </tr>
                 {% endfor %}

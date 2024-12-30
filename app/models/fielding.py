@@ -97,7 +97,7 @@ class Fielding:
             return []
             
     @staticmethod
-    def filter_fielding(player_id=None, year=None, position=None, leagues=None):
+    def filter_fielding(player_id=None, year=None, position=None, leagues=None, sort_by=None, sort_order="asc"):
         try:
             connection = create_connection()
             if connection is None:
@@ -105,7 +105,7 @@ class Fielding:
                 return []
             cursor = connection.cursor()
 
-            query = """
+            query = """ 
                 SELECT ID, playerID, yearID, stint, teamID, lgID, POS, G, GS, InnOuts, PO, A, E, DP, PB, WP, SB, CS, ZR
                 FROM fielding
                 WHERE 1=1
@@ -124,6 +124,14 @@ class Fielding:
             if position:
                 query += " AND POS = %s"
                 params.append(position)
+
+            if sort_by in ["games", "innings", "year"]:
+                column_map = {
+                    "games": "G",
+                    "innings": "InnOuts",
+                    "year": "yearID"
+                }
+                query += f" ORDER BY {column_map[sort_by]} {sort_order.upper()}"
 
             cursor.execute(query, tuple(params))
             results = [Fielding(*row) for row in cursor.fetchall()]
