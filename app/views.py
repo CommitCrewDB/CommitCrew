@@ -120,6 +120,7 @@ def fielding_page():
     league = request.args.getlist("league")
     year = request.args.get("year", "")
     position = request.args.get("position", "")
+    sort_by = request.args.get("sort_by", "")
     action = request.args.get("action", "")
 
     leagues = Teams.get_all_leagues()
@@ -128,12 +129,14 @@ def fielding_page():
 
     if action == "view_top_players":
         top_fielding_players = Fielding.get_top_fielding_players(year)
-    elif player_id or league or year or position:
+    elif player_id or league or year or position or sort_by:
         fielding_records = Fielding.filter_fielding(
             leagues=league,
             player_id=player_id,
             year=year,
-            position=position
+            position=position,
+            sort_by=sort_by,
+            sort_order=sort_order
         )
 
     return render_template(
