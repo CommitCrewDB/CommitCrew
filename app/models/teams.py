@@ -35,56 +35,6 @@ class Teams:
         self.Losses = Losses
 
     @staticmethod
-    def get_all_teams():
-        try:
-            connection = create_connection()
-            if connection is None:
-                print("Database connection failed.")
-                return
-            cursor = connection.cursor()  
-
-            query = """
-                SELECT 
-                    ID, yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
-                FROM teams
-            """
-            cursor.execute(query)
-            teams = []
-            for row in cursor.fetchall():
-                teams.append(Teams(*row))
-
-            cursor.close()
-            connection.close()
-            return teams
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return []
-
-    @staticmethod
-    def search_by_name(team_name):
-        try:
-            connection = create_connection()
-            if connection is None:
-                print("Database connection failed.")
-                return
-            cursor = connection.cursor()  
-
-            query = """
-                SELECT yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L 
-                FROM teams
-                WHERE name LIKE %s
-            """
-            cursor.execute(query, (f"%{team_name}%",))
-            teams = [Teams(*row) for row in cursor.fetchall()]
-
-            cursor.close()
-            connection.close()
-            return teams
-        except mysql.connector.Error as err:
-            print(f"Error: {err}")
-            return []
-
-    @staticmethod
     def get_top_teams_by_league():
         try:
             connection = create_connection()

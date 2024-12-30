@@ -27,9 +27,6 @@ def teams_page():
             team_name=team_name_filter,
             sort_by=sort_by
         )
-    if search_query:
-        teams = Teams.search_by_name(search_query)
-
     if action == 'view_top_teams_byLeague':
         top_teams_league = Teams.get_top_teams_by_league()
         return render_template("teams.html", top_teams_league=top_teams_league)
@@ -361,70 +358,66 @@ def delete_batting_record(record_id):
 
 def master_page():
     search_query = request.args.get("search", "")
-    action = request.args.get('action')
+    birth_country_filter = request.args.get("birth_country", "")
+    birth_year_filter = request.args.get("birth_year", "")
+    death_year_filter = request.args.get("death_year", "")
+    player_name_filter = request.args.get("player_name", "")
     sort_by = request.args.get("sort_by", "")
+    action = request.args.get("action", "")
 
     players = []
-    if action == 'view_all':
-        players = Master.get_all_players()
-        return render_template("master.html", players=players)
 
+    if birth_country_filter or birth_year_filter or death_year_filter or player_name_filter or sort_by:
+        players = Master.filter_master(
+            birth_country=birth_country_filter,
+            birth_year=birth_year_filter,
+            death_year=death_year_filter,
+            player_name=player_name_filter,
+            sort_by=sort_by
+        )
     if search_query:
         players = Master.search_by_name(search_query)
 
-    if action == 'view_top_players':
-        top_players = Master.get_top_players()
-        return render_template("master.html", top_players=top_players)
-    
-    if request.method == "POST":
-        action = request.form.get("action")
-        player_id = request.form.get("player_id")
+    if action == 'view_top_players_byLeague':
+        top_players_league = Master.get_top_players_by_league("stat", top_n=10)
+        return render_template("master.html", top_players_league=top_players_league)
 
-        if action == "delete":
-            if not player_id:
-                flash("Player ID is required to delete a player.", "danger")
-            else:
-                try:
-                    Master.delete_player(player_id)
-                    flash(f"Player with ID {player_id} deleted successfully!", "success")
-                except Exception as e:
-                    print(f"Error while deleting player: {e}")
-                    flash(f"An error occurred while deleting player: {e}", "danger")
-            return redirect(url_for("master_page"))
+    if action == 'view_top_players_byYear':
+        year = request.args.get("year", 1900)  # Örnek varsayılan yıl
+        top_players_year = Master.get_top_players_by_year("stat", year, top_n=10)
+        return render_template("master.html", top_players_year=top_players_year)
 
     return render_template("master.html", players=players)
 
-def add_player_page():
-    if request.method == "POST":
-        name_first = request.form.get("nameFirst")
-        name_last = request.form.get("nameLast")
-        birth_year = request.form.get("birthYear")
-        birth_month = request.form.get("birthMonth")
-        birth_day = request.form.get("birthDay")
-        weight = request.form.get("weight")
-        height = request.form.get("height")
-        bats = request.form.get("bats")
-        throws = request.form.get("throws")
-        debut = request.form.get("debut")
-        final_game = request.form.get("finalGame")
-        bbref_id = request.form.get("bbrefID")
-        retro_id = request.form.get("retroID")
 
+def add_master_page():
+    if request.method == "POST":
         try:
             player_data = {
-                "nameFirst": name_first,
-                "nameLast": name_last,
-                "birthYear": birth_year,
-                "birthMonth": birth_month,
-                "birthDay": birth_day,
-                "weight": weight,
-                "height": height,
-                "bats": bats,
-                "throws": throws,
-                "debut": debut,
-                "finalGame": final_game,
-                "bbrefID": bbref_id,
-                "retroID": retro_id,
+                "playerID": request.form.get("player_id"),
+                "birthYear": request.form.get("birth_year"),
+                "birthMonth": request.form.get("birth_month"),
+                "birthDay": request.form.get("birth_day"),
+                "birthCity": request.form.get("birth_city"),
+                "birthCountry": request.form.get("birth_country"),
+                "birthState": request.form.get("birth_state"),
+                "deathYear": request.form.get("death_year"),
+                "deathMonth": request.form.get("death_month"),
+                "deathDay": request.form.get("death_day"),
+                "deathCountry": request.form.get("death_country"),
+                "deathState": request.form.get("death_state"),
+                "deathCity": request.form.get("death_city"),
+                "nameFirst": request.form.get("first_name"),
+                "nameLast": request.form.get("last_name"),
+                "nameGiven": request.form.get("given_name"),
+                "weight": request.form.get("weight"),
+                "height": request.form.get("height"),
+                "bats": request.form.get("bats"),
+                "throws": request.form.get("throws"),
+                "debut": request.form.get("debut"),
+                "bbrefID": request.form.get("bbref_id"),
+                "finalGame": request.form.get("final_game"),
+                "retroID": request.form.get("retro_id"),
             }
             Master.add_player(player_data)
             flash("New player added successfully!", "success")
@@ -434,32 +427,37 @@ def add_player_page():
 
     return render_template("addmaster.html")
 
-def update_player_page(player_id):
-    if request.method == 'POST':
-        # Form verilerini al ve güncelle
-        updated_data = {
-            "nameFirst": request.form.get("nameFirst", ""),
-            "nameLast": request.form.get("nameLast", ""),
-            "birthYear": request.form.get("birthYear", 0),
-            "birthMonth": request.form.get("birthMonth", 0),
-            "birthDay": request.form.get("birthDay", 0),
-            "weight": request.form.get("weight", 0),
-            "height": request.form.get("height", 0),
-            "bats": request.form.get("bats", ""),
-            "throws": request.form.get("throws", ""),
-            "debut": request.form.get("debut", ""),
-            "finalGame": request.form.get("finalGame", ""),
-            "bbrefID": request.form.get("bbrefID", ""),
-            "retroID": request.form.get("retroID", ""),
-        }
 
-        Master.update_player(player_id, updated_data)
-        flash("Player updated successfully!", "success")
-        return redirect(url_for('master_page'))
-    else:
-        # Güncelleme formunu görüntülemek için oyuncu verilerini al
-        player = Master.get_player_by_id(player_id)
-        return render_template('update_master.html', player=player)
+def update_master_page(player_id):
+    if request.method == "POST":
+        try:
+            updated_data = {
+                "nameFirst": request.form.get("first_name"),
+                "nameLast": request.form.get("last_name"),
+                "birthYear": request.form.get("birth_year"),
+                "birthMonth": request.form.get("birth_month"),
+                "birthDay": request.form.get("birth_day"),
+                "weight": request.form.get("weight"),
+                "height": request.form.get("height"),
+            }
+            Master.update_player(player_id, updated_data)
+            flash("Player updated successfully!", "success")
+            return redirect(url_for("master_page"))
+        except Exception as e:
+            flash(f"An error occurred: {e}", "danger")
+
+    player = Master.get_player_by_id(player_id)
+    return render_template("update_master.html", player=player)
+
+
+def delete_master(player_id):
+    try:
+        Master.delete_player(player_id)
+        flash("Player deleted successfully!", "success")
+    except Exception as e:
+        flash(f"An error occurred while deleting the player: {e}", "danger")
+
+    return redirect(url_for("master_page"))
 
 
 def about_page():
