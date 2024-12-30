@@ -358,7 +358,6 @@ def delete_batting_record(record_id):
     else:
         flash("Invalid request method for deletion.", "danger")
     return redirect(url_for("batting_page"))
-from flask import request, render_template, flash, redirect, url_for
 
 def master_page():
     search_query = request.args.get("search", "")
@@ -490,13 +489,10 @@ def pitching_page():
 
         cursor = connection.cursor(dictionary=True)
 
-        # Fetch league names
-        league_query = """
-            SELECT DISTINCT lgID, league
-            FROM leagues
-        """
-        cursor.execute(league_query)
-        leagues = cursor.fetchall()
+
+        cursor.execute("SELECT DISTINCT league FROM leagues")
+        leagues = [row["league"] for row in cursor.fetchall()]
+
 
         valid_sort_columns = [
             "yearID", "playerID", "W", "L", "ERA", "G", "GS", "CG", "SHO", "SV",
@@ -524,11 +520,7 @@ def pitching_page():
             count_query = """
                 SELECT COUNT(*) AS total
                 FROM pitching p
-                LEFT JOIN master pl ON p.playerID = pl.playerID
-                LEFT JOIN teams t ON p.teamID = t.teamID
-                    AND p.yearID = t.yearID
-                    AND p.lgID = t.lgID
-                LEFT JOIN leagues l ON p.lgID = l.lgID
+                INNER JOIN leagues l ON p.lgID = l.lgID
                 WHERE 1=1
             """
             params = []
@@ -559,7 +551,8 @@ def pitching_page():
             offset = (page - 1) * per_page
             query += f" ORDER BY {sort_by} {order.upper()} LIMIT %s OFFSET %s"
             params.extend([per_page, offset])
-
+            cursor.execute("SELECT DISTINCT league FROM leagues")
+            leagues = [row["league"] for row in cursor.fetchall()]
             cursor.execute(query, params)
             results = cursor.fetchall()
 
@@ -614,16 +607,37 @@ def add_pitching_page():
                 'BAOpp': request.form.get('BAOpp') or 0.0,
             }
 
-            print(f"Form data received: {data}")  # Debug message
-            
-            success = Pitching.add_pitching(data)
-            if success:
-                flash("Successfully added a new record!", "success")
-            else:
-                flash("Failed to add pitching data.", "danger")
+            # Establish database connection
+            connection = create_connection()
+            if not connection:
+                flash("Database connection failed.", "danger")
+                return redirect(url_for('pitching_page'))
+
+            with connection.cursor(dictionary=True) as cursor:
+                # Check for duplicate entry
+                check_query = """
+                    SELECT COUNT(*) AS count FROM pitching 
+                    WHERE playerID = %s AND yearID = %s AND stint = %s
+                """
+                cursor.execute(check_query, (data["playerID"], data["yearID"], data["stint"]))
+                result = cursor.fetchone()
+
+                if result["count"] > 0:
+                    flash("Duplicate entry detected: A record with the same Player ID, Year, and Stint already exists.", "danger")
+                    return redirect(url_for("pitching_page"))
+
+                # Add the new pitching record
+                if Pitching.add_pitching(data):
+                    flash("Successfully added a new record!", "success")
+                else:
+                    flash("Failed to add pitching data.", "danger")
+
         except Exception as e:
-            flash(f"An error occurred while adding the record: {e}", "danger")
-            print(f"Error: {e}")  # Debug message
+            flash(f"An error occurred: {e}", "danger")
+            print(f"Error adding pitching data: {e}")
+        finally:
+            if connection:
+                connection.close()
 
         return redirect(url_for('pitching_page'))
 
@@ -705,7 +719,6 @@ def update_pitching_data(id):
             "SO": request.form.get("SO"),
             "BAOpp": request.form.get("BAOpp"),
         }
-        # Call the Pitching update function
         success = Pitching.update_pitching(record_id=id, updated_data=updated_data)
         if success:
             flash("Data updated successfully!", "success")

@@ -32,10 +32,10 @@
     
             <!-- League Dropdown -->
             <label for="league">Choose League:</label>
-            <select name="league" id="league" class="form-select">
-                <option value="" {% if not league %}selected{% endif %}>All Leagues</option>
+            <select name="league" id="league">
+                <option value="" {% if league == '' %}selected{% endif %}>All</option>
                 {% for lg in leagues %}
-                <option value="{{ lg.lgID }}" {% if lg.lgID == league %}selected{% endif %}>{{ lg.league }} ({{ lg.lgID }})</option>
+                <option value="{{ lg }}" {% if league == lg %}selected{% endif %}>{{ lg }}</option>
                 {% endfor %}
             </select>
     
@@ -56,6 +56,7 @@
             <!-- Filter Form Buttons -->
             <div class="form-buttons">
                 <button type="submit" class="btn btn-primary filter-btn">Apply Filters</button>
+
                 <button type="reset" class="btn btn-secondary reset-btn">Reset Filters</button>
                 <button class="btn btn-primary show-data-btn" onclick="location.href='{{ url_for('pitching_page', show_data=1) }}'">Show Data</button>
             </div>
