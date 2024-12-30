@@ -27,9 +27,6 @@ def teams_page():
             team_name=team_name_filter,
             sort_by=sort_by
         )
-    if search_query:
-        teams = Teams.search_by_name(search_query)
-
     if action == 'view_top_teams_byLeague':
         top_teams_league = Teams.get_top_teams_by_league()
         return render_template("teams.html", top_teams_league=top_teams_league)
