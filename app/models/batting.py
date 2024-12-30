@@ -57,6 +57,162 @@ class Batting:
         return cursor.fetchall()
 
     @staticmethod
+    def get_batting_average_by_year():
+        connection = get_db()
+        cursor = connection.cursor(dictionary=True)
+        query = """
+            WITH BattingWithAverage AS (
+                SELECT 
+                    CONCAT(m.nameFirst, ' ', m.nameLast) AS playerName,
+                    b.playerID,
+                    b.yearID,
+                    b.teamID,
+                    t.name AS teamName,
+                    b.lgID,
+                    b.stint,
+                    b.AB,
+                    b.H,
+                    CASE 
+                        WHEN b.AB > 0 THEN CAST(b.H AS FLOAT) / b.AB 
+                        ELSE 0 
+                    END AS battingAverage
+                FROM batting b
+                LEFT JOIN master m ON b.playerID = m.playerID
+                LEFT JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID AND b.lgID = t.lgID
+            ),
+            YearlyStats AS (
+                SELECT 
+                    yearID,
+                    MAX(battingAverage) AS maxBattingAverage,
+                    AVG(battingAverage) AS avgBattingAverage
+                FROM BattingWithAverage
+                GROUP BY yearID
+            )
+            SELECT 
+                b.playerName,
+                b.playerID,
+                b.yearID,
+                b.teamID,
+                b.teamName,
+                b.lgID,
+                b.stint,
+                b.AB,
+                b.H,
+                b.battingAverage,
+                y.avgBattingAverage
+            FROM BattingWithAverage b
+            JOIN YearlyStats y
+                ON b.yearID = y.yearID AND b.battingAverage = y.maxBattingAverage
+            ORDER BY b.yearID DESC;
+        """
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def get_batting_average_by_team():
+        connection = get_db()
+        cursor = connection.cursor(dictionary=True)
+        query = """
+            WITH BattingWithAverage AS (
+                SELECT 
+                    CONCAT(m.nameFirst, ' ', m.nameLast) AS playerName,
+                    b.playerID,
+                    b.yearID,
+                    b.teamID,
+                    t.name AS teamName,
+                    b.lgID,
+                    b.stint,
+                    b.AB,
+                    b.H,
+                    CASE 
+                        WHEN b.AB > 0 THEN CAST(b.H AS FLOAT) / b.AB 
+                        ELSE 0 
+                    END AS battingAverage
+                FROM batting b
+                LEFT JOIN master m ON b.playerID = m.playerID
+                LEFT JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID AND b.lgID = t.lgID
+            ),
+            TeamStats AS (
+                SELECT 
+                    teamID,
+                    MAX(battingAverage) AS maxBattingAverage,
+                    AVG(battingAverage) AS avgBattingAverage
+                FROM BattingWithAverage
+                GROUP BY teamID
+            )
+            SELECT 
+                b.playerName,
+                b.playerID,
+                b.yearID,
+                b.teamID,
+                b.teamName,
+                b.lgID,
+                b.stint,
+                b.AB,
+                b.H,
+                b.battingAverage,
+                t.avgBattingAverage
+            FROM BattingWithAverage b
+            JOIN TeamStats t
+                ON b.teamID = t.teamID AND b.battingAverage = t.maxBattingAverage
+            ORDER BY b.teamID;
+        """
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    @staticmethod
+    def get_batting_average_by_league():
+        connection = get_db()
+        cursor = connection.cursor(dictionary=True)
+        query = """
+            WITH BattingWithAverage AS (
+                SELECT 
+                    CONCAT(m.nameFirst, ' ', m.nameLast) AS playerName,
+                    b.playerID,
+                    b.yearID,
+                    b.teamID,
+                    t.name AS teamName,
+                    b.lgID,
+                    b.stint,
+                    b.AB,
+                    b.H,
+                    CASE 
+                        WHEN b.AB > 0 THEN CAST(b.H AS FLOAT) / b.AB 
+                        ELSE 0 
+                    END AS battingAverage
+                FROM batting b
+                LEFT JOIN master m ON b.playerID = m.playerID
+                LEFT JOIN teams t ON b.teamID = t.teamID AND b.yearID = t.yearID AND b.lgID = t.lgID
+            ),
+            LeagueStats AS (
+                SELECT 
+                    lgID,
+                    MAX(battingAverage) AS maxBattingAverage,
+                    AVG(battingAverage) AS avgBattingAverage
+                FROM BattingWithAverage
+                GROUP BY lgID
+            )
+            SELECT 
+                b.playerName,
+                b.playerID,
+                b.yearID,
+                b.teamID,
+                b.teamName,
+                b.lgID,
+                b.stint,
+                b.AB,
+                b.H,
+                b.battingAverage,
+                l.avgBattingAverage
+            FROM BattingWithAverage b
+            JOIN LeagueStats l
+                ON b.lgID = l.lgID AND b.battingAverage = l.maxBattingAverage
+            ORDER BY b.lgID;
+        """
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    @staticmethod
     def search_batting(year=None, team=None, leagues=None, player=None, sort_by=None, sort_order="asc"):
         connection = get_db()
         cursor = connection.cursor(dictionary=True)

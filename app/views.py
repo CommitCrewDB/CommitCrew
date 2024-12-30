@@ -210,9 +210,6 @@ def delete_fielding_record(record_id):
         flash(f"An error occurred while deleting the record: {e}", "danger")
     return redirect(url_for("fielding_page"))
 
-
-
-
 def batting_page():
     year_query = request.args.get("year", "")
     team_query = request.args.get("team", "")
@@ -230,10 +227,16 @@ def batting_page():
     active_leagues = [league for league in leagues if league["active"] == "Y"]
     inactive_leagues = [league for league in leagues if league["active"] != "Y"]
 
+    batting_records = []
+    total_records = 0
+    batting_avg_by_year = []
+    batting_avg_by_team = []
+    batting_avg_by_league = []
+
     if action == "view_all_data":
         total_records = Batting.get_total_batting_records()
         batting_records = Batting.get_paginated_batting(offset, per_page)
-    elif year_query or team_query or league_query or player_query or sort_by:
+    elif action == "search":
         batting_records = Batting.search_batting(
             year=year_query,
             team=team_query,
@@ -244,9 +247,18 @@ def batting_page():
         )
         total_records = len(batting_records)
         batting_records = batting_records[offset:offset + per_page]
-    else:
-        batting_records = []
-        total_records = 0
+    elif action == "view_batting_average_by_year":
+        batting_avg_by_year = Batting.get_batting_average_by_year()
+        total_records = len(batting_avg_by_year)
+        batting_avg_by_year = batting_avg_by_year[offset:offset + per_page]
+    elif action == "view_batting_average_by_team":
+        batting_avg_by_team = Batting.get_batting_average_by_team()
+        total_records = len(batting_avg_by_team)
+        batting_avg_by_team = batting_avg_by_team[offset:offset + per_page]
+    elif action == "view_batting_average_by_league":
+        batting_avg_by_league = Batting.get_batting_average_by_league()
+        total_records = len(batting_avg_by_league)
+        batting_avg_by_league = batting_avg_by_league[offset:offset + per_page]
 
     total_pages = (total_records + per_page - 1) // per_page
     start_page = max(1, page - 2)
@@ -255,6 +267,9 @@ def batting_page():
     return render_template(
         "batting.html",
         batting_records=batting_records,
+        batting_avg_by_year=batting_avg_by_year,
+        batting_avg_by_team=batting_avg_by_team,
+        batting_avg_by_league=batting_avg_by_league,
         year_query=year_query,
         team_query=team_query,
         league_query=league_query,
