@@ -1,15 +1,12 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Update Player
+Update Player Record
 {% endblock %}
 
 {% block content %}
-<h1 class="text-center my-4">Update Player</h1>
+<h1 class="text-center my-4">Update Player Record</h1>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
-
-<!-- Flash Messages -->
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div>
@@ -20,58 +17,60 @@ Update Player
   {% endif %}
 {% endwith %}
 
-<form method="POST" action="{{ url_for('update_player_page', player_id=player.ID) }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
+
+<form method="POST" action="{{ url_for('update_master_page', player_id=player.playerID) }}">
     <div class="form-group">
-        <label for="nameFirst">First Name</label>
-        <input type="text" class="form-control" id="nameFirst" name="nameFirst" value="{{ player.nameFirst }}" required>
+        <label for="first_name">First Name</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" value="{{ player.nameFirst }}" required>
     </div>
     <div class="form-group">
-        <label for="nameLast">Last Name</label>
-        <input type="text" class="form-control" id="nameLast" name="nameLast" value="{{ player.nameLast }}" required>
+        <label for="last_name">Last Name</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" value="{{ player.nameLast }}" required>
     </div>
     <div class="form-group">
-        <label for="birthYear">Birth Year</label>
-        <input type="number" class="form-control" id="birthYear" name="birthYear" value="{{ player.birthYear }}" required>
+        <label for="given_name">Given Name</label>
+        <input type="text" class="form-control" id="given_name" name="given_name" value="{{ player.nameGiven }}">
     </div>
     <div class="form-group">
-        <label for="birthMonth">Birth Month</label>
-        <input type="number" class="form-control" id="birthMonth" name="birthMonth" value="{{ player.birthMonth }}" required>
+        <label for="birth_year">Birth Year</label>
+        <input type="number" class="form-control" id="birth_year" name="birth_year" value="{{ player.birthYear }}" required>
     </div>
     <div class="form-group">
-        <label for="birthDay">Birth Day</label>
-        <input type="number" class="form-control" id="birthDay" name="birthDay" value="{{ player.birthDay }}" required>
+        <label for="birth_month">Birth Month</label>
+        <input type="number" class="form-control" id="birth_month" name="birth_month" value="{{ player.birthMonth }}">
+    </div>
+    <div class="form-group">
+        <label for="birth_day">Birth Day</label>
+        <input type="number" class="form-control" id="birth_day" name="birth_day" value="{{ player.birthDay }}">
     </div>
     <div class="form-group">
         <label for="weight">Weight</label>
-        <input type="number" class="form-control" id="weight" name="weight" value="{{ player.weight }}" required>
+        <input type="number" class="form-control" id="weight" name="weight" value="{{ player.weight }}">
     </div>
     <div class="form-group">
         <label for="height">Height</label>
-        <input type="number" class="form-control" id="height" name="height" value="{{ player.height }}" required>
+        <input type="number" class="form-control" id="height" name="height" value="{{ player.height }}">
     </div>
     <div class="form-group">
         <label for="bats">Bats</label>
-        <input type="text" class="form-control" id="bats" name="bats" value="{{ player.bats }}" required>
+        <input type="text" class="form-control" id="bats" name="bats" value="{{ player.bats }}">
     </div>
     <div class="form-group">
         <label for="throws">Throws</label>
-        <input type="text" class="form-control" id="throws" name="throws" value="{{ player.throws }}" required>
+        <input type="text" class="form-control" id="throws" name="throws" value="{{ player.throws }}">
     </div>
     <div class="form-group">
         <label for="debut">Debut</label>
-        <input type="date" class="form-control" id="debut" name="debut" value="{{ player.debut }}" required>
+        <input type="date" class="form-control" id="debut" name="debut" value="{{ player.debut }}">
     </div>
     <div class="form-group">
-        <label for="finalGame">Final Game</label>
-        <input type="date" class="form-control" id="finalGame" name="finalGame" value="{{ player.finalGame }}">
+        <label for="final_game">Final Game</label>
+        <input type="date" class="form-control" id="final_game" name="final_game" value="{{ player.finalGame }}">
     </div>
     <div class="form-group">
-        <label for="bbrefID">BBRef ID</label>
-        <input type="text" class="form-control" id="bbrefID" name="bbrefID" value="{{ player.bbrefID }}">
-    </div>
-    <div class="form-group">
-        <label for="retroID">Retro ID</label>
-        <input type="text" class="form-control" id="retroID" name="retroID" value="{{ player.retroID }}">
+        <label for="retro_id">Retro ID</label>
+        <input type="text" class="form-control" id="retro_id" name="retro_id" value="{{ player.retroID }}">
     </div>
     <button type="submit" class="btn btn-primary">Update Player</button>
 </form>

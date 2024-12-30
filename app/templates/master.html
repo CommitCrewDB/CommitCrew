@@ -1,31 +1,43 @@
 {% extends "layout.html" %}
 {% block title %}
-Players{% endblock %}
+Master{% endblock %}
 {% block content %}
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div>
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='master.css') }}">
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 
-<h1 class="title text-center my-4">Players</h1>
+<h1 class="title text-center my-4">Master</h1>
 
 <div class="text-right my-3">
-    <a href="{{ url_for('add_player_page') }}" class="btn btn-success">Add New Player</a>
+    <a href="{{ url_for('add_master_page') }}" class="btn btn-success">Add New Player</a>
 </div>
 
 <div class="info-container">
     <p>
         This page displays data from the <strong>Lahman Baseball Database</strong>, specifically from the 
-        <strong>Master</strong> table. This table contains information about baseball players, including their
-        birth details, career statistics, and other relevant information.
+        <strong>Master</strong> table. This table contains information about players, including their
+        <strong>birth details, debut dates, and other attributes</strong>.
     </p>
     <p>
-        Use the filters below to narrow down your search and explore specific players or player statistics.
-        You can also sort the data by name, birth year, or other attributes.
+        Use the filters below to narrow down your search and explore specific players, birth years, or countries.
+        You can also sort the data by name, birth year, or debut date.
     </p>
     <ul>
-        <li><strong>Player Name:</strong> The name of the player.</li>
+        <li><strong>Player Name:</strong> The full name of the player.</li>
         <li><strong>Birth Year:</strong> The year the player was born.</li>
-        <li><strong>Death Year:</strong> The year the player passed away (if applicable).</li>
-        <li><strong>Country:</strong> The birth country of the player.</li>
+        <li><strong>Birth Country:</strong> The country where the player was born.</li>
+        <li><strong>Debut Date:</strong> The date the player debuted.</li>
+        <li><strong>Final Game:</strong> The last game the player participated in.</li>
     </ul>
 </div>
 
@@ -58,16 +70,16 @@ Players{% endblock %}
             />
         </div>
 
-        <!-- Death Year Filter -->
+        <!-- Birth Country Filter -->
         <div class="form-group">
-            <label for="death_year">Death Year</label>
+            <label for="birth_country">Birth Country</label>
             <input
                 type="text"
-                name="death_year"
-                id="death_year"
-                value="{{ request.args.get('death_year', '') }}"
+                name="birth_country"
+                id="birth_country"
+                value="{{ request.args.get('birth_country', '') }}"
                 class="form-control"
-                placeholder="Enter Death Year"
+                placeholder="Enter Birth Country"
             />
         </div>
 
@@ -76,80 +88,70 @@ Players{% endblock %}
             <label for="sort_by">Sort By</label>
             <select name="sort_by" id="sort_by" class="form-control">
                 <option value="">Select</option>
+                <option value="name_asc" {% if request.args.get('sort_by') == 'name_asc' %}selected{% endif %}>Name (A-Z)</option>
+                <option value="name_desc" {% if request.args.get('sort_by') == 'name_desc' %}selected{% endif %}>Name (Z-A)</option>
                 <option value="birth_year_asc" {% if request.args.get('sort_by') == 'birth_year_asc' %}selected{% endif %}>Birth Year (Ascending)</option>
                 <option value="birth_year_desc" {% if request.args.get('sort_by') == 'birth_year_desc' %}selected{% endif %}>Birth Year (Descending)</option>
-                <option value="player_name_asc" {% if request.args.get('sort_by') == 'player_name_asc' %}selected{% endif %}>Player Name (A-Z)</option>
-                <option value="player_name_desc" {% if request.args.get('sort_by') == 'player_name_desc' %}selected{% endif %}>Player Name (Z-A)</option>
+                <option value="debut_asc" {% if request.args.get('sort_by') == 'debut_asc' %}selected{% endif %}>Debut Date (Ascending)</option>
+                <option value="debut_desc" {% if request.args.get('sort_by') == 'debut_desc' %}selected{% endif %}>Debut Date (Descending)</option>
             </select>
         </div>
 
         <!-- Submit and Reset Buttons -->
         <div class="form-group btn-block">
             <button type="submit" class="btn btn-primary btn-block">Filter</button>
-            <button type="reset" class="btn btn-secondary btn-block">Reset</button>
-            <form method="get" action="/master">
-                <input type="hidden" name="action" value="view_all">
-                <button type="submit" class="btn btn-primary">View All</button>
-            </form>
+            <a href="{{ url_for('master_page') }}" class="btn btn-secondary">Reset</a>
         </div>
-
-        {% if players %}
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Player ID</th>
-                        <th>Name</th>
-                        <th>Birth Year</th>
-                        <th>Death Year</th>
-                        <th>Birth City</th>
-                        <th>Birth Country</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for player in players %}
-                    <tr>
-                        <td>{{ player.ID }}</td>
-                        <td>{{ player.playerID }}</td>
-                        <td>{{ player.nameFirst }} {{ player.nameLast }}</td>
-                        <td>{{ player.birthYear }}</td>
-                        <td>{{ player.deathYear }}</td>
-                        <td>{{ player.birthCity }}</td>
-                        <td>{{ player.birthCountry }}</td>
-                        <td>
-                            <div>
-                                <form method="POST" action="/master" style="display:inline;">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="player_id" value="{{ player.ID }}">
-                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
-                                </form>     
-                            </div>   
-                            <div class="mt-2">
-                                <a href="{{ url_for('update_player_page', player_id=player.ID) }}" class="btn btn-warning btn-sm btn-block">
-                                    <i class="fas fa-edit"></i> Update
-                                </a>
-                            </div>                                                          
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% elif request.args.get('search') %}
-            <p>No results found. Try searching for a different player name.</p>
-        {% endif %}
     </div>
 </form>
 
-<!-- Flash Messages -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div>
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-      {% endfor %}
+<!-- Players Table -->
+{% if players %}
+    <div class="scrollable-table">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Player ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Birth Year</th>
+                    <th>Birth Country</th>
+                    <th>Debut</th>
+                    <th>Final Game</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <td>{{ player.playerID }}</td>
+                    <td>{{ player.nameFirst }}</td>
+                    <td>{{ player.nameLast }}</td>
+                    <td>{{ player.birthYear }}</td>
+                    <td>{{ player.birthCountry }}</td>
+                    <td>{{ player.debut }}</td>
+                    <td>{{ player.finalGame }}</td>
+                    <td style="text-align: center; vertical-align: middle; white-space: nowrap;">
+                        <!-- Update Button -->
+                        <form action="{{ url_for('update_master_page', player_id=player.playerID) }}" method="get" style="display:inline; border: none; margin: 0; padding: 0;">
+                            <button type="submit" class="btn btn-dark btn-sm" style="margin-right: 5px;">
+                                <i class="fas fa-edit"></i> Update
+                            </button>
+                        </form>
+                    
+                        <!-- Delete Button -->
+                        <form method="POST" action="{{ url_for('delete_master', player_id=player.playerID) }}" style="display:inline; border: none; margin: 0; padding: 0;">
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-  {% endif %}
-{% endwith %}
-
+{% elif request.args.get('search') %}
+    <p>No results found. Try searching for a different player name.</p>
+{% endif %}
 {% endblock %}

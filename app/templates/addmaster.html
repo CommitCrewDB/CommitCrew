@@ -23,56 +23,68 @@ Add Player
 <!-- Add Player Form -->
 <form method="POST" action="/master/add">
     <div class="form-group">
-        <label for="nameFirst">First Name</label>
-        <input type="text" class="form-control" id="nameFirst" name="nameFirst" placeholder="Enter First Name" required>
+        <label for="player_id">Player ID</label>
+        <input type="text" class="form-control" id="player_id" name="player_id" placeholder="Enter Player ID" required>
     </div>
     <div class="form-group">
-        <label for="nameLast">Last Name</label>
-        <input type="text" class="form-control" id="nameLast" name="nameLast" placeholder="Enter Last Name" required>
+        <label for="first_name">First Name</label>
+        <input type="text" class="form-control" id="first_name" name="first_name" placeholder="Enter First Name" required>
     </div>
     <div class="form-group">
-        <label for="birthYear">Birth Year</label>
-        <input type="number" class="form-control" id="birthYear" name="birthYear" placeholder="Enter Birth Year" required>
+        <label for="last_name">Last Name</label>
+        <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Enter Last Name" required>
     </div>
     <div class="form-group">
-        <label for="birthMonth">Birth Month</label>
-        <input type="number" class="form-control" id="birthMonth" name="birthMonth" placeholder="Enter Birth Month (1-12)" required>
+        <label for="given_name">Given Name</label>
+        <input type="text" class="form-control" id="given_name" name="given_name" placeholder="Enter Given Name" required>
     </div>
     <div class="form-group">
-        <label for="birthDay">Birth Day</label>
-        <input type="number" class="form-control" id="birthDay" name="birthDay" placeholder="Enter Birth Day (1-31)" required>
+        <label for="birth_year">Birth Year</label>
+        <input type="number" class="form-control" id="birth_year" name="birth_year" placeholder="Enter Birth Year" required>
     </div>
     <div class="form-group">
-        <label for="weight">Weight (lbs)</label>
+        <label for="birth_month">Birth Month</label>
+        <input type="number" class="form-control" id="birth_month" name="birth_month" placeholder="Enter Birth Month" required>
+    </div>
+    <div class="form-group">
+        <label for="birth_day">Birth Day</label>
+        <input type="number" class="form-control" id="birth_day" name="birth_day" placeholder="Enter Birth Day" required>
+    </div>
+    <div class="form-group">
+        <label for="birth_city">Birth City</label>
+        <input type="text" class="form-control" id="birth_city" name="birth_city" placeholder="Enter Birth City" required>
+    </div>
+    <div class="form-group">
+        <label for="birth_country">Birth Country</label>
+        <input type="text" class="form-control" id="birth_country" name="birth_country" placeholder="Enter Birth Country" required>
+    </div>
+    <div class="form-group">
+        <label for="weight">Weight</label>
         <input type="number" class="form-control" id="weight" name="weight" placeholder="Enter Weight" required>
     </div>
     <div class="form-group">
-        <label for="height">Height (inches)</label>
+        <label for="height">Height</label>
         <input type="number" class="form-control" id="height" name="height" placeholder="Enter Height" required>
     </div>
     <div class="form-group">
         <label for="bats">Bats</label>
-        <input type="text" class="form-control" id="bats" name="bats" placeholder="Enter Batting Hand (R/L/S)" required>
+        <input type="text" class="form-control" id="bats" name="bats" placeholder="Enter Bats" required>
     </div>
     <div class="form-group">
         <label for="throws">Throws</label>
-        <input type="text" class="form-control" id="throws" name="throws" placeholder="Enter Throwing Hand (R/L)" required>
+        <input type="text" class="form-control" id="throws" name="throws" placeholder="Enter Throws" required>
     </div>
     <div class="form-group">
-        <label for="debut">Debut Date</label>
-        <input type="date" class="form-control" id="debut" name="debut" required>
+        <label for="debut">Debut</label>
+        <input type="date" class="form-control" id="debut" name="debut" placeholder="Enter Debut Date" required>
     </div>
     <div class="form-group">
-        <label for="finalGame">Final Game Date</label>
-        <input type="date" class="form-control" id="finalGame" name="finalGame">
+        <label for="final_game">Final Game</label>
+        <input type="date" class="form-control" id="final_game" name="final_game" placeholder="Enter Final Game Date" required>
     </div>
     <div class="form-group">
-        <label for="bbrefID">BBRef ID</label>
-        <input type="text" class="form-control" id="bbrefID" name="bbrefID" placeholder="Enter BBRef ID">
-    </div>
-    <div class="form-group">
-        <label for="retroID">Retro ID</label>
-        <input type="text" class="form-control" id="retroID" name="retroID" placeholder="Enter Retro ID">
+        <label for="retro_id">Retro ID</label>
+        <input type="text" class="form-control" id="retro_id" name="retro_id" placeholder="Enter Retro ID" required>
     </div>
     <button type="submit" class="btn btn-primary">Add Player</button>
 </form>
