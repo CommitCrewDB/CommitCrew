@@ -190,10 +190,11 @@ class Teams:
             cursor = connection.cursor()
 
             query = """
-                SELECT yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L
+                SELECT ID, yearID, lgID, teamID, name, franchID, divID, teamRank, G, Ghome, W, L
                 FROM teams
                 WHERE 1=1
             """
+
             params = []
 
             if leagues:

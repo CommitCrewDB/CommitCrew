@@ -20,9 +20,6 @@ def teams_page():
     leagues = Teams.get_all_leagues()
 
     teams = []
-    if action == 'view_all':
-        teams = Teams.get_all_teams()
-        return render_template("teams.html", teams=teams, leagues=leagues)
     if league_filters or year_filter or team_name_filter or sort_by:
         teams = Teams.filter_teams(
             leagues=league_filters,
