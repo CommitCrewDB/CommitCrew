@@ -167,7 +167,7 @@ Fielding
                         <td>{{ record.ZR }}</td>
                         <td>
                             <form action="{{ url_for('update_fielding_page', record_id=record.ID) }}" method="get" style="display:inline; border: none; margin: 0; padding: 0;">
-                                <button type="submit" class="btn btn-dark btn-sm" style="margin-right: 5px;">
+                                <button type="submit" class="btn btn-dark btn-sm" style="margin-right: 5px; background-color: #002d62;">
                                     <i class="fas fa-edit"></i> Update
                                 </button>
                             </form>
@@ -175,7 +175,7 @@ Fielding
                             <!-- Delete Button -->
                             <form method="POST" action="{{ url_for('delete_fielding_record', record_id=record.ID) }}" style="display:inline; border: none; margin: 0; padding: 0;">
                                 <button type="submit" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash-alt"></i> Delete
+                                    <i class="fas fa-trash-alt"></i>  Delete
                                 </button>
                             </form>                             
                         </td>
