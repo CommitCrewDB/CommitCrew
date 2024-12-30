@@ -70,14 +70,7 @@ Fielding
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Filter</button>
             <a href="{{ url_for('fielding_page') }}" class="btn btn-secondary">Reset</a>
-        </div>
-        <div>
-            <form method="GET" action="{{ url_for('fielding_page') }}" style="text-align: center; margin-top: 10px;">
-                <input type="hidden" name="action" value="view_all_data">
-                <button type="submit" class="btn btn-primary btn-sm">Show All Data</button>
-            </form>
-        </div>
-        
+        </div>        
     </div>
 </form>
 {% if fielding_records %}

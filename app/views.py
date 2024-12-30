@@ -126,9 +126,7 @@ def fielding_page():
     fielding_records = []
     top_fielding_players = []
 
-    if action == "view_all_data":
-        fielding_records = Fielding.get_all_fielding()
-    elif action == "view_top_players":
+    if action == "view_top_players":
         top_fielding_players = Fielding.get_top_fielding_players(year)
     elif player_id or league or year or position:
         fielding_records = Fielding.filter_fielding(
